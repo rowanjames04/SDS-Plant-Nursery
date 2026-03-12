@@ -115,3 +115,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# User model from planetnurseryapp/models.py - This is just for now 
+AUTH_USER_MODEL = 'planetnursery.User'
