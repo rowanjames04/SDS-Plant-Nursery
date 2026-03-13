@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Sprout & Soil</title>
+    <link rel="stylesheet" href="login-styles.css">
+</head>
+<body>
+
+<div class="login-container">
+    <h2>Join the Nursery!</h2>
+    <p>Create your CCC Marketplace account</p>
+    
+    <form action="/register-processing-script" method="POST">
+        <div class="input-group">
+            <label for="fullname">Full Name</label>
+            <input type="text" id="fullname" name="fullname" placeholder="John Doe" required>
+        </div>
+
+        <div class="input-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="green@thumb.com" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="password">Create Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <div class="input-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm-password" required>
+        </div>
+        
+        <button type="submit">Create Account</button>
+    </form>
+
+    <div class="footer-links">
+        <span>Already have an account? </span><a href="login.html">Sign In</a>
+    </div>
+</div>
+
+</body>
+</html>
