@@ -1,0 +1,81 @@
+/* General Layout */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f1; /* Light minty grey */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Container Styles */
+.login-container {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    width: 350px;
+    text-align: center;
+}
+
+h2 {
+    color: #2d5a27; /* Forest Green */
+    margin-bottom: 10px;
+}
+
+p {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+}
+
+/* Form Elements */
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #444;
+    font-weight: 600;
+}
+
+input[type="text"],
+input[type="email"], 
+input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* Interaction */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50; /* Leaf Green */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #388E3C;
+}
+
+.footer-links {
+    margin-top: 20px;
+    font-size: 0.8rem;
+}
+
+.footer-links a {
+    color: #2d5a27;
+    text-decoration: none;
+}
