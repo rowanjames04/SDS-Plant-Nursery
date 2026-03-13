@@ -1,1 +1,10 @@
 .DS_Store
+.env
+.env.*
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.vscode/
+instance/
+*.pem

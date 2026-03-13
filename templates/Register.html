@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register | Sprout & Soil</title>
-    <link rel="stylesheet" href="login-styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login-styles.css') }}">
 </head>
 <body>
 
@@ -37,7 +37,7 @@
     </form>
 
     <div class="footer-links">
-        <span>Already have an account? </span><a href="login.html">Sign In</a>
+        <span>Already have an account? </span><a href="/login">Sign In</a>
     </div>
 </div>
 
