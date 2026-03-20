@@ -18,7 +18,8 @@ from models import Plant, User
     
 @app.route("/")
 def home():
-    return render_template('Home.html')
+    plants = Plant.query.all()
+    return render_template('Home.html', plants=plants)
 
 @app.route("/login")
 def login():
@@ -68,3 +69,4 @@ def create_plant():
 def plant_detail(id):
     plant = Plant.query.get_or_404(id)
     return render_template('plant_detail.html', plant=plant)
+
