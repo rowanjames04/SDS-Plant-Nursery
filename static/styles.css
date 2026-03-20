@@ -28,9 +28,39 @@ body {
 }
 
 .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
     font-weight: 700;
     text-decoration: none;
     color: #222;
+}
+
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #2d5a27 0%, #23471f 100%);
+    color: #fff;
+    flex: 0 0 auto;
+}
+
+.brand-mark svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+}
+
+.brand-text {
+    display: grid;
+}
+
+.brand-name {
+    font-size: 1rem;
+    line-height: 1.1;
 }
 
 .brand small {
@@ -52,6 +82,44 @@ body {
 
 .site-nav a:hover {
     text-decoration: underline;
+}
+
+.nav-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid #d8e3d5;
+    border-radius: 14px;
+    background: #fbfef9;
+    text-decoration: none;
+    line-height: 1;
+    font-weight: 600;
+    color: #23471f;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.nav-button:hover {
+    text-decoration: none;
+    border-color: #b8cbb4;
+    background: #eef5eb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(45, 90, 39, 0.08);
+}
+
+.nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2rem;
+    height: 1.2rem;
+    flex: 0 0 auto;
+}
+
+.nav-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
 }
 
 .card {

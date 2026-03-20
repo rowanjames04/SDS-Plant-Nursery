@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart | Sprout & Soil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <section class="card">
+            <h1>Cart</h1>
+            <p class="muted">Your selected plants will appear here in a future version.</p>
+            {% if cart_items %}
+                <div class="plant-list">
+                    {% for item in cart_items %}
+                        <article class="plant-card">
+                            <h3>{{ item.common_name }}</h3>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">Your cart is empty.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

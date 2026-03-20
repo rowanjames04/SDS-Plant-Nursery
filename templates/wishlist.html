@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist | Sprout & Soil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <section class="card">
+            <h1>Wishlist</h1>
+            <p class="muted">Your saved plants will appear here in a future version.</p>
+            {% if wishlist_items %}
+                <div class="plant-list">
+                    {% for item in wishlist_items %}
+                        <article class="plant-card">
+                            <h3>{{ item.common_name }}</h3>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">No wishlist items yet.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

@@ -24,6 +24,20 @@ def home():
 def login():
     return render_template('Login.html')
 
+@app.route("/wishlist")
+def wishlist():
+    return render_template(
+        "wishlist.html",
+        wishlist_items=[],
+    )
+
+@app.route("/cart")
+def cart():
+    return render_template(
+        "cart.html",
+        cart_items=[],
+    )
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -68,4 +82,3 @@ def create_plant():
 def plant_detail(id):
     plant = Plant.query.get_or_404(id)
     return render_template('plant_detail.html', plant=plant)
-
