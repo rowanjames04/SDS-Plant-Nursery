@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.name }} | Sprout & Soil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>{{ category.name }}</h1>
+                <p class="muted">Category landing page placeholder.</p>
+                <p>{{ category.description }}</p>
+            </div>
+            <div class="card hero-panel">
+                <h2>Coming soon</h2>
+                <p>This page will eventually list every product in the selected category.</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
