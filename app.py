@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__, instance_relative_config=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI', 'sqlite:///plants.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI', 'sqlite:///nursery.db')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 db = SQLAlchemy(app)
@@ -86,3 +86,29 @@ def create_plant():
 def plant_detail(id):
     plant = Plant.query.get_or_404(id)
     return render_template('plant_detail.html', plant=plant)
+
+@app.route("/delete/<int:id>", methods=['POST'])
+def delete_plant(id):
+    plant = Plant.query.get_or_404(id)
+    db.session.delete(plant)
+    db.session.commit()
+    return redirect(url_for('home'))
+
+@app.route("/edit/<int:id>", methods=['GET', 'POST'])
+def edit_plant(id):
+    pass
+
+#add category
+@app.route("/categories/new", methods=['GET', 'POST'])
+def create_category():
+    pass
+
+#add species
+@app.route("/species/new", methods=['GET', 'POST'])
+def create_species():
+    pass
+
+#add variety
+@app.route("/varieties/new", methods=['GET', 'POST'])
+def create_variety():
+    pass
