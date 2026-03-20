@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 
@@ -11,15 +12,24 @@ app = Flask(__name__, instance_relative_config=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI', 'sqlite:///nursery.db')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
-db = SQLAlchemy(app)
+convention = {
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s",
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+}
+
+db = SQLAlchemy(app, metadata=MetaData(naming_convention=convention))
 migrate = Migrate(app, db)
 
-from models import Plant, User
+from models import Category, Plant, Species, User, Variety
     
 @app.route("/")
 def home():
-    return render_template('Home.html')
-    
+    categories = Category.query.all()
+    return render_template('Home.html', categories=categories)
+
 @app.route("/profile")
 def profile():
     return render_template('profile.html')
@@ -59,9 +69,9 @@ def create_plant():
             common_name=request.form['common_name'],
             scientific_name=request.form.get('scientific_name'),
             size=request.form.get('size'),
-            category=request.form.get('category'),
-            species=request.form.get('species'),
-            variety=request.form.get('variety'),
+            category_id=request.form.get('category_id'),
+            species_id=request.form.get('species_id'),
+            variety_id=request.form.get('variety_id'),
             pot_container=request.form.get('pot_container'),
             price=request.form.get('price'),
             description=request.form.get('description'),
@@ -96,19 +106,49 @@ def delete_plant(id):
 
 @app.route("/edit/<int:id>", methods=['GET', 'POST'])
 def edit_plant(id):
-    pass
+    plant = Plant.query.get_or_404(id)
+    if request.method == 'POST':
+        for field, value in request.form.items():
+            setattr(plant, field, value)
+        db.session.commit()
+        return redirect(url_for('plant_detail', id=plant.id))
+    return render_template('edit_plant.html', plant=plant)
 
 #add category
 @app.route("/categories/new", methods=['GET', 'POST'])
 def create_category():
-    pass
+    if request.method == 'POST':
+        category = Category(
+            name=request.form['name'],
+            description=request.form.get('description')
+        )
+        db.session.add(category)
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template('create_category.html')
 
 #add species
 @app.route("/species/new", methods=['GET', 'POST'])
 def create_species():
-    pass
+    if request.method == 'POST':
+        species = Species(
+            name=request.form['name'],
+            description=request.form.get('description')
+        )
+        db.session.add(species)
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template('create_species.html')
 
 #add variety
 @app.route("/varieties/new", methods=['GET', 'POST'])
 def create_variety():
-    pass
+    if request.method == 'POST':
+        variety = Variety(
+            name=request.form['name'],
+            description=request.form.get('description')
+        )
+        db.session.add(variety)
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template('create_variety.html')

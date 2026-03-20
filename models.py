@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import String, Float, Boolean, Integer
+from sqlalchemy import String, Float, Boolean, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from app import db
 
@@ -8,9 +8,11 @@ class Plant(db.Model):
     common_name: Mapped[str] = mapped_column(String(100))
     scientific_name: Mapped[Optional[str]] = mapped_column(String(100))
     size: Mapped[Optional[int]] = mapped_column(Integer)
-    category: Mapped[Optional[str]] = mapped_column(String(100))
-    species: Mapped[Optional[str]] = mapped_column(String(100))
-    variety: Mapped[Optional[str]] = mapped_column(String(100))
+    #categorization
+    category_id: Mapped[Optional[int]] = mapped_column(ForeignKey('category.id'))
+    species_id: Mapped[Optional[int]] = mapped_column(ForeignKey('species.id'))
+    variety_id: Mapped[Optional[int]] = mapped_column(ForeignKey('variety.id'))
+    
     pot_container: Mapped[Optional[str]] = mapped_column(String(100))
     price: Mapped[Optional[float]] = mapped_column(Float, default=0.00)
     description: Mapped[Optional[str]] = mapped_column(String(200))
