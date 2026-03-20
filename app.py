@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 app = Flask(__name__, instance_relative_config=True)
@@ -13,7 +14,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import Plant
+from models import Plant, User
     
 @app.route("/")
 def home():
@@ -24,8 +25,14 @@ def home():
 def login():
     return render_template('Login.html')
 
-@app.route("/register")
+@app.route("/register", methods=['GET', 'POST'])
 def register():
+    if request.method == 'POST':
+        user = User(
+            email=request.form['email'],
+            full_name=request.form['full_name'],
+            password=request.form['password']
+        )
     return render_template('Register.html')
 
 @app.route("/plants/new", methods=['GET', 'POST'])

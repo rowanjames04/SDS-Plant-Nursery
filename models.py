@@ -27,3 +27,9 @@ class Plant(db.Model):
     planting_advice: Mapped[Optional[str]] = mapped_column(String(200))
     watering_needs: Mapped[Optional[str]] = mapped_column(String(200))
     pruning_needs: Mapped[Optional[str]] = mapped_column(String(200))
+
+class User(db.Model):
+    email: Mapped[str] = mapped_column(String(120), primary_key=True)
+    full_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
