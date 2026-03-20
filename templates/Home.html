@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprout & Soil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a class="brand" href="{{ url_for('home') }}">Sprout &amp; Soil<small>Plant catalogue</small></a>
+            <nav class="site-nav">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>Sprout &amp; Soil</h1>
+                <p class="muted">A simple catalogue for your nursery plants.</p>
+                <p>Use this home page to browse plants, check pricing, and keep the inventory easy to scan.</p>
+            </div>
+            <div class="card hero-panel">
+                <h2>Quick view</h2>
+                <p><strong>{{ plants|length }}</strong> plant{% if plants|length != 1 %}s{% endif %} listed right now.</p>
+                <p class="muted">This shared layout is meant to stay lightweight for current and future pages.</p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Plants</h2>
+            {% if plants %}
+                <div class="plant-list">
+                    {% for plant in plants %}
+                        <article class="plant-card">
+                            <h3>{{ plant.common_name }}</h3>
+                            {% if plant.scientific_name %}
+                                <p><em>{{ plant.scientific_name }}</em></p>
+                            {% endif %}
+                            <div class="tag-row">
+                                {% if plant.category %}
+                                    <span class="tag">{{ plant.category }}</span>
+                                {% endif %}
+                                {% if plant.size %}
+                                    <span class="tag">Size {{ plant.size }}</span>
+                                {% endif %}
+                            </div>
+                            {% if plant.description %}
+                                <p>{{ plant.description }}</p>
+                            {% endif %}
+                            {% if plant.price is not none %}
+                                <p><strong>Price:</strong> ${{ '%.2f'|format(plant.price) }}</p>
+                            {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">No plants have been added yet.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

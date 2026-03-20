@@ -1,0 +1,159 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    color: #222;
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.site-header {
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+}
+
+.site-header__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.brand {
+    font-weight: 700;
+    text-decoration: none;
+    color: #222;
+}
+
+.brand small {
+    display: block;
+    color: #666;
+    font-weight: 400;
+}
+
+.site-nav {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.site-nav a {
+    color: #2d5a27;
+    text-decoration: none;
+}
+
+.site-nav a:hover {
+    text-decoration: underline;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.hero h1 {
+    margin-bottom: 8px;
+    font-size: 2.2rem;
+}
+
+.hero-panel {
+    background: #f0f6ef;
+}
+
+.plant-list {
+    display: grid;
+    gap: 16px;
+}
+
+.plant-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    background: #fff;
+}
+
+.tag-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.tag {
+    background: #eef3ed;
+    color: #2d5a27;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.85rem;
+}
+
+.muted {
+    color: #666;
+}
+
+.form {
+    display: grid;
+    gap: 14px;
+}
+
+.input-group {
+    display: grid;
+    gap: 6px;
+}
+
+label {
+    font-weight: 600;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #2d5a27;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #23471f;
+}
+
+@media (max-width: 720px) {
+    .site-header__inner,
+    .hero {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    .site-header__inner {
+        display: grid;
+    }
+}
