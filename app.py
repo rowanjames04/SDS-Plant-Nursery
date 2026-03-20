@@ -18,7 +18,6 @@ from models import Plant, User
     
 @app.route("/")
 def home():
-    plants = Plant.query.all()
     return render_template('Home.html', plants=plants)
 
 @app.route("/login")
