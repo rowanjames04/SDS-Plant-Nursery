@@ -24,6 +24,10 @@ db = SQLAlchemy(app, metadata=MetaData(naming_convention=convention))
 migrate = Migrate(app, db)
 
 from models import Category, Plant, Species, User, Variety
+
+with app.app_context():
+    # Create any missing tables for a fresh local SQLite database.
+    db.create_all()
     
 @app.route("/")
 def home():
