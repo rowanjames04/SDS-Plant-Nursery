@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 load_dotenv()
 UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-MAX_CONTENT_LENGTH = 16 * 1000 * 1000  # 16 MB
+MAX_CONTENT_LENGTH = 16 * 1000 * 1000  # 16 MB lmit for uploaded images
 
 app = Flask(__name__, instance_relative_config=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI', 'sqlite:///nursery.db')
@@ -35,6 +35,12 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def save_image(file):
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return filename
+    return None
 
 def load_catalog():
     categories = Category.query.order_by(Category.name).all()
@@ -182,26 +188,15 @@ def register():
         )
     return render_template('Register.html')
 
+
 @app.route("/plants/new", methods=['GET', 'POST'])
 def create_plant():
     if request.method == 'POST':
-        #check if the post request has the file part
-        if 'file' not in request.files:
-            return "No file part", 400
-
-        image = request.files['file']
-        if image.filename == '':
-            return "No selected image file", 400
-        #check if there is an image file and it is allowed, if so then save to folder, and plant record should have the filename
-        if image and allowed_file(image.filename):
-            filename = secure_filename(image.filename)
-            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        else:
-            return "Invalid image type. Only PNG, JPG, and JPEG are allowed.", 400
+        image_filename = save_image(request.files['image'])
         
         plant = Plant(
             common_name=request.form['common_name'],
-            image_filename=filename,
+            image_filename=image_filename,
             scientific_name=request.form.get('scientific_name'),
             size=request.form.get('size'),
             category_id=request.form.get('category_id'),
@@ -263,8 +258,12 @@ def edit_plant(id):
 @app.route("/categories/new", methods=['GET', 'POST'])
 def create_category():
     if request.method == 'POST':
+        
+        image_filename = save_image(request.files['image'])
+        
         category = Category(
             name=request.form['name'],
+            image_filename=image_filename,
             description=request.form.get('description')
         )
         db.session.add(category)
