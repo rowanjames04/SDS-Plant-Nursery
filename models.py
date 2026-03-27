@@ -5,6 +5,7 @@ from app import db
 
 class Plant(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
+    image_filename: Mapped[Optional[str]] = mapped_column(String(255))
     common_name: Mapped[str] = mapped_column(String(100))
     scientific_name: Mapped[Optional[str]] = mapped_column(String(100))
     size: Mapped[Optional[int]] = mapped_column(Integer)
@@ -44,6 +45,7 @@ class Species(db.Model):
 class Category(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
+    image_filename: Mapped[Optional[str]] = mapped_column(String(255))
     description: Mapped[Optional[str]] = mapped_column(String(255))
 
 class Variety(db.Model):

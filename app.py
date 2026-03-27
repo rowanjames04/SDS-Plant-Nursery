@@ -4,13 +4,19 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from flask_migrate import Migrate
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
 
 
 load_dotenv()
+UPLOAD_FOLDER = 'static/images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+MAX_CONTENT_LENGTH = 16 * 1000 * 1000  # 16 MB
 
 app = Flask(__name__, instance_relative_config=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI', 'sqlite:///nursery.db')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
@@ -24,6 +30,11 @@ db = SQLAlchemy(app, metadata=MetaData(naming_convention=convention))
 migrate = Migrate(app, db)
 
 from models import Category, Plant, Species, User, Variety
+    
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 with app.app_context():
     # Create any missing tables for a fresh local SQLite database.
@@ -69,8 +80,23 @@ def register():
 @app.route("/plants/new", methods=['GET', 'POST'])
 def create_plant():
     if request.method == 'POST':
+        #check if the post request has the file part
+        if 'file' not in request.files:
+            return "No file part", 400
+
+        image = request.files['file']
+        if image.filename == '':
+            return "No selected image file", 400
+        #check if there is an image file and it is allowed, if so then save to folder, and plant record should have the filename
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        else:
+            return "Invalid image type. Only PNG, JPG, and JPEG are allowed.", 400
+        
         plant = Plant(
             common_name=request.form['common_name'],
+            image_filename=filename,
             scientific_name=request.form.get('scientific_name'),
             size=request.form.get('size'),
             category_id=request.form.get('category_id'),
@@ -93,6 +119,7 @@ def create_plant():
         )
         db.session.add(plant)
         db.session.commit()
+        
         return redirect(url_for('plant_detail', id=plant.id))
     return render_template('create_plant.html')
 
@@ -156,3 +183,6 @@ def create_variety():
         db.session.commit()
         return redirect(url_for('home'))
     return render_template('create_variety.html')
+
+
+
