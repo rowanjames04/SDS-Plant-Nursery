@@ -151,11 +151,33 @@ body {
     gap: 16px;
 }
 
+.compact-list {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
 .plant-card {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 16px;
     background: #fff;
+}
+
+.compact-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #fff;
+}
+
+.compact-card h3 {
+    margin: 0 0 4px;
+    font-size: 1rem;
+}
+
+.compact-card p {
+    margin: 0;
 }
 
 .tag-row {

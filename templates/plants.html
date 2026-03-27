@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plants | Sprout & Soil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>Plants</h1>
+                <p class="muted">A simple list of everything in the nursery.</p>
+            </div>
+            <div class="card hero-panel">
+                <h2>Counts</h2>
+                <p><strong>{{ plants|length }}</strong> plant{% if plants|length != 1 %}s{% endif %}</p>
+                <p><strong>{{ categories|length }}</strong> categor{% if categories|length != 1 %}ies{% else %}y{% endif %}</p>
+                <p><strong>{{ species|length }}</strong> species</p>
+                <p><strong>{{ varieties|length }}</strong> variet{% if varieties|length != 1 %}ies{% else %}y{% endif %}</p>
+            </div>
+        </section>
+
+        <section class="card">
+            {% if plants %}
+                <div class="plant-list">
+                    {% for plant in plants %}
+                        <article class="plant-card">
+                            <h3><a href="{{ url_for('plant_detail', id=plant.id) }}">{{ plant.common_name }}</a></h3>
+                            {% if plant.scientific_name %}
+                                <p><em>{{ plant.scientific_name }}</em></p>
+                            {% endif %}
+                            <div class="tag-row">
+                                {% if plant.category_name %}
+                                    <span class="tag">{{ plant.category_name }}</span>
+                                {% endif %}
+                                {% if plant.species_name %}
+                                    <span class="tag">{{ plant.species_name }}</span>
+                                {% endif %}
+                                {% if plant.variety_name %}
+                                    <span class="tag">{{ plant.variety_name }}</span>
+                                {% endif %}
+                                {% if plant.price is not none %}
+                                    <span class="tag">${{ '%.2f'|format(plant.price) }}</span>
+                                {% endif %}
+                            </div>
+                            {% if plant.description %}
+                                <p>{{ plant.description }}</p>
+                            {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">No plants have been added yet.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

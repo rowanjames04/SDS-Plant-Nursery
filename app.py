@@ -36,14 +36,119 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def load_catalog():
+    categories = Category.query.order_by(Category.name).all()
+    species = Species.query.order_by(Species.name).all()
+    varieties = Variety.query.order_by(Variety.name).all()
+    plants = Plant.query.order_by(Plant.common_name).all()
+
+    category_map = {item.id: item.name for item in categories}
+    species_map = {item.id: item.name for item in species}
+    variety_map = {item.id: item.name for item in varieties}
+
+    plant_rows = []
+    for plant in plants:
+        plant_rows.append({
+            "id": plant.id,
+            "common_name": plant.common_name,
+            "scientific_name": plant.scientific_name,
+            "size": plant.size,
+            "category_name": category_map.get(plant.category_id),
+            "species_name": species_map.get(plant.species_id),
+            "variety_name": variety_map.get(plant.variety_id),
+            "pot_container": plant.pot_container,
+            "price": plant.price,
+            "description": plant.description,
+            "colour": plant.colour,
+            "growth_width": plant.growth_width,
+            "growth_height": plant.growth_height,
+            "fragrant": plant.fragrant,
+            "frost_sensitive": plant.frost_sensitive,
+            "flowering_period": plant.flowering_period,
+            "light_requirements": plant.light_requirements,
+            "soil_requirements": plant.soil_requirements,
+            "planting_advice": plant.planting_advice,
+            "watering_needs": plant.watering_needs,
+            "pruning_needs": plant.pruning_needs,
+            "image_filename": plant.image_filename,
+        })
+
+    return {
+        "categories": categories,
+        "species": species,
+        "varieties": varieties,
+        "plants": plant_rows,
+    }
+
+
 with app.app_context():
     # Create any missing tables for a fresh local SQLite database.
     db.create_all()
     
 @app.route("/")
 def home():
-    categories = Category.query.all()
-    return render_template('Home.html', categories=categories)
+    catalog = load_catalog()
+    return render_template(
+        'Home.html',
+        categories=catalog["categories"],
+        species=catalog["species"],
+        varieties=catalog["varieties"],
+        plants=catalog["plants"],
+    )
+
+
+@app.route("/categories")
+def categories_index():
+    categories = Category.query.order_by(Category.name).all()
+    counts = {item.id: Plant.query.filter_by(category_id=item.id).count() for item in categories}
+    return render_template(
+        "catalog_index.html",
+        title="Categories",
+        subtitle="Browse the nursery by plant group.",
+        items=categories,
+        detail_label="category_detail",
+        counts=counts,
+    )
+
+
+@app.route("/species")
+def species_index():
+    species = Species.query.order_by(Species.name).all()
+    counts = {item.id: Plant.query.filter_by(species_id=item.id).count() for item in species}
+    return render_template(
+        "catalog_index.html",
+        title="Species",
+        subtitle="Browse by botanical species.",
+        items=species,
+        detail_label="species_detail",
+        counts=counts,
+    )
+
+
+@app.route("/varieties")
+def varieties_index():
+    varieties = Variety.query.order_by(Variety.name).all()
+    counts = {item.id: Plant.query.filter_by(variety_id=item.id).count() for item in varieties}
+    return render_template(
+        "catalog_index.html",
+        title="Varieties",
+        subtitle="Browse the named plant varieties we have on hand.",
+        items=varieties,
+        detail_label="variety_detail",
+        counts=counts,
+    )
+
+
+@app.route("/plants")
+def plants_index():
+    catalog = load_catalog()
+    return render_template(
+        "plants.html",
+        plants=catalog["plants"],
+        categories=catalog["categories"],
+        species=catalog["species"],
+        varieties=catalog["varieties"],
+    )
 
 @app.route("/profile")
 def profile():
@@ -126,7 +231,16 @@ def create_plant():
 @app.route("/plants/<int:id>")
 def plant_detail(id):
     plant = Plant.query.get_or_404(id)
-    return render_template('plant_detail.html', plant=plant)
+    category = Category.query.get(plant.category_id) if plant.category_id else None
+    species = Species.query.get(plant.species_id) if plant.species_id else None
+    variety = Variety.query.get(plant.variety_id) if plant.variety_id else None
+    return render_template(
+        'plant_detail.html',
+        plant=plant,
+        category=category,
+        species=species,
+        variety=variety,
+    )
 
 @app.route("/delete/<int:id>", methods=['POST'])
 def delete_plant(id):
@@ -185,4 +299,43 @@ def create_variety():
     return render_template('create_variety.html')
 
 
+@app.route("/categories/<int:id>")
+def category_detail(id):
+    category = Category.query.get_or_404(id)
+    plants = Plant.query.filter_by(category_id=id).order_by(Plant.common_name).all()
+    return render_template(
+        "catalog_detail.html",
+        title="Category",
+        item=category,
+        plants=plants,
+        item_count=len(plants),
+        back_url=url_for("categories_index"),
+    )
 
+
+@app.route("/species/<int:id>")
+def species_detail(id):
+    item = Species.query.get_or_404(id)
+    plants = Plant.query.filter_by(species_id=id).order_by(Plant.common_name).all()
+    return render_template(
+        "catalog_detail.html",
+        title="Species",
+        item=item,
+        plants=plants,
+        item_count=len(plants),
+        back_url=url_for("species_index"),
+    )
+
+
+@app.route("/varieties/<int:id>")
+def variety_detail(id):
+    item = Variety.query.get_or_404(id)
+    plants = Plant.query.filter_by(variety_id=id).order_by(Plant.common_name).all()
+    return render_template(
+        "catalog_detail.html",
+        title="Variety",
+        item=item,
+        plants=plants,
+        item_count=len(plants),
+        back_url=url_for("varieties_index"),
+    )

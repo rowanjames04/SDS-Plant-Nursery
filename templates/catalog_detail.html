@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.name }} | Sprout & Soil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>{{ item.name }}</h1>
+                <p class="muted">{{ title }}</p>
+                {% if item.description %}
+                    <p>{{ item.description }}</p>
+                {% endif %}
+            </div>
+            <div class="card hero-panel">
+                <h2>Plants</h2>
+                <p><strong>{{ item_count }}</strong> plant{% if item_count != 1 %}s{% endif %} use this {{ title|lower }}.</p>
+                <p><a href="{{ back_url }}">Back to {{ title }} list</a></p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Linked plants</h2>
+            {% if plants %}
+                <div class="plant-list">
+                    {% for plant in plants %}
+                        <article class="plant-card">
+                            <h3><a href="{{ url_for('plant_detail', id=plant.id) }}">{{ plant.common_name }}</a></h3>
+                            {% if plant.scientific_name %}
+                                <p><em>{{ plant.scientific_name }}</em></p>
+                            {% endif %}
+                            <div class="tag-row">
+                                {% if plant.size %}
+                                    <span class="tag">Size {{ plant.size }}</span>
+                                {% endif %}
+                                {% if plant.price is not none %}
+                                    <span class="tag">${{ '%.2f'|format(plant.price) }}</span>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">No plants are linked to this item yet.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

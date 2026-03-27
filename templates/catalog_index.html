@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Sprout & Soil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <section class="card">
+            <h1>{{ title }}</h1>
+            <p class="muted">{{ subtitle }}</p>
+
+            {% if items %}
+                <div class="plant-list">
+                    {% for item in items %}
+                        <article class="plant-card">
+                            <h3>
+                                <a href="{{ url_for(detail_label, id=item.id) }}">{{ item.name }}</a>
+                            </h3>
+                            {% if item.description %}
+                                <p>{{ item.description }}</p>
+                            {% endif %}
+                            <p class="muted">{{ counts[item.id] }} plant{% if counts[item.id] != 1 %}s{% endif %} linked</p>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">Nothing has been added yet.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

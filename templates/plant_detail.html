@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ plant.common_name }} | Sprout & Soil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>{{ plant.common_name }}</h1>
+                {% if plant.scientific_name %}
+                    <p><em>{{ plant.scientific_name }}</em></p>
+                {% endif %}
+                {% if plant.description %}
+                    <p>{{ plant.description }}</p>
+                {% endif %}
+            </div>
+            <div class="card hero-panel">
+                <h2>Details</h2>
+                {% if plant.price is not none %}
+                    <p><strong>Price:</strong> ${{ '%.2f'|format(plant.price) }}</p>
+                {% endif %}
+                {% if category %}
+                    <p><strong>Category:</strong> <a href="{{ url_for('category_detail', id=category.id) }}">{{ category.name }}</a></p>
+                {% endif %}
+                {% if species %}
+                    <p><strong>Species:</strong> <a href="{{ url_for('species_detail', id=species.id) }}">{{ species.name }}</a></p>
+                {% endif %}
+                {% if variety %}
+                    <p><strong>Variety:</strong> <a href="{{ url_for('variety_detail', id=variety.id) }}">{{ variety.name }}</a></p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Care</h2>
+            <div class="tag-row">
+                {% if plant.size %}
+                    <span class="tag">Size {{ plant.size }}</span>
+                {% endif %}
+                {% if plant.pot_container %}
+                    <span class="tag">{{ plant.pot_container }}</span>
+                {% endif %}
+                {% if plant.colour %}
+                    <span class="tag">{{ plant.colour }}</span>
+                {% endif %}
+                {% if plant.fragrant %}
+                    <span class="tag">Fragrant</span>
+                {% endif %}
+                {% if plant.frost_sensitive %}
+                    <span class="tag">Frost sensitive</span>
+                {% endif %}
+            </div>
+            <p><strong>Flowering period:</strong> {{ plant.flowering_period or 'Not listed' }}</p>
+            <p><strong>Light:</strong> {{ plant.light_requirements or 'Not listed' }}</p>
+            <p><strong>Soil:</strong> {{ plant.soil_requirements or 'Not listed' }}</p>
+            <p><strong>Planting:</strong> {{ plant.planting_advice or 'Not listed' }}</p>
+            <p><strong>Watering:</strong> {{ plant.watering_needs or 'Not listed' }}</p>
+            <p><strong>Pruning:</strong> {{ plant.pruning_needs or 'Not listed' }}</p>
+        </section>
+    </main>
+</body>
+</html>
