@@ -1,6 +1,8 @@
 from typing import Optional
 from sqlalchemy import String, Float, Boolean, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 
 class Plant(db.Model):
@@ -31,11 +33,18 @@ class Plant(db.Model):
     watering_needs: Mapped[Optional[str]] = mapped_column(String(200))
     pruning_needs: Mapped[Optional[str]] = mapped_column(String(200))
 
-class User(db.Model):
-    email: Mapped[str] = mapped_column(String(120), primary_key=True)
+class User(db.Model, UserMixin):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     full_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 class Species(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)

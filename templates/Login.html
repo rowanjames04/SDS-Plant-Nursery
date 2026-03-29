@@ -12,7 +12,7 @@
             <h1>Login</h1>
             <p class="muted">Sign in to the nursery system.</p>
 
-            <form class="form" action="/login-processing-script" method="POST">
+            <form class="form" action="{{ url_for('login') }}" method="POST">
                 <div class="input-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" placeholder="green@thumb.com" required>

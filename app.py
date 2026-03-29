@@ -1,8 +1,9 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from flask_migrate import Migrate
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 
@@ -29,7 +30,18 @@ convention = {
 db = SQLAlchemy(app, metadata=MetaData(naming_convention=convention))
 migrate = Migrate(app, db)
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 from models import Category, Plant, Species, User, Variety
+
+# Move load_catalog after imports to avoid circular dependency issues
     
 def allowed_file(filename):
     return '.' in filename and \
@@ -157,14 +169,35 @@ def plants_index():
     )
 
 @app.route("/profile")
+@login_required
 def profile():
-    return render_template('profile.html')
+    return render_template('profile.html', user=current_user)
 
-@app.route("/login")
+@app.route("/login", methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user = User.query.filter_by(email=email).first()
+
+        if user and user.check_password(password):
+            login_user(user)
+            next_page = request.form.get('next') or request.args.get('next')
+            if next_page:
+                return redirect(next_page)
+            return redirect(url_for('home'))
+        else:
+            flash('Invalid email or password', 'error')
+
     return render_template('Login.html')
 
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
 @app.route("/wishlist")
+@login_required
 def wishlist():
     return render_template(
         "wishlist.html",
@@ -172,6 +205,7 @@ def wishlist():
     )
 
 @app.route("/cart")
+@login_required
 def cart():
     return render_template(
         "cart.html",
@@ -181,11 +215,31 @@ def cart():
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        user = User(
-            email=request.form['email'],
-            full_name=request.form['full_name'],
-            password=request.form['password']
-        )
+        email = request.form.get('email')
+        full_name = request.form.get('fullname') or request.form.get('full_name')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm-password') or request.form.get('confirm_password')
+
+        if not email or not full_name or not password:
+            flash('All fields are required', 'error')
+            return render_template('Register.html')
+
+        if password != confirm_password:
+            flash('Passwords do not match', 'error')
+            return render_template('Register.html')
+
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered', 'error')
+            return render_template('Register.html')
+
+        user = User(email=email, full_name=full_name)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+
+        flash('Account created! Please log in.', 'success')
+        return redirect(url_for('login'))
+
     return render_template('Register.html')
 
 
