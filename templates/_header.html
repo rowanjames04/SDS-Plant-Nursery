@@ -2,57 +2,61 @@
     <div class="site-header__inner">
         <a class="brand" href="{{ url_for('home') }}">
             <span class="brand-mark" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                    <path d="M12 3c3.9 0 7 3.1 7 7 0 3-1.9 5.5-4.6 6.5L13 18.4V21h-2v-2.6l-1.4-.4C6.9 17 5 14.5 5 11c0-4 3.1-8 7-8Zm0 2c-2.7 0-5 3-5 6 0 2.2 1.2 4.1 3 5l1 .4V12h2v4.4l1-.4c1.8-.9 3-2.8 3-5 0-3-2.3-6-5-6Z"></path>
-                </svg>
+                <span class="icon-glyph icon-glyph--brand">❁</span>
             </span>
             <span class="brand-text">
                 <span class="brand-name">Sprout &amp; Soil</span>
                 <small>Plant catalogue</small>
             </span>
         </a>
-        <nav class="site-nav">
-            <a class="nav-button" href="{{ url_for('home') }}">
-                <span>Home</span>
-            </a>
-            <a class="nav-button" href="{{ url_for('categories_index') }}">
-                <span>Categories</span>
-            </a>
-            <a class="nav-button" href="{{ url_for('species_index') }}">
-                <span>Species</span>
-            </a>
-            <a class="nav-button" href="{{ url_for('varieties_index') }}">
-                <span>Varieties</span>
-            </a>
-            <a class="nav-button" href="{{ url_for('plants_index') }}">
-                <span>Plants</span>
-            </a>
-            <a class="nav-button" href="{{ url_for('wishlist') }}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                        <path d="M12 21s-7-4.7-9.2-9C.8 8.5 2.5 5 6.1 5c2 0 3.2 1 3.9 2 .7-1 1.9-2 3.9-2 3.6 0 5.3 3.5 3.3 7-2.2 4.3-9.2 9-9.2 9Z"></path>
-                    </svg>
-                </span>
-                <span>Wishlist</span>
-            </a>
-            <a class="nav-button" href="{{ url_for('cart') }}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                        <path d="M7 4h-2l-1 2H2v2h1l2.2 9.2A2 2 0 0 0 7.2 19H18v-2H7.2l-.3-1.2H18a2 2 0 0 0 1.9-1.4L22 7H7.4L7 4Zm2.3 11 1-5h8l-1.2 4.4a.5.5 0 0 1-.5.4H9.3Z"></path>
-                        <circle cx="10" cy="21" r="1.5"></circle>
-                        <circle cx="17" cy="21" r="1.5"></circle>
-                    </svg>
-                </span>
-                <span>Cart</span>
-            </a>
-            <a class="nav-button" href="{{ url_for('login') }}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                        <path d="M10 17v-2h4V9h-4V7l-5 5 5 5Zm2-14h7v18h-7v-2h5V5h-5V3Z"></path>
-                    </svg>
-                </span>
-                <span>Login</span>
-            </a>
-        </nav>
+        <div class="header-actions">
+            <nav class="site-nav site-nav--primary">
+                <a class="nav-button" href="{{ url_for('home') }}">
+                    <span>Home</span>
+                </a>
+                <a class="nav-button" href="{{ url_for('categories_index') }}">
+                    <span>Categories</span>
+                </a>
+                <a class="nav-button" href="{{ url_for('species_index') }}">
+                    <span>Species</span>
+                </a>
+                <a class="nav-button" href="{{ url_for('varieties_index') }}">
+                    <span>Varieties</span>
+                </a>
+                <a class="nav-button" href="{{ url_for('plants_index') }}">
+                    <span>Plants</span>
+                </a>
+            </nav>
+            <nav class="site-nav site-nav--utility">
+                <a class="nav-button nav-button--icon" href="{{ url_for('wishlist') }}">
+                    <span class="nav-icon-chip" aria-hidden="true">♡</span>
+                    <span>Wishlist</span>
+                </a>
+                <a class="nav-button nav-button--cart" href="{{ url_for('cart') }}">
+                    <span class="nav-icon-chip" aria-hidden="true">🛒</span>
+                    <span class="nav-button__content">
+                        <span>Cart</span>
+                        <span class="nav-meta">
+                            <span class="nav-badge">{{ header_cart_item_count }}</span>
+                            <span>${{ '%.2f'|format(header_cart_total) }}</span>
+                        </span>
+                    </span>
+                </a>
+                <a class="nav-button nav-button--icon" href="{{ url_for('login') }}">
+                    <span class="nav-icon-chip" aria-hidden="true">⇥</span>
+                    <span>Login</span>
+                </a>
+            </nav>
+        </div>
     </div>
 </header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container flash-stack">
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}

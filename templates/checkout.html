@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Sprout & Soil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>Checkout</h1>
+                <p class="muted">This review page is backed by a pending order snapshot so Stripe can be connected later without changing the checkout flow.</p>
+            </div>
+            <div class="card hero-panel">
+                <h2>Order {{ order.id }}</h2>
+                <p><strong>Status:</strong> {{ order.status }}</p>
+                <p><strong>Items:</strong> {{ checkout_item_count }}</p>
+                <p><strong>Total:</strong> ${{ '%.2f'|format(checkout_total) }}</p>
+                <p><a href="{{ url_for('cart') }}">Back to cart</a></p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Order summary</h2>
+            <div class="cart-list">
+                {% for item in checkout_items %}
+                    <article class="plant-card cart-item">
+                        <div>
+                            <h3>{{ item.name }}</h3>
+                            <p class="muted">Unit price: ${{ '%.2f'|format(item.unit_price) }}</p>
+                        </div>
+                        <div class="checkout-line">
+                            <p><strong>Qty:</strong> {{ item.quantity }}</p>
+                            <p><strong>Line total:</strong> ${{ '%.2f'|format(item.line_total) }}</p>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="card checkout-grid">
+            <div>
+                <h2>Next step</h2>
+                <p class="muted">When Stripe is added, this order record can be used to generate Checkout Session line items and store the resulting Stripe session and payment intent IDs.</p>
+            </div>
+            <div class="cart-total-panel">
+                <p><strong>Subtotal:</strong> ${{ '%.2f'|format(checkout_subtotal) }}</p>
+                <p><strong>Total:</strong> ${{ '%.2f'|format(checkout_total) }}</p>
+                <button type="button" disabled>Stripe payment coming soon</button>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

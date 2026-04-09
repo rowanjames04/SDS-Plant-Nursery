@@ -1,7 +1,9 @@
 import os
+from datetime import datetime
+from decimal import Decimal
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, inspect, text
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
@@ -12,10 +14,11 @@ load_dotenv()
 UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 MAX_CONTENT_LENGTH = 16 * 1000 * 1000  # 16 MB lmit for uploaded images
+DEFAULT_DEV_SECRET_KEY = "dev-secret-key-change-me"
 
 app = Flask(__name__, instance_relative_config=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI', 'sqlite:///nursery.db')
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or DEFAULT_DEV_SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
@@ -39,7 +42,7 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-from models import Category, Plant, Species, User, Variety
+from models import Cart, CartItem, Category, Order, OrderItem, Plant, Species, User, Variety
 
 # Move load_catalog after imports to avoid circular dependency issues
     
@@ -99,9 +102,184 @@ def load_catalog():
     }
 
 
+def get_or_create_active_cart(user):
+    cart = (
+        Cart.query.filter_by(user_id=user.id, status="active")
+        .order_by(Cart.updated_at.desc(), Cart.id.desc())
+        .first()
+    )
+    if cart is None:
+        cart = Cart(user_id=user.id)
+        db.session.add(cart)
+        db.session.flush()
+    return cart
+
+
+def decimal_price(value):
+    if value is None:
+        return Decimal("0.00")
+    if isinstance(value, Decimal):
+        return value.quantize(Decimal("0.01"))
+    return Decimal(str(value)).quantize(Decimal("0.01"))
+
+
+def build_cart_summary(cart):
+    items = []
+    subtotal = Decimal("0.00")
+
+    for item in cart.items:
+        unit_price = decimal_price(item.unit_price_snapshot)
+        line_total = unit_price * item.quantity
+        subtotal += line_total
+        items.append(
+            {
+                "id": item.id,
+                "plant_id": item.plant_id,
+                "name": item.plant_name_snapshot,
+                "image_filename": item.image_snapshot,
+                "quantity": item.quantity,
+                "unit_price": unit_price,
+                "line_total": line_total,
+                "plant": item.plant,
+            }
+        )
+
+    return {
+        "items": items,
+        "subtotal": subtotal,
+        "total": subtotal,
+        "item_count": sum(item["quantity"] for item in items),
+    }
+
+
+def sync_order_with_cart(user, cart):
+    order = (
+        Order.query.filter_by(user_id=user.id, cart_id=cart.id, status="pending")
+        .order_by(Order.updated_at.desc(), Order.id.desc())
+        .first()
+    )
+    if order is None:
+        order = Order(user_id=user.id, cart_id=cart.id)
+        db.session.add(order)
+        db.session.flush()
+
+    order.items.clear()
+    subtotal = Decimal("0.00")
+
+    for cart_item in cart.items:
+        line_total = decimal_price(cart_item.unit_price_snapshot) * cart_item.quantity
+        subtotal += line_total
+        order.items.append(
+            OrderItem(
+                plant_id=cart_item.plant_id,
+                quantity=cart_item.quantity,
+                unit_price_snapshot=decimal_price(cart_item.unit_price_snapshot),
+                plant_name_snapshot=cart_item.plant_name_snapshot,
+                image_snapshot=cart_item.image_snapshot,
+            )
+        )
+
+    order.subtotal_amount = subtotal
+    order.total_amount = subtotal
+    order.payment_status = "pending"
+    return order
+
+
+def build_order_summary(order):
+    items = []
+    for item in order.items:
+        unit_price = decimal_price(item.unit_price_snapshot)
+        items.append(
+            {
+                "id": item.id,
+                "plant_id": item.plant_id,
+                "name": item.plant_name_snapshot,
+                "image_filename": item.image_snapshot,
+                "quantity": item.quantity,
+                "unit_price": unit_price,
+                "line_total": unit_price * item.quantity,
+            }
+        )
+
+    return {
+        "items": items,
+        "subtotal": decimal_price(order.subtotal_amount),
+        "total": decimal_price(order.total_amount),
+        "item_count": sum(item["quantity"] for item in items),
+    }
+
+
+def get_active_cart(user):
+    return (
+        Cart.query.filter_by(user_id=user.id, status="active")
+        .order_by(Cart.updated_at.desc(), Cart.id.desc())
+        .first()
+    )
+
+
+def get_header_cart_summary():
+    if not current_user.is_authenticated:
+        return {
+            "header_cart_item_count": 0,
+            "header_cart_total": Decimal("0.00"),
+        }
+
+    cart = get_active_cart(current_user)
+    if cart is None:
+        return {
+            "header_cart_item_count": 0,
+            "header_cart_total": Decimal("0.00"),
+        }
+
+    summary = build_cart_summary(cart)
+    return {
+        "header_cart_item_count": summary["item_count"],
+        "header_cart_total": summary["total"],
+    }
+
+
+def repair_legacy_user_table():
+    database_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+    if not database_uri.startswith("sqlite"):
+        return
+
+    inspector = inspect(db.engine)
+    if "user" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("user")}
+    has_legacy_shape = "id" not in columns and "password" in columns
+    if not has_legacy_shape:
+        return
+
+    with db.engine.begin() as connection:
+        connection.execute(text("""
+            CREATE TABLE user__migration (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                email VARCHAR(120) NOT NULL UNIQUE,
+                full_name VARCHAR(100) NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                is_staff BOOLEAN NOT NULL DEFAULT 0
+            )
+        """))
+        connection.execute(text("""
+            INSERT INTO user__migration (email, full_name, password_hash, is_staff)
+            SELECT email, full_name, password, COALESCE(is_staff, 0)
+            FROM user
+        """))
+        connection.execute(text("DROP TABLE user"))
+        connection.execute(text("ALTER TABLE user__migration RENAME TO user"))
+
+
 with app.app_context():
+    repair_legacy_user_table()
     # Create any missing tables for a fresh local SQLite database.
     db.create_all()
+
+
+@app.context_processor
+def inject_header_cart_summary():
+    return get_header_cart_summary()
     
 @app.route("/")
 def home():
@@ -207,9 +385,110 @@ def wishlist():
 @app.route("/cart")
 @login_required
 def cart():
+    cart = get_or_create_active_cart(current_user)
+    summary = build_cart_summary(cart)
     return render_template(
         "cart.html",
-        cart_items=[],
+        cart=cart,
+        cart_items=summary["items"],
+        cart_subtotal=summary["subtotal"],
+        cart_total=summary["total"],
+        cart_item_count=summary["item_count"],
+    )
+
+
+@app.route("/cart/add", methods=["POST"])
+@login_required
+def add_to_cart():
+    plant_id = request.form.get("plant_id", type=int)
+    quantity = request.form.get("quantity", default=1, type=int)
+    quantity = max(quantity or 1, 1)
+
+    plant = Plant.query.get_or_404(plant_id)
+    cart = get_or_create_active_cart(current_user)
+    existing_item = CartItem.query.filter_by(cart_id=cart.id, plant_id=plant.id).first()
+
+    if existing_item:
+        existing_item.quantity += quantity
+        existing_item.unit_price_snapshot = decimal_price(plant.price)
+        existing_item.plant_name_snapshot = plant.common_name
+        existing_item.image_snapshot = plant.image_filename
+    else:
+        db.session.add(
+            CartItem(
+                cart_id=cart.id,
+                plant_id=plant.id,
+                quantity=quantity,
+                unit_price_snapshot=decimal_price(plant.price),
+                plant_name_snapshot=plant.common_name,
+                image_snapshot=plant.image_filename,
+            )
+        )
+
+    cart.updated_at = datetime.utcnow()
+    db.session.commit()
+    flash(f"{plant.common_name} added to your cart.", "success")
+
+    next_url = request.form.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect(url_for("cart"))
+
+
+@app.route("/cart/items/<int:item_id>/update", methods=["POST"])
+@login_required
+def update_cart_item(item_id):
+    cart = get_or_create_active_cart(current_user)
+    item = CartItem.query.filter_by(id=item_id, cart_id=cart.id).first_or_404()
+    action = request.form.get("action", "set")
+
+    if action == "remove":
+        db.session.delete(item)
+        flash("Item removed from your cart.", "success")
+    elif action == "increase":
+        item.quantity += 1
+    elif action == "decrease":
+        item.quantity -= 1
+        if item.quantity <= 0:
+            db.session.delete(item)
+            flash("Item removed from your cart.", "success")
+    else:
+        raw_quantity = request.form.get("quantity", "1")
+        try:
+            quantity = int(raw_quantity)
+        except (TypeError, ValueError):
+            quantity = 1
+
+        if quantity <= 0:
+            db.session.delete(item)
+            flash("Item removed from your cart.", "success")
+        else:
+            item.quantity = quantity
+
+    cart.updated_at = datetime.utcnow()
+    db.session.commit()
+    return redirect(url_for("cart"))
+
+
+@app.route("/checkout")
+@login_required
+def checkout():
+    cart = get_or_create_active_cart(current_user)
+    if not cart.items:
+        flash("Your cart is empty.", "info")
+        return redirect(url_for("cart"))
+
+    order = sync_order_with_cart(current_user, cart)
+    db.session.commit()
+    summary = build_order_summary(order)
+    return render_template(
+        "checkout.html",
+        cart=cart,
+        order=order,
+        checkout_items=summary["items"],
+        checkout_subtotal=summary["subtotal"],
+        checkout_total=summary["total"],
+        checkout_item_count=summary["item_count"],
     )
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -289,6 +568,7 @@ def plant_detail(id):
         category=category,
         species=species,
         variety=variety,
+        default_quantity=1,
     )
 
 @app.route("/delete/<int:id>", methods=['POST'])

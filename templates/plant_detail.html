@@ -34,6 +34,13 @@
                 {% if variety %}
                     <p><strong>Variety:</strong> <a href="{{ url_for('variety_detail', id=variety.id) }}">{{ variety.name }}</a></p>
                 {% endif %}
+                <form class="inline-form" method="post" action="{{ url_for('add_to_cart') }}">
+                    <input type="hidden" name="plant_id" value="{{ plant.id }}">
+                    <input type="hidden" name="next" value="{{ url_for('plant_detail', id=plant.id) }}">
+                    <label class="inline-label" for="quantity">Qty</label>
+                    <input id="quantity" class="quantity-input" type="number" name="quantity" min="1" value="{{ default_quantity }}">
+                    <button type="submit">Add to cart</button>
+                </form>
             </div>
         </section>
 
