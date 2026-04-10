@@ -9,17 +9,13 @@ from app import db
 
 class Plant(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    image_filename: Mapped[Optional[str]] = mapped_column(String(255))
     common_name: Mapped[str] = mapped_column(String(100))
     scientific_name: Mapped[Optional[str]] = mapped_column(String(100))
-    size: Mapped[Optional[int]] = mapped_column(Integer)
     #categorization
     category_id: Mapped[Optional[int]] = mapped_column(ForeignKey('category.id'))
     species_id: Mapped[Optional[int]] = mapped_column(ForeignKey('species.id'))
     variety_id: Mapped[Optional[int]] = mapped_column(ForeignKey('variety.id'))
-    
-    pot_container: Mapped[Optional[str]] = mapped_column(String(100))
-    price: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), default=Decimal("0.00"))
+
     description: Mapped[Optional[str]] = mapped_column(String(200))
     #key info
     colour: Mapped[Optional[str]] = mapped_column(String(50))
@@ -34,7 +30,27 @@ class Plant(db.Model):
     planting_advice: Mapped[Optional[str]] = mapped_column(String(200))
     watering_needs: Mapped[Optional[str]] = mapped_column(String(200))
     pruning_needs: Mapped[Optional[str]] = mapped_column(String(200))
+
+    plant_pots: Mapped[list["PlantPot"]] = relationship(back_populates="plant")
     cart_items: Mapped[list["CartItem"]] = relationship(back_populates="plant")
+
+
+class Pot(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    size: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
+
+    plant_pots: Mapped[list["PlantPot"]] = relationship(back_populates="pot")
+
+
+class PlantPot(db.Model):
+    plant_id: Mapped[int] = mapped_column(ForeignKey("plant.id"), primary_key=True)
+    pot_id: Mapped[int] = mapped_column(ForeignKey("pot.id"), primary_key=True)
+    stock_qty: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    image_filename: Mapped[Optional[str]] = mapped_column(String(255))
+    price: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), default=Decimal("0.00"))
+
+    plant: Mapped["Plant"] = relationship(back_populates="plant_pots")
+    pot: Mapped["Pot"] = relationship(back_populates="plant_pots")
 
 class User(db.Model, UserMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
