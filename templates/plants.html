@@ -43,9 +43,6 @@
                                 {% if plant.variety_name %}
                                     <span class="tag">{{ plant.variety_name }}</span>
                                 {% endif %}
-                                {% if plant.price is not none %}
-                                    <span class="tag">${{ '%.2f'|format(plant.price) }}</span>
-                                {% endif %}
                             </div>
                             {% if plant.description %}
                                 <p>{{ plant.description }}</p>

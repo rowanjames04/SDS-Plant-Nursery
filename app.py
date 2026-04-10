@@ -290,47 +290,6 @@ def home():
     )
 
 
-@app.route("/categories")
-def categories_index():
-    categories = Category.query.order_by(Category.name).all()
-    counts = {item.id: Plant.query.filter_by(category_id=item.id).count() for item in categories}
-    return render_template(
-        "catalog_index.html",
-        title="Categories",
-        subtitle="Browse the nursery by plant group.",
-        items=categories,
-        detail_label="category_detail",
-        counts=counts,
-    )
-
-
-@app.route("/species")
-def species_index():
-    species = Species.query.order_by(Species.name).all()
-    counts = {item.id: Plant.query.filter_by(species_id=item.id).count() for item in species}
-    return render_template(
-        "catalog_index.html",
-        title="Species",
-        subtitle="Browse by botanical species.",
-        items=species,
-        detail_label="species_detail",
-        counts=counts,
-    )
-
-
-@app.route("/varieties")
-def varieties_index():
-    varieties = Variety.query.order_by(Variety.name).all()
-    counts = {item.id: Plant.query.filter_by(variety_id=item.id).count() for item in varieties}
-    return render_template(
-        "catalog_index.html",
-        title="Varieties",
-        subtitle="Browse the named plant varieties we have on hand.",
-        items=varieties,
-        detail_label="variety_detail",
-        counts=counts,
-    )
-
 
 @app.route("/plants")
 def plants_index():
