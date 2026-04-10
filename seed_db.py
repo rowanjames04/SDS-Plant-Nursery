@@ -58,7 +58,7 @@ VARIETY_SEEDS = [
 
 USER_SEEDS = [
     {
-        "email": "staff@sproutsoil.com",
+        "email": "staff@littlejillsplantnursery.com",
         "full_name": "Nursery Staff",
         "password": "staff123",
         "is_staff": True,
