@@ -42,7 +42,7 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-from models import Cart, CartItem, Category, Order, OrderItem, Plant, Species, User, Variety
+from models import Cart, CartItem, Category, Order, OrderItem, Plant, PlantPot, Pot, Species, User, Variety
 
 # Move load_catalog after imports to avoid circular dependency issues
     
@@ -73,12 +73,9 @@ def load_catalog():
             "id": plant.id,
             "common_name": plant.common_name,
             "scientific_name": plant.scientific_name,
-            "size": plant.size,
             "category_name": category_map.get(plant.category_id),
             "species_name": species_map.get(plant.species_id),
             "variety_name": variety_map.get(plant.variety_id),
-            "pot_container": plant.pot_container,
-            "price": plant.price,
             "description": plant.description,
             "colour": plant.colour,
             "growth_width": plant.growth_width,
@@ -91,7 +88,7 @@ def load_catalog():
             "planting_advice": plant.planting_advice,
             "watering_needs": plant.watering_needs,
             "pruning_needs": plant.pruning_needs,
-            "image_filename": plant.image_filename,
+            "plant_pots": plant.plant_pots,
         })
 
     return {
@@ -401,27 +398,29 @@ def cart():
 @login_required
 def add_to_cart():
     plant_id = request.form.get("plant_id", type=int)
+    pot_id = request.form.get("pot_id", type=int)
     quantity = request.form.get("quantity", default=1, type=int)
     quantity = max(quantity or 1, 1)
 
-    plant = Plant.query.get_or_404(plant_id)
+    plant_pot = PlantPot.query.filter_by(plant_id=plant_id, pot_id=pot_id).first_or_404()
+    plant = plant_pot.plant
     cart = get_or_create_active_cart(current_user)
     existing_item = CartItem.query.filter_by(cart_id=cart.id, plant_id=plant.id).first()
 
     if existing_item:
         existing_item.quantity += quantity
-        existing_item.unit_price_snapshot = decimal_price(plant.price)
+        existing_item.unit_price_snapshot = decimal_price(plant_pot.price)
         existing_item.plant_name_snapshot = plant.common_name
-        existing_item.image_snapshot = plant.image_filename
+        existing_item.image_snapshot = plant_pot.image_filename
     else:
         db.session.add(
             CartItem(
                 cart_id=cart.id,
                 plant_id=plant.id,
                 quantity=quantity,
-                unit_price_snapshot=decimal_price(plant.price),
+                unit_price_snapshot=decimal_price(plant_pot.price),
                 plant_name_snapshot=plant.common_name,
-                image_snapshot=plant.image_filename,
+                image_snapshot=plant_pot.image_filename,
             )
         )
 
@@ -525,18 +524,12 @@ def register():
 @app.route("/plants/new", methods=['GET', 'POST'])
 def create_plant():
     if request.method == 'POST':
-        image_filename = save_image(request.files['image'])
-        
         plant = Plant(
             common_name=request.form['common_name'],
-            image_filename=image_filename,
             scientific_name=request.form.get('scientific_name'),
-            size=request.form.get('size'),
             category_id=request.form.get('category_id'),
             species_id=request.form.get('species_id'),
             variety_id=request.form.get('variety_id'),
-            pot_container=request.form.get('pot_container'),
-            price=request.form.get('price'),
             description=request.form.get('description'),
             colour=request.form.get('colour'),
             growth_width=request.form.get('growth_width'),
@@ -552,7 +545,7 @@ def create_plant():
         )
         db.session.add(plant)
         db.session.commit()
-        
+
         return redirect(url_for('plant_detail', id=plant.id))
     return render_template('create_plant.html')
 
@@ -562,12 +555,14 @@ def plant_detail(id):
     category = Category.query.get(plant.category_id) if plant.category_id else None
     species = Species.query.get(plant.species_id) if plant.species_id else None
     variety = Variety.query.get(plant.variety_id) if plant.variety_id else None
+    plant_pots = PlantPot.query.filter_by(plant_id=id).order_by(PlantPot.pot_id).all()
     return render_template(
         'plant_detail.html',
         plant=plant,
         category=category,
         species=species,
         variety=variety,
+        plant_pots=plant_pots,
         default_quantity=1,
     )
 
