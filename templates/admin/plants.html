@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin — Plants</title>
+</head>
+<body>
+    <h1>Manage Plants</h1>
+    <a href="{{ url_for('admin.create_plant') }}">Add new plant</a>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Common Name</th>
+            <th>Scientific Name</th>
+            <th>Actions</th>
+        </tr>
+        {% for plant in plants %}
+        <tr>
+            <td>{{ plant.id }}</td>
+            <td>{{ plant.common_name }}</td>
+            <td>{{ plant.scientific_name or '' }}</td>
+            <td>
+                <a href="{{ url_for('admin.edit_plant', id=plant.id) }}">Edit</a>
+                <form method="post" action="{{ url_for('admin.delete_plant', id=plant.id) }}" style="display:inline">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

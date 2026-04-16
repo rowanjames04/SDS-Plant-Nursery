@@ -480,34 +480,6 @@ def register():
     return render_template('Register.html')
 
 
-@app.route("/plants/new", methods=['GET', 'POST'])
-def create_plant():
-    if request.method == 'POST':
-        plant = Plant(
-            common_name=request.form['common_name'],
-            scientific_name=request.form.get('scientific_name'),
-            category_id=request.form.get('category_id'),
-            species_id=request.form.get('species_id'),
-            variety_id=request.form.get('variety_id'),
-            description=request.form.get('description'),
-            colour=request.form.get('colour'),
-            growth_width=request.form.get('growth_width'),
-            growth_height=request.form.get('growth_height'),
-            fragrant=request.form.get('fragrant') == 'true',
-            frost_sensitive=request.form.get('frost_sensitive') == 'true',
-            flowering_period=request.form.get('flowering_period'),
-            light_requirements=request.form.get('light_requirements'),
-            soil_requirements=request.form.get('soil_requirements'),
-            planting_advice=request.form.get('planting_advice'),
-            watering_needs=request.form.get('watering_needs'),
-            pruning_needs=request.form.get('pruning_needs'),
-        )
-        db.session.add(plant)
-        db.session.commit()
-
-        return redirect(url_for('plant_detail', id=plant.id))
-    return render_template('create_plant.html')
-
 @app.route("/plants/<int:id>")
 def plant_detail(id):
     plant = Plant.query.get_or_404(id)
@@ -524,23 +496,6 @@ def plant_detail(id):
         plant_pots=plant_pots,
         default_quantity=1,
     )
-
-@app.route("/delete/<int:id>", methods=['POST'])
-def delete_plant(id):
-    plant = Plant.query.get_or_404(id)
-    db.session.delete(plant)
-    db.session.commit()
-    return redirect(url_for('home'))
-
-@app.route("/edit/<int:id>", methods=['GET', 'POST'])
-def edit_plant(id):
-    plant = Plant.query.get_or_404(id)
-    if request.method == 'POST':
-        for field, value in request.form.items():
-            setattr(plant, field, value)
-        db.session.commit()
-        return redirect(url_for('plant_detail', id=plant.id))
-    return render_template('edit_plant.html', plant=plant)
 
 #add category
 @app.route("/categories/new", methods=['GET', 'POST'])
