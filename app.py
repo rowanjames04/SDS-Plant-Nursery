@@ -43,8 +43,8 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 from models import Cart, CartItem, Category, Order, OrderItem, Plant, PlantPot, Pot, Species, User, Variety
-
-# Move load_catalog after imports to avoid circular dependency issues
+from admin import admin_bp
+app.register_blueprint(admin_bp)
     
 def allowed_file(filename):
     return '.' in filename and \
