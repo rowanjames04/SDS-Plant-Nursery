@@ -1,5 +1,5 @@
 from app import app, db
-from models import Category, Plant, Species, User, Variety
+from models import Category, Plant, PlantPot, Pot, Species, User, Variety
 
 
 CATEGORY_SEEDS = [
@@ -332,29 +332,26 @@ def seed():
             varieties[seed["name"]] = item
 
         for seed in USER_SEEDS:
-            get_or_create(
+            user, created = get_or_create(
                 User,
                 {"email": seed["email"]},
                 {
                     "full_name": seed["full_name"],
-                    "password": seed["password"],
                     "is_staff": seed["is_staff"],
                 },
             )
+            if created:
+                user.set_password(seed["password"])
 
         db.session.flush()
 
         for seed in PLANT_SEEDS:
             lookup = {"common_name": seed["common_name"]}
             defaults = {
-                "image_filename": seed["image_filename"],
                 "scientific_name": seed["scientific_name"],
-                "size": seed["size"],
                 "category_id": categories[seed["category"]].id,
                 "species_id": species[seed["species"]].id,
                 "variety_id": varieties[seed["variety"]].id,
-                "pot_container": seed["pot_container"],
-                "price": seed["price"],
                 "description": seed["description"],
                 "colour": seed["colour"],
                 "growth_width": seed["growth_width"],
@@ -368,7 +365,21 @@ def seed():
                 "watering_needs": seed["watering_needs"],
                 "pruning_needs": seed["pruning_needs"],
             }
-            get_or_create(Plant, lookup, defaults)
+            plant, _ = get_or_create(Plant, lookup, defaults)
+            db.session.flush()
+
+            pot, _ = get_or_create(Pot, {"size": seed["size"]})
+            db.session.flush()
+
+            get_or_create(
+                PlantPot,
+                {"plant_id": plant.id, "pot_id": pot.id},
+                {
+                    "price": seed["price"],
+                    "image_filename": seed["image_filename"],
+                    "stock_qty": 10,
+                },
+            )
 
         db.session.commit()
 

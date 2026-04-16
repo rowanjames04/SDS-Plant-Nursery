@@ -22,9 +22,6 @@
             </div>
             <div class="card hero-panel">
                 <h2>Details</h2>
-                {% if plant.price is not none %}
-                    <p><strong>Price:</strong> ${{ '%.2f'|format(plant.price) }}</p>
-                {% endif %}
                 {% if category %}
                     <p><strong>Category:</strong> <a href="{{ url_for('category_detail', id=category.id) }}">{{ category.name }}</a></p>
                 {% endif %}
@@ -34,25 +31,29 @@
                 {% if variety %}
                     <p><strong>Variety:</strong> <a href="{{ url_for('variety_detail', id=variety.id) }}">{{ variety.name }}</a></p>
                 {% endif %}
-                <form class="inline-form" method="post" action="{{ url_for('add_to_cart') }}">
-                    <input type="hidden" name="plant_id" value="{{ plant.id }}">
-                    <input type="hidden" name="next" value="{{ url_for('plant_detail', id=plant.id) }}">
-                    <label class="inline-label" for="quantity">Qty</label>
-                    <input id="quantity" class="quantity-input" type="number" name="quantity" min="1" value="{{ default_quantity }}">
-                    <button type="submit">Add to cart</button>
-                </form>
+                {% if plant_pots %}
+                    <form class="inline-form" method="post" action="{{ url_for('add_to_cart') }}">
+                        <input type="hidden" name="plant_id" value="{{ plant.id }}">
+                        <input type="hidden" name="next" value="{{ url_for('plant_detail', id=plant.id) }}">
+                        <label class="inline-label" for="pot_id">Pot size</label>
+                        <select id="pot_id" name="pot_id">
+                            {% for pp in plant_pots %}
+                                <option value="{{ pp.pot_id }}">{{ pp.pot.size }}mm — ${{ '%.2f'|format(pp.price) }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="inline-label" for="quantity">Qty</label>
+                        <input id="quantity" class="quantity-input" type="number" name="quantity" min="1" value="{{ default_quantity }}">
+                        <button type="submit">Add to cart</button>
+                    </form>
+                {% else %}
+                    <p class="muted">No sizes currently available.</p>
+                {% endif %}
             </div>
         </section>
 
         <section class="card">
             <h2>Care</h2>
             <div class="tag-row">
-                {% if plant.size %}
-                    <span class="tag">Size {{ plant.size }}</span>
-                {% endif %}
-                {% if plant.pot_container %}
-                    <span class="tag">{{ plant.pot_container }}</span>
-                {% endif %}
                 {% if plant.colour %}
                     <span class="tag">{{ plant.colour }}</span>
                 {% endif %}
