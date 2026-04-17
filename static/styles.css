@@ -145,6 +145,7 @@ body {
     white-space: nowrap;
     color: #23471f;
     transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    min-height: 42px;
 }
 
 .nav-button:hover {
