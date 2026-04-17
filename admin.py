@@ -172,3 +172,11 @@ def delete_pot(id):
     db.session.delete(pot)
     db.session.commit()
     return redirect(url_for("admin.pots"))
+
+
+@admin_bp.route("/orders")
+@staff_required
+def orders():
+    from models import Order
+    orders = Order.query.order_by(Order.id).all()
+    return render_template("admin/orders.html", orders=orders)
