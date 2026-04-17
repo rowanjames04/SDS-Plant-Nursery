@@ -316,6 +316,7 @@ def login():
 
         if user and user.check_password(password):
             login_user(user)
+            flash(f'Welcome back, {user.full_name}!', 'success')
             next_page = request.form.get('next') or request.args.get('next')
             if next_page:
                 return redirect(next_page)
@@ -325,9 +326,10 @@ def login():
 
     return render_template('Login.html')
 
-@app.route("/logout")
+@app.route("/logout", methods=['GET', 'POST'])
 def logout():
     logout_user()
+    flash('You have been logged out.', 'info')
     return redirect(url_for('home'))
 
 @app.route("/wishlist")

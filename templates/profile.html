@@ -1,27 +1,24 @@
-<!DOCTYPE html>>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Little Jill's Plant Nursery</title>
+        <title>Profile | Little Jill's Plant Nursery</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
     <body>
         {% include '_header.html' %}
 
         <div class="boxcon">
-  <h2 class="titleprof">My Profile</h2>
+            <h2 class="titleprof">My Profile</h2>
 
-  <img class="pfp" src="" alt="Profile Picture">
+            <div class="info"><span class="label">Full Name:</span> {{ current_user.full_name }}</div>
+            <div class="info"><span class="label">Email:</span> {{ current_user.email }}</div>
 
-  <div class="info"><span class="label">First Name:</span> John</div>
-  <div class="info"><span class="label">Last Name:</span> Doe</div>
-  <div class="info"><span class="label">Email:</span> john@example.com</div>
-  <div class="info"><span class="label">Phone:</span> 0400 000 000</div>
-
-  <button class="about-btn">Orders</button>
-  <button class="logout-btn">Logout</button>
-</div>
+            <form action="{{ url_for('logout') }}" method="POST" style="margin-top: 20px;">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
 
     </body>
 </html>

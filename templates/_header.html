@@ -33,14 +33,21 @@
                         </span>
                     </span>
                 </a>
+                {% if current_user.is_authenticated %}
+                <a class="nav-button" href="{{ url_for('profile') }}">
+                    <span class="nav-icon-chip" aria-hidden="true">👤</span>
+                    <span>{{ current_user.full_name }}</span>
+                </a>
+                <a class="nav-button nav-button--icon" href="{{ url_for('logout') }}">
+                    <span class="nav-icon-chip" aria-hidden="true">⇤</span>
+                    <span>Logout</span>
+                </a>
+                {% else %}
                 <a class="nav-button nav-button--icon" href="{{ url_for('login') }}">
                     <span class="nav-icon-chip" aria-hidden="true">⇥</span>
                     <span>Login</span>
                 </a>
-                <a class="nav-button nav-button--icon" href="{{ url_for('profile')}}">
-                    <span class="nav-icon-chip" aria-hidden="true">⇥</span>
-                    <span>Profile</span>
-                </a>
+                {% endif %}
                 {% if current_user.is_authenticated and current_user.is_staff %}
                 <a class="nav-button" href="{{ url_for('admin.plants') }}">
                     <span>Admin</span>
