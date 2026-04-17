@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin — {{ "Edit" if pot else "New" }} Pot</title>
+</head>
+<body>
+    <h1>{{ "Edit" if pot else "New" }} Pot</h1>
+    <a href="{{ url_for('admin.pots') }}">Back to list</a>
+    <form method="post">
+        <label>Size (mm) <input name="size" type="number" value="{{ pot.size if pot else '' }}" required></label><br>
+        <button type="submit">{{ "Save" if pot else "Create" }}</button>
+    </form>
+</body>
+</html>

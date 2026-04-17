@@ -49,7 +49,7 @@
                 </a>
                 {% endif %}
                 {% if current_user.is_authenticated and current_user.is_staff %}
-                <a class="nav-button" href="{{ url_for('admin.plants') }}">
+                <a class="nav-button" href="{{ url_for('admin.home') }}">
                     <span>Admin</span>
                 </a>
                 {% endif %}

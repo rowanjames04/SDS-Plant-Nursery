@@ -14,6 +14,11 @@ def staff_required(f):
         return f(*args, **kwargs)
     return decorated
 
+@admin_bp.route("/home")
+@staff_required
+def home():
+    return render_template("admin/home.html")
+
 
 @admin_bp.route("/plants")
 @staff_required
@@ -117,3 +122,53 @@ def delete_plant(id):
     db.session.delete(plant)
     db.session.commit()
     return redirect(url_for("admin.plants"))
+
+@admin_bp.route("/pots")
+@staff_required
+def pots():
+    from models import Pot
+    pots = Pot.query.order_by(Pot.size).all()
+    return render_template("admin/pots.html", pots=pots)
+
+
+@admin_bp.route("/pots/new", methods=["GET", "POST"])
+@staff_required
+def create_pot():
+    from app import db
+    from models import Pot
+    if request.method == "POST":
+        pot = Pot(
+            size=request.form.get("size"),
+        )
+        db.session.add(pot)
+        db.session.commit()
+        return redirect(url_for("admin.pots"))
+
+    return render_template("admin/pot_form.html", pot=None)
+
+
+@admin_bp.route("/pots/<int:id>/edit", methods=["GET", "POST"])
+@staff_required
+def edit_pot(id):
+    from app import db
+    from models import Pot
+
+    pot = Pot.query.get_or_404(id)
+    if request.method == "POST":
+        pot.size = request.form.get("size")
+        db.session.commit()
+        return redirect(url_for("admin.pots"))
+
+    return render_template("admin/pot_form.html", pot=pot)
+
+
+@admin_bp.route("/pots/<int:id>/delete", methods=["POST"])
+@staff_required
+def delete_pot(id):
+    from app import db
+    from models import Pot
+
+    pot = Pot.query.get_or_404(id)
+    db.session.delete(pot)
+    db.session.commit()
+    return redirect(url_for("admin.pots"))

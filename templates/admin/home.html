@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin — Home</title>
+</head>
+<body>
+    <h1>Admin Overview</h1>
+    <p>Home page for admin showing plants, pots, orders overview</p>
+    <ul>
+        <li><a href="{{ url_for('admin.plants') }}">Manage Plants</a></li>
+        <li><a href="{{ url_for('admin.pots') }}">Manage Pots</a></li>
+    </ul>
+</body>
+</html>
