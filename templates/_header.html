@@ -37,6 +37,10 @@
                     <span class="nav-icon-chip" aria-hidden="true">⇥</span>
                     <span>Login</span>
                 </a>
+                <a class="nav-button nav-button--icon" href="{{ url_for('profile')}}">
+                    <span class="nav-icon-chip" aria-hidden="true">⇥</span>
+                    <span>Profile</span>
+                </a>
                 {% if current_user.is_authenticated and current_user.is_staff %}
                 <a class="nav-button" href="{{ url_for('admin.plants') }}">
                     <span>Admin</span>
