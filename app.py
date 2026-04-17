@@ -42,7 +42,7 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-from models import Cart, CartItem, Category, Order, OrderItem, Plant, PlantPot, Pot, Species, User, Variety
+from models import Cart, CartItem, Category, Order, OrderItem, Plant, PlantPot, Pot, Species, User, Variety, Wishlist
 from admin import admin_bp
 app.register_blueprint(admin_bp)
     
@@ -335,10 +335,44 @@ def logout():
 @app.route("/wishlist")
 @login_required
 def wishlist():
+    wishlist_items = Wishlist.query.filter_by(user_id=current_user.id).order_by(Wishlist.created_at.desc()).all()
     return render_template(
         "wishlist.html",
-        wishlist_items=[],
+        wishlist_items=wishlist_items,
     )
+
+
+@app.route("/wishlist/add/<int:plant_id>", methods=["POST"])
+@login_required
+def add_to_wishlist(plant_id):
+    # Check if already in wishlist
+    existing = Wishlist.query.filter_by(user_id=current_user.id, plant_id=plant_id).first()
+    if existing:
+        flash("Plant is already in your wishlist.", "info")
+    else:
+        wishlist_item = Wishlist(user_id=current_user.id, plant_id=plant_id)
+        db.session.add(wishlist_item)
+        db.session.commit()
+        flash("Added to wishlist!", "success")
+
+    next_url = request.form.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect(url_for("wishlist"))
+
+
+@app.route("/wishlist/remove/<int:plant_id>", methods=["POST"])
+@login_required
+def remove_from_wishlist(plant_id):
+    wishlist_item = Wishlist.query.filter_by(user_id=current_user.id, plant_id=plant_id).first_or_404()
+    db.session.delete(wishlist_item)
+    db.session.commit()
+    flash("Removed from wishlist.", "info")
+
+    next_url = request.form.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect(url_for("wishlist"))
 
 @app.route("/cart")
 @login_required

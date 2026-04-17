@@ -12,17 +12,33 @@
     <main class="container">
         <section class="card">
             <h1>Wishlist</h1>
-            <p class="muted">Your saved plants will appear here in a future version.</p>
+            <p class="muted">Plants you've saved for later.</p>
             {% if wishlist_items %}
                 <div class="plant-list">
                     {% for item in wishlist_items %}
-                        <article class="plant-card">
-                            <h3>{{ item.common_name }}</h3>
+                        <article class="compact-card" style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="margin: 0 0 4px;"><a href="{{ url_for('plant_detail', id=item.plant.id) }}">{{ item.plant.common_name }}</a></h3>
+                                {% if item.plant.scientific_name %}
+                                    <p class="muted" style="margin: 0; font-size: 0.9rem;"><em>{{ item.plant.scientific_name }}</em></p>
+                                {% endif %}
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                                <form method="post" action="{{ url_for('add_to_cart', plant_id=item.plant.id) }}" style="display: inline;">
+                                    <input type="hidden" name="next" value="{{ url_for('wishlist') }}">
+                                    <button type="submit" class="button-link" style="padding: 6px 10px; font-size: 0.9rem;">Add to cart</button>
+                                </form>
+                                <form method="post" action="{{ url_for('remove_from_wishlist', plant_id=item.plant.id) }}" style="display: inline;">
+                                    <input type="hidden" name="next" value="{{ url_for('wishlist') }}">
+                                    <button type="submit" class="button-secondary" style="padding: 6px 10px; font-size: 0.9rem;">Remove</button>
+                                </form>
+                            </div>
                         </article>
                     {% endfor %}
                 </div>
             {% else %}
                 <p class="muted">No wishlist items yet.</p>
+                <p><a href="{{ url_for('plants_index') }}">Browse plants</a> to add some!</p>
             {% endif %}
         </section>
     </main>

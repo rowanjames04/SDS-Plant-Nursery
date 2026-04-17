@@ -48,6 +48,10 @@
                 {% else %}
                     <p class="muted">No sizes currently available.</p>
                 {% endif %}
+                <form class="inline-form" method="post" action="{{ url_for('add_to_wishlist', plant_id=plant.id) }}" style="margin-top: 12px;">
+                    <input type="hidden" name="next" value="{{ url_for('plant_detail', id=plant.id) }}">
+                    <button type="submit" class="button-secondary">♡ Add to wishlist</button>
+                </form>
             </div>
         </section>
 

@@ -60,6 +60,7 @@ class User(db.Model, UserMixin):
     is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
     carts: Mapped[list["Cart"]] = relationship(back_populates="user")
     orders: Mapped[list["Order"]] = relationship(back_populates="user")
+    wishlist: Mapped[list["Wishlist"]] = relationship(back_populates="user")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -169,3 +170,13 @@ class OrderItem(db.Model):
     )
 
     order: Mapped["Order"] = relationship(back_populates="items")
+
+
+class Wishlist(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False, index=True)
+    plant_id: Mapped[int] = mapped_column(ForeignKey("plant.id"), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user: Mapped["User"] = relationship(back_populates="wishlist")
+    plant: Mapped["Plant"] = relationship()
