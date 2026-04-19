@@ -525,4 +525,94 @@ button:disabled {
     color: white;
   }
 
+.ordercontainer {
+    width: 80%;
+    margin: 40px auto; /* fixed comment */
+}
+
+/* Orders Page */
+
+.ordertitle {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #2f5d3a;
+}
+
+.orderslist {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.orderhistory {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #dbe7db;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.orderhistory:hover {
+    transform: translateY(-6px);
+}
+
+.orderheading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.orderhistory h3 {
+    color: #2f5d3a;
+}
+
+.orderhistory p {
+    margin: 6px 0;
+}
+
+.orderitems ul {
+    margin: 5px 0 10px 0;
+    padding-left: 18px;
+}
+
+.orderitems li {
+    margin-bottom: 4px;
+}
+
+.detailsbtn {
+    margin-top: 10px;
+    padding: 8px 14px;
+    border: none;
+    background: #2f5d3a;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.detailsbtn:hover {
+    background: #244a2e;
+}
+
+.status {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+}
+
+.delivered {
+    background: #e6f4ea;
+    color: #2e7d32;
+}
+
+.pending {
+    background: #fff8e1;
+    color: #b28704;
+}
+
+.cancelled {
+    background: #fdecea;
+    color: #c62828;
+}
+
 

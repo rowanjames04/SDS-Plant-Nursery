@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Profile | Little Jill's Plant Nursery</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+
+    <body>
+        {% include '_header.html' %}
+
+        <div class="ordercontainer">
+            <h2 class="ordertitle">My Orders</h2>
+
+            <div class="orderslist">
+
+                <div class="orderhistory">
+                    <div class="orderheading">
+                        <h3>Order #N/A</h3>
+                        <span class="status delivered">Delivered</span>
+                    </div>
+
+                    <p><strong>Date:</strong> (DD/MM/YYYY)</p>
+
+                    <div class="orderitems">
+                        <strong>Items:</strong>
+                        <ul>
+                            <li>N/A</li>
+                            <li>N/A</li>
+                        </ul>
+                    </div>
+
+                    <p><strong>Total:</strong> N/A</p>
+
+                    <p><strong>Payment Type:</strong> N/A</p>
+
+                    <p><strong>Delivery Address:</strong><br>
+                        N/A</p>
+
+                    <button class="detailsbtn">View Details</button>
+                </div>
+
+                <div class="orderhistory">
+                    <div class="orderheading">
+                        <h3>Order #N/A</h3>
+                        <span class="status pending">Pending</span>
+                </div>
+
+                <p><strong>Date:</strong> (DD/MM/YYYY)</p>
+
+                <div class="orderitems">
+                    <strong>Items:</strong>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                </div>
+
+                <p><strong>Total:</strong> N/A</p>
+
+                <p><strong>Payment Type:</strong> N/A</p>
+
+                <p><strong>Delivery Address:</strong><br>
+                    N/A
+                </p>
+
+                <button class="detailsbtn">View Details</button>
+                </div>
+
+            </div>
+        </div>
+
+    </body>
+</html>
