@@ -17,7 +17,11 @@
 
             <form action="{{ url_for('logout') }}" method="POST" style="margin-top: 20px;">
                 <button type="submit" class="logout-btn">Logout</button> 
-                <button type="button" class="ordersbtn">My Orders</button>
+
+                <nav class="site-nav site-nav--utility">
+                    <a class="nav-button nav-button--icon" href="{{ url_for('orders') }}">
+                        <span class="nav-icon-chip" aria-hidden="true"></span>
+                        <span>orders</span>
             </form>
         </div>
 
