@@ -16,7 +16,8 @@
             <div class="info"><span class="label">Email:</span> {{ current_user.email }}</div>
 
             <form action="{{ url_for('logout') }}" method="POST" style="margin-top: 20px;">
-                <button type="submit" class="logout-btn">Logout</button>
+                <button type="submit" class="logout-btn">Logout</button> 
+                <button type="button" class="ordersbtn">My Orders</button>
             </form>
         </div>
 
