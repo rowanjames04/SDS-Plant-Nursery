@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin — Categories</title>
+</head>
+<body>
+    <a href="{{ url_for('admin.home') }}">Back to admin</a>
+    <h1>Categories</h1>
+
+    <h2>Categories</h2>
+    <a href="{{ url_for('admin.create_category') }}">Add category</a>
+    {% if categories %}
+    <table border="1">
+        <tr><th>Name</th><th>Description</th></tr>
+        {% for c in categories %}
+        <tr>
+            <td>{{ c.name }}</td>
+            <td>{{ c.description or '' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No categories yet.</p>
+    {% endif %}
+
+    <h2>Species</h2>
+    <a href="{{ url_for('admin.create_species') }}">Add species</a>
+    {% if species %}
+    <table border="1">
+        <tr><th>Name</th><th>Description</th></tr>
+        {% for s in species %}
+        <tr>
+            <td>{{ s.name }}</td>
+            <td>{{ s.description or '' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No species yet.</p>
+    {% endif %}
+
+    <h2>Varieties</h2>
+    <a href="{{ url_for('admin.create_variety') }}">Add variety</a>
+    {% if varieties %}
+    <table border="1">
+        <tr><th>Name</th><th>Description</th></tr>
+        {% for v in varieties %}
+        <tr>
+            <td>{{ v.name }}</td>
+            <td>{{ v.description or '' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No varieties yet.</p>
+    {% endif %}
+</body>
+</html>

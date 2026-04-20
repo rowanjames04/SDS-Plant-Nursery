@@ -212,3 +212,62 @@ def orders():
     from models import Order
     orders = Order.query.order_by(Order.id).all()
     return render_template("admin/orders.html", orders=orders)
+
+
+@admin_bp.route("/categories")
+@staff_required
+def categories():
+    from models import Category, Species, Variety
+    categories = Category.query.order_by(Category.name).all()
+    species = Species.query.order_by(Species.name).all()
+    varieties = Variety.query.order_by(Variety.name).all()
+    return render_template("admin/categories.html", categories=categories, species=species, varieties=varieties)
+
+
+@admin_bp.route("/categories/new", methods=["GET", "POST"])
+@staff_required
+def create_category():
+    from app import db
+    from models import Category
+    if request.method == "POST":
+        category = Category(
+            name=request.form["name"],
+            description=request.form.get("description"),
+        )
+        db.session.add(category)
+        db.session.commit()
+        return redirect(url_for("admin.home"))
+    return render_template("admin/category_form.html", category=None)
+
+
+@admin_bp.route("/species/new", methods=["GET", "POST"])
+@staff_required
+def create_species():
+    from app import db
+    from models import Species
+    if request.method == "POST":
+        species = Species(
+            name=request.form["name"],
+            description=request.form.get("description"),
+        )
+        db.session.add(species)
+        db.session.commit()
+        return redirect(url_for("admin.home"))
+    return render_template("admin/species_form.html", species=None)
+
+
+@admin_bp.route("/varieties/new", methods=["GET", "POST"])
+@staff_required
+def create_variety():
+    from app import db
+    from models import Variety
+    if request.method == "POST":
+        variety = Variety(
+            name=request.form["name"],
+            description=request.form.get("description"),
+        )
+        db.session.add(variety)
+        db.session.commit()
+        return redirect(url_for("admin.home"))
+    return render_template("admin/variety_form.html", variety=None)
+
