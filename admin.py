@@ -56,7 +56,7 @@ def create_plant():
         )
         db.session.add(plant)
         db.session.commit()
-        return redirect(url_for("admin.plants"))
+        return redirect(url_for("admin.plant_detail", id=plant.id))
 
     categories = Category.query.order_by(Category.name).all()
     species = Species.query.order_by(Species.name).all()
@@ -77,9 +77,9 @@ PLANT_FIELDS = [
 ]
 
 
-@admin_bp.route("/plants/<int:id>/edit", methods=["GET", "POST"])
+@admin_bp.route("/plants/<int:id>", methods=["GET", "POST"])
 @staff_required
-def edit_plant(id):
+def plant_detail(id):
     from app import db
     from models import Plant, Category, Species, Variety
 
@@ -98,7 +98,7 @@ def edit_plant(id):
         plant.frost_sensitive = request.form.get("frost_sensitive") == "true"
 
         db.session.commit()
-        return redirect(url_for("admin.plants"))
+        return redirect(url_for("admin.plant_detail", id=plant.id))
 
     categories = Category.query.order_by(Category.name).all()
     species = Species.query.order_by(Species.name).all()

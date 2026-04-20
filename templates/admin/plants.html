@@ -20,7 +20,7 @@
             <td>{{ plant.common_name }}</td>
             <td>{{ plant.scientific_name or '' }}</td>
             <td>
-                <a href="{{ url_for('admin.edit_plant', id=plant.id) }}">Edit</a>
+                <a href="{{ url_for('admin.plant_detail', id=plant.id) }}">Edit</a>
                 <form method="post" action="{{ url_for('admin.delete_plant', id=plant.id) }}" style="display:inline">
                     <button type="submit">Delete</button>
                 </form>
