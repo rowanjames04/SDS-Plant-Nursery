@@ -23,13 +23,13 @@
             <div class="card hero-panel">
                 <h2>Details</h2>
                 {% if category %}
-                    <p><strong>Category:</strong> <a href="{{ url_for('category_detail', id=category.id) }}">{{ category.name }}</a></p>
+                    <p><strong>Category:</strong> {{ category.name }}</p>
                 {% endif %}
                 {% if species %}
-                    <p><strong>Species:</strong> <a href="{{ url_for('species_detail', id=species.id) }}">{{ species.name }}</a></p>
+                    <p><strong>Species:</strong> {{ species.name }}</p>
                 {% endif %}
                 {% if variety %}
-                    <p><strong>Variety:</strong> <a href="{{ url_for('variety_detail', id=variety.id) }}">{{ variety.name }}</a></p>
+                    <p><strong>Variety:</strong> {{ variety.name }}</p>
                 {% endif %}
                 {% if plant_pots %}
                     <form class="inline-form" method="post" action="{{ url_for('add_to_cart') }}">
