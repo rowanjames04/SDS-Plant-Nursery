@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin — {{ plant.common_name }}</title>
+</head>
+<body>
+    <a href="{{ url_for('admin.plants') }}">Back to plants</a>
+    <h1>{{ plant.common_name }}</h1>
+
+    <h2>Plant Details</h2>
+    <form method="post" action="{{ url_for('admin.plant_detail', id=plant.id) }}">
+        <label>Common name <input name="common_name" value="{{ plant.common_name }}" required></label><br>
+        <label>Scientific name <input name="scientific_name" value="{{ plant.scientific_name or '' }}"></label><br>
+        <label>Category
+            <select name="category_id">
+                <option value="">—</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}" {{ 'selected' if plant.category_id == c.id }}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Species
+            <select name="species_id">
+                <option value="">—</option>
+                {% for s in species %}
+                <option value="{{ s.id }}" {{ 'selected' if plant.species_id == s.id }}>{{ s.name }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Variety
+            <select name="variety_id">
+                <option value="">—</option>
+                {% for v in varieties %}
+                <option value="{{ v.id }}" {{ 'selected' if plant.variety_id == v.id }}>{{ v.name }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Description <input name="description" value="{{ plant.description or '' }}"></label><br>
+        <label>Colour <input name="colour" value="{{ plant.colour or '' }}"></label><br>
+        <label>Growth width <input name="growth_width" type="number" step="0.1" value="{{ plant.growth_width or '' }}"></label><br>
+        <label>Growth height <input name="growth_height" type="number" step="0.1" value="{{ plant.growth_height or '' }}"></label><br>
+        <label>Fragrant
+            <select name="fragrant">
+                <option value="false" {{ 'selected' if not plant.fragrant }}>No</option>
+                <option value="true" {{ 'selected' if plant.fragrant }}>Yes</option>
+            </select>
+        </label><br>
+        <label>Frost sensitive
+            <select name="frost_sensitive">
+                <option value="false" {{ 'selected' if not plant.frost_sensitive }}>No</option>
+                <option value="true" {{ 'selected' if plant.frost_sensitive }}>Yes</option>
+            </select>
+        </label><br>
+        <label>Flowering period <input name="flowering_period" value="{{ plant.flowering_period or '' }}"></label><br>
+        <label>Light requirements <input name="light_requirements" value="{{ plant.light_requirements or '' }}"></label><br>
+        <label>Soil requirements <input name="soil_requirements" value="{{ plant.soil_requirements or '' }}"></label><br>
+        <label>Planting advice <input name="planting_advice" value="{{ plant.planting_advice or '' }}"></label><br>
+        <label>Watering needs <input name="watering_needs" value="{{ plant.watering_needs or '' }}"></label><br>
+        <label>Pruning needs <input name="pruning_needs" value="{{ plant.pruning_needs or '' }}"></label><br>
+        <button type="submit">Save</button>
+    </form>
+
+    <hr>
+
+    <h2>Pot Sizes</h2>
+    {% if plant.plant_pots %}
+    <table border="1">
+        <tr>
+            <th>Pot size (mm)</th>
+            <th>Price</th>
+            <th>Stock qty</th>
+            <th>Actions</th>
+        </tr>
+        {% for pp in plant.plant_pots %}
+        <tr>
+            <td>{{ pp.pot.size }}mm</td>
+            <td>{{ pp.price }}</td>
+            <td>{{ pp.stock_qty }}</td>
+            <td>
+                <form method="post" action="{{ url_for('admin.unassign_pot', id=plant.id, pot_id=pp.pot_id) }}" style="display:inline">
+                    <button type="submit">Remove</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No pot sizes assigned yet.</p>
+    {% endif %}
+
+    {% if available_pots %}
+    <h3>Assign a pot size</h3>
+    <form method="post" action="{{ url_for('admin.assign_pot', id=plant.id) }}">
+        <label>Pot size
+            <select name="pot_id">
+                {% for p in available_pots %}
+                <option value="{{ p.id }}">{{ p.size }}mm</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Price <input name="price" type="number" step="0.01" min="0"></label>
+        <label>Stock qty <input name="stock_qty" type="number" min="0" value="0"></label>
+        <button type="submit">Assign</button>
+    </form>
+    {% else %}
+    <p>All available pot sizes have been assigned.</p>
+    {% endif %}
+</body>
+</html>

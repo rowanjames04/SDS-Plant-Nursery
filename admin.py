@@ -81,7 +81,7 @@ PLANT_FIELDS = [
 @staff_required
 def plant_detail(id):
     from app import db
-    from models import Plant, Category, Species, Variety
+    from models import Plant, Category, Species, Variety, Pot
 
     plant = Plant.query.get_or_404(id)
 
@@ -103,12 +103,15 @@ def plant_detail(id):
     categories = Category.query.order_by(Category.name).all()
     species = Species.query.order_by(Species.name).all()
     varieties = Variety.query.order_by(Variety.name).all()
+    assigned_pot_ids = {pp.pot_id for pp in plant.plant_pots}
+    available_pots = [p for p in Pot.query.order_by(Pot.size).all() if p.id not in assigned_pot_ids]
     return render_template(
-        "admin/plant_form.html",
+        "admin/plant_detail.html",
         plant=plant,
         categories=categories,
         species=species,
         varieties=varieties,
+        available_pots=available_pots,
     )
 
 
@@ -122,6 +125,35 @@ def delete_plant(id):
     db.session.delete(plant)
     db.session.commit()
     return redirect(url_for("admin.plants"))
+
+@admin_bp.route("/plants/<int:id>/assign-pot", methods=["POST"])
+@staff_required
+def assign_pot(id):
+    from app import db
+    from models import Plant, PlantPot
+
+    Plant.query.get_or_404(id)
+    pot_id = request.form.get("pot_id", type=int)
+    price = request.form.get("price") or None
+    stock_qty = request.form.get("stock_qty", type=int) or 0
+
+    plant_pot = PlantPot(plant_id=id, pot_id=pot_id, price=price, stock_qty=stock_qty)
+    db.session.add(plant_pot)
+    db.session.commit()
+    return redirect(url_for("admin.plant_detail", id=id))
+
+
+@admin_bp.route("/plants/<int:id>/unassign-pot/<int:pot_id>", methods=["POST"])
+@staff_required
+def unassign_pot(id, pot_id):
+    from app import db
+    from models import PlantPot
+
+    plant_pot = PlantPot.query.get_or_404((id, pot_id))
+    db.session.delete(plant_pot)
+    db.session.commit()
+    return redirect(url_for("admin.plant_detail", id=id))
+
 
 @admin_bp.route("/pots")
 @staff_required
