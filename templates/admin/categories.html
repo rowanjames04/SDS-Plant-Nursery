@@ -2,58 +2,101 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin — Categories</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories | Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <a href="{{ url_for('admin.home') }}">Back to admin</a>
-    <h1>Categories</h1>
+    {% include 'admin/_header.html' %}
 
-    <h2>Categories</h2>
-    <a href="{{ url_for('admin.create_category') }}">Add category</a>
-    {% if categories %}
-    <table border="1">
-        <tr><th>Name</th><th>Description</th></tr>
-        {% for c in categories %}
-        <tr>
-            <td>{{ c.name }}</td>
-            <td>{{ c.description or '' }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p>No categories yet.</p>
-    {% endif %}
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>Categories</h1>
+                <p class="muted">Manage categories, species, and varieties.</p>
+            </div>
+        </section>
 
-    <h2>Species</h2>
-    <a href="{{ url_for('admin.create_species') }}">Add species</a>
-    {% if species %}
-    <table border="1">
-        <tr><th>Name</th><th>Description</th></tr>
-        {% for s in species %}
-        <tr>
-            <td>{{ s.name }}</td>
-            <td>{{ s.description or '' }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p>No species yet.</p>
-    {% endif %}
+        <section class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h2 style="margin:0;">Categories</h2>
+                <a class="button-link" href="{{ url_for('admin.create_category') }}">Add category</a>
+            </div>
+            {% if categories %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in categories %}
+                    <tr>
+                        <td>{{c.name }}</td>
+                        <td class="muted">{{c.description or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="muted">No categories yet.</p>
+            {% endif %}
+        </section>
 
-    <h2>Varieties</h2>
-    <a href="{{ url_for('admin.create_variety') }}">Add variety</a>
-    {% if varieties %}
-    <table border="1">
-        <tr><th>Name</th><th>Description</th></tr>
-        {% for v in varieties %}
-        <tr>
-            <td>{{ v.name }}</td>
-            <td>{{ v.description or '' }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p>No varieties yet.</p>
-    {% endif %}
+        <section class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h2 style="margin:0;">Species</h2>
+                <a class="button-link" href="{{ url_for('admin.create_species') }}">Add species</a>
+            </div>
+            {% if species %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in species %}
+                    <tr>
+                        <td>{{s.name }}</td>
+                        <td class="muted">{{s.description or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="muted">No species yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h2 style="margin:0;">Varieties</h2>
+                <a class="button-link" href="{{ url_for('admin.create_variety') }}">Add variety</a>
+            </div>
+            {% if varieties %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in varieties %}
+                    <tr>
+                        <td>{{v.name }}</td>
+                        <td class="muted">{{v.description or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="muted">No varieties yet.</p>
+            {% endif %}
+        </section>
+    </main>
 </body>
 </html>

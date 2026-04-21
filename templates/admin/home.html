@@ -2,16 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin — Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Admin Overview</h1>
-    <p>Home page for admin showing plants, pots, orders overview</p>
-    <ul>
-        <li><a href="{{ url_for('admin.plants') }}">Manage Plants</a></li>
-        <li><a href="{{ url_for('admin.pots') }}">Manage Pots</a></li>
-        <li><a href="{{ url_for('admin.orders') }}">Manage Orders</a></li>
-        <li><a href="{{ url_for('admin.categories') }}">Manage Categories</a></li>
-    </ul>
+    {% include 'admin/_header.html' %}
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p class="muted">Manage plants, categories, pots, and orders.</p>
+            </div>
+        </section>
+
+        <div class="compact-list">
+            <a class="compact-card" href="{{ url_for('admin.plants') }}" style="text-decoration:none;color:inherit;">
+                <h3>Plants</h3>
+                <p class="muted">Add, edit, and remove plants</p>
+            </a>
+            <a class="compact-card" href="{{ url_for('admin.categories') }}" style="text-decoration:none;color:inherit;">
+                <h3>Categories</h3>
+                <p class="muted">Manage categories, species, and varieties</p>
+            </a>
+            <a class="compact-card" href="{{ url_for('admin.pots') }}" style="text-decoration:none;color:inherit;">
+                <h3>Pots</h3>
+                <p class="muted">Manage pot sizes</p>
+            </a>
+            <a class="compact-card" href="{{ url_for('admin.orders') }}" style="text-decoration:none;color:inherit;">
+                <h3>Orders</h3>
+                <p class="muted">View and manage customer orders</p>
+            </a>
+        </div>
+    </main>
 </body>
 </html>

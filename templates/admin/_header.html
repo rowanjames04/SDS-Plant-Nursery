@@ -1,0 +1,33 @@
+<header class="site-header">
+    <div class="site-header__inner">
+        <a class="brand" href="{{ url_for('home') }}">
+            <span class="brand-mark" aria-hidden="true">
+                <span class="icon-glyph icon-glyph--brand">❁</span>
+            </span>
+            <span class="brand-text">
+                <span class="brand-name">Little Jill's Plant Nursery</span>
+                <small>Admin</small>
+            </span>
+        </a>
+        <div class="header-actions">
+            <nav class="site-nav site-nav--utility">
+                <a class="nav-button" href="{{ url_for('admin.home') }}">Dashboard</a>
+                <a class="nav-button" href="{{ url_for('home') }}">Back to site</a>
+                <a class="nav-button nav-button--icon" href="{{ url_for('logout') }}">
+                    <span class="nav-icon-chip" aria-hidden="true">⇤</span>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container flash-stack">
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}

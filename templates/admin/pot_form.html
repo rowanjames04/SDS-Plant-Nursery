@@ -2,14 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin — {{ "Edit" if pot else "New" }} Pot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ "Edit" if pot else "New" }} Pot | Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>{{ "Edit" if pot else "New" }} Pot</h1>
-    <a href="{{ url_for('admin.pots') }}">Back to list</a>
-    <form method="post">
-        <label>Size (mm) <input name="size" type="number" value="{{ pot.size if pot else '' }}" required></label><br>
-        <button type="submit">{{ "Save" if pot else "Create" }}</button>
-    </form>
+    {% include 'admin/_header.html' %}
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>{{ "Edit" if pot else "New" }} Pot</h1>
+            </div>
+            <div class="card hero-panel">
+                <a class="button-link button-secondary" href="{{ url_for('admin.pots') }}">Back to pots</a>
+            </div>
+        </section>
+
+        <section class="card">
+            <form method="post" class="form">
+                <div class="input-group">
+                    <label>Size (mm)</label>
+                    <input type="number" name="size" value="{{ pot.size if pot else '' }}" required>
+                </div>
+                <div>
+                    <button type="submit">{{ "Save" if pot else "Create" }}</button>
+                </div>
+            </form>
+        </section>
+    </main>
 </body>
 </html>

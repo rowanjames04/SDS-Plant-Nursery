@@ -2,31 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin — Plants</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plants | Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Manage Plants</h1>
-    <a href="{{ url_for('admin.create_plant') }}">Add new plant</a>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Common Name</th>
-            <th>Scientific Name</th>
-            <th>Actions</th>
-        </tr>
-        {% for plant in plants %}
-        <tr>
-            <td>{{ plant.id }}</td>
-            <td>{{ plant.common_name }}</td>
-            <td>{{ plant.scientific_name or '' }}</td>
-            <td>
-                <a href="{{ url_for('admin.plant_detail', id=plant.id) }}">Edit</a>
-                <form method="post" action="{{ url_for('admin.delete_plant', id=plant.id) }}" style="display:inline">
-                    <button type="submit">Delete</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+    {% include 'admin/_header.html' %}
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>Plants</h1>
+                <p class="muted">{{ plants|length }} plant{% if plants|length != 1 %}s{% endif %} in the catalogue.</p>
+            </div>
+            <div class="card hero-panel">
+                <a class="button-link" href="{{ url_for('admin.create_plant') }}">Add plant</a>
+            </div>
+        </section>
+
+        <section class="card">
+            {% if plants %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Common name</th>
+                        <th>Scientific name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plant in plants %}
+                    <tr>
+                        <td>{{ plant.common_name }}</td>
+                        <td><em>{{ plant.scientific_name or '' }}</em></td>
+                        <td style="display:flex;gap:8px;align-items:center;">
+                            <a class="button-link button-secondary" href="{{ url_for('admin.plant_detail', id=plant.id) }}">Edit</a>
+                            <form method="post" action="{{ url_for('admin.delete_plant', id=plant.id) }}" style="display:inline">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="muted">No plants yet.</p>
+            {% endif %}
+        </section>
+    </main>
 </body>
 </html>

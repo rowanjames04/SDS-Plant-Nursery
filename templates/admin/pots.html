@@ -2,31 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin — Pots</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pots | Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Manage Pots</h1>
-    <a href="{{ url_for('admin.create_pot') }}">Add new pot</a>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Size (mm)</th>
-            <th>Plants</th>
-            <th>Actions</th>
-        </tr>
-        {% for pot in pots %}
-        <tr>
-            <td>{{ pot.id }}</td>
-            <td>{{ pot.size }}</td>
-            <td>{{ pot.plant_pots | length }}</td>
-            <td>
-                <a href="{{ url_for('admin.edit_pot', id=pot.id) }}">Edit</a>
-                <form method="post" action="{{ url_for('admin.delete_pot', id=pot.id) }}" style="display:inline">
-                    <button type="submit">Delete</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+    {% include 'admin/_header.html' %}
+
+    <main class="container">
+        <section class="card hero">
+            <div>
+                <h1>Pots</h1>
+                <p class="muted">{{ pots|length }} pot size{% if pots|length != 1 %}s{% endif %}.</p>
+            </div>
+            <div class="card hero-panel">
+                <a class="button-link" href="{{ url_for('admin.create_pot') }}">Add pot</a>
+            </div>
+        </section>
+
+        <section class="card">
+            {% if pots %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Size (mm)</th>
+                        <th>Plants assigned</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pot in pots %}
+                    <tr>
+                        <td>{{ pot.size }}mm</td>
+                        <td>{{ pot.plant_pots|length }}</td>
+                        <td style="display:flex;gap:8px;align-items:center;">
+                            <a class="button-link button-secondary" href="{{ url_for('admin.edit_pot', id=pot.id) }}">Edit</a>
+                            <form method="post" action="{{ url_for('admin.delete_pot', id=pot.id) }}" style="display:inline">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="muted">No pot sizes yet.</p>
+            {% endif %}
+        </section>
+    </main>
 </body>
 </html>
