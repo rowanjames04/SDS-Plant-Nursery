@@ -1,4 +1,5 @@
 import os
+from collections import Counter
 from datetime import datetime
 from decimal import Decimal
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -293,13 +294,43 @@ def home():
 
 @app.route("/plants")
 def plants_index():
-    catalog = load_catalog()
+    category_id = request.args.get('category', type=int)
+
+    categories = Category.query.order_by(Category.name).all()
+    species_list = Species.query.order_by(Species.name).all()
+    varieties = Variety.query.order_by(Variety.name).all()
+
+    category_map = {c.id: c.name for c in categories}
+    species_map = {s.id: s.name for s in species_list}
+    variety_map = {v.id: v.name for v in varieties}
+
+    all_plants = Plant.query.all()
+    cat_counts = Counter(p.category_id for p in all_plants if p.category_id)
+
+    q = Plant.query
+    if category_id:
+        q = q.filter_by(category_id=category_id)
+
+    plant_rows = []
+    for plant in q.order_by(Plant.common_name).all():
+        plant_rows.append({
+            "id": plant.id,
+            "common_name": plant.common_name,
+            "scientific_name": plant.scientific_name,
+            "category_name": category_map.get(plant.category_id),
+            "species_name": species_map.get(plant.species_id),
+            "variety_name": variety_map.get(plant.variety_id),
+            "description": plant.description,
+        })
+
     return render_template(
         "plants.html",
-        plants=catalog["plants"],
-        categories=catalog["categories"],
-        species=catalog["species"],
-        varieties=catalog["varieties"],
+        plants=plant_rows,
+        categories=categories,
+        species=species_list,
+        varieties=varieties,
+        cat_counts=cat_counts,
+        active_category=category_id,
     )
 
 @app.route("/profile")

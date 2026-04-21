@@ -24,6 +24,20 @@
             </div>
         </section>
 
+        {% if categories %}
+        <div>
+            {% for cat in categories %}
+            {% if cat_counts.get(cat.id, 0) > 0 %}
+                {% if active_category == cat.id %}
+                <a href="{{ url_for('plants_index') }}">{{ cat.name }} ({{ cat_counts.get(cat.id, 0) }})</a>
+                {% else %}
+                <a href="?category={{ cat.id }}">{{ cat.name }} ({{ cat_counts.get(cat.id, 0) }})</a>
+                {% endif %}
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <section class="card">
             {% if plants %}
                 <div class="plant-list">
