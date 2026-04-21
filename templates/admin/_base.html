@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin{% endblock %} | Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include 'admin/_header.html' %}
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <a class="admin-nav__item {% if request.endpoint == 'admin.home' %}admin-nav__item--active{% endif %}" href="{{ url_for('admin.home') }}">
+                    Home
+                </a>
+                <a class="admin-nav__item {% if request.endpoint == 'admin.orders' %}admin-nav__item--active{% endif %}" href="{{ url_for('admin.orders') }}">
+                    Orders
+                    {% if pending_orders is defined and pending_orders > 0 %}
+                    <span class="admin-nav__badge">{{ pending_orders }}</span>
+                    {% endif %}
+                </a>
+                <a class="admin-nav__item {% if request.endpoint in ['admin.plants', 'admin.plant_detail', 'admin.create_plant'] %}admin-nav__item--active{% endif %}" href="{{ url_for('admin.plants') }}">
+                    Plants
+                </a>
+                <a class="admin-nav__item {% if request.endpoint == 'admin.categories' %}admin-nav__item--active{% endif %}" href="{{ url_for('admin.categories') }}">
+                    Categories
+                </a>
+                <a class="admin-nav__item {% if request.endpoint in ['admin.pots', 'admin.create_pot', 'admin.edit_pot'] %}admin-nav__item--active{% endif %}" href="{{ url_for('admin.pots') }}">
+                    Pots
+                </a>
+            </nav>
+
+        </aside>
+
+        <main class="admin-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div style="margin-bottom:20px;">
+                        {% for category, message in messages %}
+                            <div class="flash flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

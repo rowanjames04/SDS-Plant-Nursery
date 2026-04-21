@@ -1,181 +1,171 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ plant.common_name }} | Admin</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    {% include 'admin/_header.html' %}
+{% extends 'admin/_base.html' %}
+{% block title %}{{ plant.common_name }}{% endblock %}
 
-    <main class="container">
-        <section class="card hero">
-            <div>
-                <h1>{{ plant.common_name }}</h1>
-                {% if plant.scientific_name %}<p class="muted"><em>{{ plant.scientific_name }}</em></p>{% endif %}
-            </div>
-            <div class="card hero-panel">
-                <a class="button-link button-secondary" href="{{ url_for('admin.plants') }}">Back to plants</a>
-            </div>
-        </section>
+{% block content %}
+<section class="card hero" style="margin-bottom:20px;">
+    <div>
+        <h1>{{ plant.common_name }}</h1>
+        {% if plant.scientific_name %}<p class="muted"><em>{{ plant.scientific_name }}</em></p>{% endif %}
+    </div>
+    <div class="card hero-panel">
+        <a class="button-link button-secondary" href="{{ url_for('admin.plants') }}">Back to plants</a>
+    </div>
+</section>
 
-        <section class="card">
-            <h2>Plant Details</h2>
-            <form method="post" action="{{ url_for('admin.plant_detail', id=plant.id) }}" class="form">
-                <div class="input-group">
-                    <label>Common name</label>
-                    <input type="text" name="common_name" value="{{ plant.common_name }}" required>
-                </div>
-                <div class="input-group">
-                    <label>Scientific name</label>
-                    <input type="text" name="scientific_name" value="{{ plant.scientific_name or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Category</label>
-                    <select name="category_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                        <option value="">—</option>
-                        {% for c in categories %}
-                        <option value="{{ c.id }}" {{ 'selected' if plant.category_id == c.id }}>{{ c.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Species</label>
-                    <select name="species_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                        <option value="">—</option>
-                        {% for s in species %}
-                        <option value="{{ s.id }}" {{ 'selected' if plant.species_id == s.id }}>{{ s.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Variety</label>
-                    <select name="variety_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                        <option value="">—</option>
-                        {% for v in varieties %}
-                        <option value="{{ v.id }}" {{ 'selected' if plant.variety_id == v.id }}>{{ v.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Description</label>
-                    <input type="text" name="description" value="{{ plant.description or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Colour</label>
-                    <input type="text" name="colour" value="{{ plant.colour or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Growth width (m)</label>
-                    <input type="number" name="growth_width" step="0.1" value="{{ plant.growth_width or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Growth height (m)</label>
-                    <input type="number" name="growth_height" step="0.1" value="{{ plant.growth_height or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Fragrant</label>
-                    <select name="fragrant" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                        <option value="false" {{ 'selected' if not plant.fragrant }}>No</option>
-                        <option value="true" {{ 'selected' if plant.fragrant }}>Yes</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Frost sensitive</label>
-                    <select name="frost_sensitive" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                        <option value="false" {{ 'selected' if not plant.frost_sensitive }}>No</option>
-                        <option value="true" {{ 'selected' if plant.frost_sensitive }}>Yes</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Flowering period</label>
-                    <input type="text" name="flowering_period" value="{{ plant.flowering_period or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Light requirements</label>
-                    <input type="text" name="light_requirements" value="{{ plant.light_requirements or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Soil requirements</label>
-                    <input type="text" name="soil_requirements" value="{{ plant.soil_requirements or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Planting advice</label>
-                    <input type="text" name="planting_advice" value="{{ plant.planting_advice or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Watering needs</label>
-                    <input type="text" name="watering_needs" value="{{ plant.watering_needs or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Pruning needs</label>
-                    <input type="text" name="pruning_needs" value="{{ plant.pruning_needs or '' }}">
-                </div>
-                <div>
-                    <button type="submit">Save</button>
-                </div>
-            </form>
-        </section>
+<section class="card" style="margin-bottom:20px;">
+    <h2>Plant Details</h2>
+    <form method="post" action="{{ url_for('admin.plant_detail', id=plant.id) }}" class="form">
+        <div class="input-group">
+            <label>Common name</label>
+            <input type="text" name="common_name" value="{{ plant.common_name }}" required>
+        </div>
+        <div class="input-group">
+            <label>Scientific name</label>
+            <input type="text" name="scientific_name" value="{{ plant.scientific_name or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Category</label>
+            <select name="category_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+                <option value="">—</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}" {{ 'selected' if plant.category_id == c.id }}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Species</label>
+            <select name="species_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+                <option value="">—</option>
+                {% for s in species %}
+                <option value="{{ s.id }}" {{ 'selected' if plant.species_id == s.id }}>{{ s.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Variety</label>
+            <select name="variety_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+                <option value="">—</option>
+                {% for v in varieties %}
+                <option value="{{ v.id }}" {{ 'selected' if plant.variety_id == v.id }}>{{ v.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Description</label>
+            <input type="text" name="description" value="{{ plant.description or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Colour</label>
+            <input type="text" name="colour" value="{{ plant.colour or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Growth width (m)</label>
+            <input type="number" name="growth_width" step="0.1" value="{{ plant.growth_width or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Growth height (m)</label>
+            <input type="number" name="growth_height" step="0.1" value="{{ plant.growth_height or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Fragrant</label>
+            <select name="fragrant" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+                <option value="false" {{ 'selected' if not plant.fragrant }}>No</option>
+                <option value="true" {{ 'selected' if plant.fragrant }}>Yes</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Frost sensitive</label>
+            <select name="frost_sensitive" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+                <option value="false" {{ 'selected' if not plant.frost_sensitive }}>No</option>
+                <option value="true" {{ 'selected' if plant.frost_sensitive }}>Yes</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Flowering period</label>
+            <input type="text" name="flowering_period" value="{{ plant.flowering_period or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Light requirements</label>
+            <input type="text" name="light_requirements" value="{{ plant.light_requirements or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Soil requirements</label>
+            <input type="text" name="soil_requirements" value="{{ plant.soil_requirements or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Planting advice</label>
+            <input type="text" name="planting_advice" value="{{ plant.planting_advice or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Watering needs</label>
+            <input type="text" name="watering_needs" value="{{ plant.watering_needs or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Pruning needs</label>
+            <input type="text" name="pruning_needs" value="{{ plant.pruning_needs or '' }}">
+        </div>
+        <div>
+            <button type="submit">Save</button>
+        </div>
+    </form>
+</section>
 
-        <section class="card">
-            <h2>Pot Sizes</h2>
-            {% if plant.plant_pots %}
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Pot size (mm)</th>
-                        <th>Price</th>
-                        <th>Stock qty</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pp in plant.plant_pots %}
-                    <tr>
-                        <td>{{ pp.pot.size }}mm</td>
-                        <td>${{ pp.price }}</td>
-                        <td>{{ pp.stock_qty }}</td>
-                        <td>
-                            <form method="post" action="{{ url_for('admin.unassign_pot', id=plant.id, pot_id=pp.pot_id) }}">
-                                <button type="submit">Remove</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p class="muted">No pot sizes assigned yet.</p>
-            {% endif %}
+<section class="card">
+    <h2>Pot Sizes</h2>
+    {% if plant.plant_pots %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Pot size (mm)</th>
+                <th>Price</th>
+                <th>Stock qty</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pp in plant.plant_pots %}
+            <tr>
+                <td>{{ pp.pot.size }}mm</td>
+                <td>${{ pp.price }}</td>
+                <td>{{ pp.stock_qty }}</td>
+                <td>
+                    <form method="post" action="{{ url_for('admin.unassign_pot', id=plant.id, pot_id=pp.pot_id) }}">
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="muted">No pot sizes assigned yet.</p>
+    {% endif %}
 
-            {% if available_pots %}
-            <h3 style="margin-top:24px;">Assign a pot size</h3>
-            <form method="post" action="{{ url_for('admin.assign_pot', id=plant.id) }}" class="form">
-                <div class="input-group">
-                    <label>Pot size</label>
-                    <select name="pot_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                        {% for p in available_pots %}
-                        <option value="{{ p.id }}">{{ p.size }}mm</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Price</label>
-                    <input type="number" name="price" step="0.01" min="0">
-                </div>
-                <div class="input-group">
-                    <label>Stock qty</label>
-                    <input type="number" name="stock_qty" min="0" value="0">
-                </div>
-                <div>
-                    <button type="submit">Assign</button>
-                </div>
-            </form>
-            {% else %}
-            <p class="muted" style="margin-top:16px;">All available pot sizes have been assigned.</p>
-            {% endif %}
-        </section>
-    </main>
-</body>
-</html>
+    {% if available_pots %}
+    <h3 style="margin-top:24px;">Assign a pot size</h3>
+    <form method="post" action="{{ url_for('admin.assign_pot', id=plant.id) }}" class="form">
+        <div class="input-group">
+            <label>Pot size</label>
+            <select name="pot_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+                {% for p in available_pots %}
+                <option value="{{ p.id }}">{{ p.size }}mm</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Price</label>
+            <input type="number" name="price" step="0.01" min="0">
+        </div>
+        <div class="input-group">
+            <label>Stock qty</label>
+            <input type="number" name="stock_qty" min="0" value="0">
+        </div>
+        <div>
+            <button type="submit">Assign</button>
+        </div>
+    </form>
+    {% else %}
+    <p class="muted" style="margin-top:16px;">All available pot sizes have been assigned.</p>
+    {% endif %}
+</section>
+{% endblock %}

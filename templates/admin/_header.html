@@ -1,6 +1,6 @@
 <header class="site-header">
     <div class="site-header__inner">
-        <a class="brand" href="{{ url_for('home') }}">
+        <a class="brand" href="{{ url_for('admin.home') }}">
             <span class="brand-mark" aria-hidden="true">
                 <span class="icon-glyph icon-glyph--brand">❁</span>
             </span>
@@ -11,7 +11,6 @@
         </a>
         <div class="header-actions">
             <nav class="site-nav site-nav--utility">
-                <a class="nav-button" href="{{ url_for('admin.home') }}">Dashboard</a>
                 <a class="nav-button" href="{{ url_for('home') }}">Back to site</a>
                 <a class="nav-button nav-button--icon" href="{{ url_for('logout') }}">
                     <span class="nav-icon-chip" aria-hidden="true">⇤</span>

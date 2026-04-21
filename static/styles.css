@@ -546,6 +546,132 @@ button:disabled {
     color: white;
   }
 
+/* Admin layout */
+
+.admin-wrapper {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 100vh;
+}
+
+.admin-sidebar {
+    background: #1c1c1c;
+    color: #ccc;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.admin-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #2e2e2e;
+    text-decoration: none;
+}
+
+.admin-sidebar__brand small {
+    display: block;
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 8px;
+    flex: 1;
+}
+
+.admin-nav__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 6px;
+    color: #bbb;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.admin-nav__item:hover {
+    background: #2a2a2a;
+    color: #fff;
+    text-decoration: none;
+}
+
+.admin-nav__item--active {
+    background: #2d5a27;
+    color: #fff;
+}
+
+.admin-nav__badge {
+    margin-left: auto;
+    background: #e05a2b;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+}
+
+.admin-sidebar__footer {
+    padding: 12px 8px;
+    border-top: 1px solid #2e2e2e;
+}
+
+.admin-content {
+    background: #f5f5f5;
+    padding: 28px;
+    min-width: 0;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.stat-card__value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-card__label {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+@media (max-width: 720px) {
+    .admin-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-sidebar {
+        position: static;
+        height: auto;
+    }
+}
+
 .ordercontainer {
     width: 80%;
     margin: 40px auto; /* fixed comment */

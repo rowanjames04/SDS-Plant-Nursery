@@ -17,7 +17,16 @@ def staff_required(f):
 @admin_bp.route("/home")
 @staff_required
 def home():
-    return render_template("admin/home.html")
+    from models import Order, Plant
+    total_orders = Order.query.count()
+    pending_orders = Order.query.filter_by(status="pending").count()
+    total_plants = Plant.query.count()
+    return render_template(
+        "admin/home.html",
+        total_orders=total_orders,
+        pending_orders=pending_orders,
+        total_plants=total_plants,
+    )
 
 
 @admin_bp.route("/plants")

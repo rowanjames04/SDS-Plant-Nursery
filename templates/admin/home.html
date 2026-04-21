@@ -1,40 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Admin</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    {% include 'admin/_header.html' %}
+{% extends 'admin/_base.html' %}
+{% block title %}Dashboard{% endblock %}
 
-    <main class="container">
-        <section class="card hero">
-            <div>
-                <h1>Admin Dashboard</h1>
-                <p class="muted">Manage plants, categories, pots, and orders.</p>
-            </div>
-        </section>
+{% block content %}
+<section class="card hero" style="margin-bottom:20px;">
+    <div>
+        <h1>Dashboard</h1>
+        <p class="muted">Welcome back, {{ current_user.full_name }}.</p>
+    </div>
+</section>
 
-        <div class="compact-list">
-            <a class="compact-card" href="{{ url_for('admin.plants') }}" style="text-decoration:none;color:inherit;">
-                <h3>Plants</h3>
-                <p class="muted">Add, edit, and remove plants</p>
-            </a>
-            <a class="compact-card" href="{{ url_for('admin.categories') }}" style="text-decoration:none;color:inherit;">
-                <h3>Categories</h3>
-                <p class="muted">Manage categories, species, and varieties</p>
-            </a>
-            <a class="compact-card" href="{{ url_for('admin.pots') }}" style="text-decoration:none;color:inherit;">
-                <h3>Pots</h3>
-                <p class="muted">Manage pot sizes</p>
-            </a>
-            <a class="compact-card" href="{{ url_for('admin.orders') }}" style="text-decoration:none;color:inherit;">
-                <h3>Orders</h3>
-                <p class="muted">View and manage customer orders</p>
-            </a>
-        </div>
-    </main>
-</body>
-</html>
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-card__value">{{ pending_orders }}</div>
+        <div class="stat-card__label">Pending orders</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__value">{{ total_orders }}</div>
+        <div class="stat-card__label">Total orders</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__value">{{ total_plants }}</div>
+        <div class="stat-card__label">Plants in catalogue</div>
+    </div>
+</div>
+{% endblock %}
