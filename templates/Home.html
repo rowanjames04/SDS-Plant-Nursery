@@ -28,7 +28,7 @@
                 <div class="compact-list">
                     {% for category in categories %}
                         <article class="compact-card">
-                            <h3>{{ category.name }}</h3>
+                            <h3><a href="{{ url_for('plants_index', category=category.id) }}">{{ category.name }}</a></h3>
                             {% if category.description %}
                                 <p class="muted">{{ category.description }}</p>
                             {% endif %}
