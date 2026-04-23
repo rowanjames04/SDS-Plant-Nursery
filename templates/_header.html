@@ -19,29 +19,29 @@
                 </a>
             </nav>
             <nav class="site-nav site-nav--utility">
-                <a class="nav-button nav-button--icon" href="{{ url_for('wishlist') }}">
-                    <span class="nav-icon-chip" aria-hidden="true">♡</span>
-                    <span>Wishlist</span>
-
                 <a class="nav-button nav-button--cart" href="{{ url_for('cart') }}">
-                    <span class="nav-icon-chip" aria-hidden="true">🛒</span>
+                    <span class="nav-icon-chip nav-icon-chip--cart" aria-hidden="true">
+                        <span class="nav-icon-chip__emoji">🛒</span>
+                        <span class="nav-icon-chip__badge">{{ header_cart_item_count }}</span>
+                    </span>
                     <span class="nav-button__content">
-                        <span>Cart</span>
-                        <span class="nav-meta">
-                            <span class="nav-badge">{{ header_cart_item_count }}</span>
-                            <span>${{ '%.2f'|format(header_cart_total) }}</span>
-                        </span>
+                        <span class="nav-button__title">Cart</span>
+                        <span class="nav-button__subtitle">${{ '%.2f'|format(header_cart_total) }}</span>
                     </span>
                 </a>
                 {% if current_user.is_authenticated %}
-                <a class="nav-button" href="{{ url_for('profile') }}">
-                    <span class="nav-icon-chip" aria-hidden="true">👤</span>
-                    <span>{{ current_user.full_name }}</span>
-                </a>
-                <a class="nav-button nav-button--icon" href="{{ url_for('logout') }}">
-                    <span class="nav-icon-chip" aria-hidden="true">⇤</span>
-                    <span>Logout</span>
-                </a>
+                <details class="account-menu">
+                    <summary class="nav-button account-menu__summary">
+                        <span class="nav-icon-chip" aria-hidden="true">👤</span>
+                        <span>{{ current_user.full_name }}</span>
+                        <span class="account-menu__caret" aria-hidden="true">▾</span>
+                    </summary>
+                    <div class="account-menu__dropdown">
+                        <a class="account-menu__item" href="{{ url_for('profile') }}">Profile</a>
+                        <a class="account-menu__item" href="{{ url_for('wishlist') }}">Wishlist</a>
+                        <a class="account-menu__item" href="{{ url_for('logout') }}">Logout</a>
+                    </div>
+                </details>
                 {% else %}
                 <a class="nav-button nav-button--icon" href="{{ url_for('login') }}">
                     <span class="nav-icon-chip" aria-hidden="true">⇥</span>
