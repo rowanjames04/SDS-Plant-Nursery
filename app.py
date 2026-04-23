@@ -505,6 +505,55 @@ def update_cart_item(item_id):
     return redirect(url_for("cart"))
 
 
+@app.route("/cart/update", methods=["POST"])
+@login_required
+def update_cart():
+    cart = get_or_create_active_cart(current_user)
+    items = CartItem.query.filter_by(cart_id=cart.id).all()
+    item_map = {item.id: item for item in items}
+
+    removed_any = False
+    changed_any = False
+
+    for key, raw_value in request.form.items():
+        if not key.startswith("quantity_"):
+            continue
+
+        try:
+            item_id = int(key.split("_", 1)[1])
+        except (TypeError, ValueError):
+            continue
+
+        item = item_map.get(item_id)
+        if item is None:
+            continue
+
+        try:
+            quantity = int(raw_value)
+        except (TypeError, ValueError):
+            quantity = item.quantity
+
+        if quantity <= 0:
+            db.session.delete(item)
+            removed_any = True
+            changed_any = True
+        elif quantity != item.quantity:
+            item.quantity = quantity
+            changed_any = True
+
+    if changed_any:
+        cart.updated_at = datetime.utcnow()
+        db.session.commit()
+        if removed_any:
+            flash("Cart updated. Items with zero quantity were removed.", "success")
+        else:
+            flash("Your cart has been updated.", "success")
+    else:
+        flash("No changes were made to your cart.", "info")
+
+    return redirect(url_for("cart"))
+
+
 @app.route("/checkout")
 @login_required
 def checkout():

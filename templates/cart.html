@@ -9,68 +9,98 @@
 <body>
     {% include '_header.html' %}
 
-    <main class="container">
-        <section class="card hero">
-            <div>
-                <h1>Cart</h1>
+    <main class="container cart-page">
+        <section class="card cart-panel">
+            <div class="cart-page__heading">
+                <h1>Shopping Cart</h1>
                 <p class="muted">Review your selected plants before checkout.</p>
             </div>
-            <div class="card hero-panel">
-                <h2>Summary</h2>
-                <p><strong>{{ cart_item_count }}</strong> item{% if cart_item_count != 1 %}s{% endif %}</p>
-                <p><strong>Subtotal:</strong> ${{ '%.2f'|format(cart_subtotal) }}</p>
-                <p><strong>Total:</strong> ${{ '%.2f'|format(cart_total) }}</p>
-                {% if cart_items %}
-                    <p><a href="{{ url_for('checkout') }}">Continue to checkout</a></p>
-                {% endif %}
-            </div>
-        </section>
 
-        <section class="card">
             {% if cart_items %}
-                <div class="cart-list">
-                    {% for item in cart_items %}
-                        <article class="plant-card cart-item">
-                            <div>
-                                <h3>
-                                    <a href="{{ url_for('plant_detail', id=item.plant_id) }}">{{ item.name }}</a>
-                                </h3>
-                                <p class="muted">Unit price: ${{ '%.2f'|format(item.unit_price) }}</p>
-                                <p><strong>Line total:</strong> ${{ '%.2f'|format(item.line_total) }}</p>
-                            </div>
-                            <div class="cart-item__actions">
-                                <form class="inline-form" method="post" action="{{ url_for('update_cart_item', item_id=item.id) }}">
-                                    <input type="hidden" name="action" value="decrease">
-                                    <button type="submit">-</button>
-                                </form>
-                                <form class="inline-form" method="post" action="{{ url_for('update_cart_item', item_id=item.id) }}">
-                                    <label class="inline-label" for="quantity-{{ item.id }}">Qty</label>
-                                    <input id="quantity-{{ item.id }}" class="quantity-input" type="number" name="quantity" min="1" value="{{ item.quantity }}">
-                                    <button type="submit">Update</button>
-                                </form>
-                                <form class="inline-form" method="post" action="{{ url_for('update_cart_item', item_id=item.id) }}">
-                                    <input type="hidden" name="action" value="increase">
-                                    <button type="submit">+</button>
-                                </form>
-                                <form class="inline-form" method="post" action="{{ url_for('update_cart_item', item_id=item.id) }}">
-                                    <input type="hidden" name="action" value="remove">
-                                    <button class="button-secondary" type="submit">Remove</button>
-                                </form>
-                            </div>
-                        </article>
-                    {% endfor %}
-                </div>
+                <form method="post" action="{{ url_for('update_cart') }}">
+                    <div class="cart-table">
+                        <div class="cart-table__head">
+                            <div>Product</div>
+                            <div>Unit Price</div>
+                            <div>Quantity</div>
+                            <div>Subtotal</div>
+                        </div>
 
-                <div class="cart-footer">
-                    <div>
-                        <p class="muted">Checkout uses an order snapshot of these items, so later payment integration can rely on stable line items.</p>
+                        <div class="cart-list cart-list--table">
+                            {% for item in cart_items %}
+                                <article class="cart-row">
+                                    <div class="cart-row__product">
+                                        <div class="cart-row__thumb">
+                                            {% if item.image_filename %}
+                                                <img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}" alt="">
+                                            {% else %}
+                                                <span aria-hidden="true">Plant</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="cart-row__details">
+                                            <h3><a href="{{ url_for('plant_detail', id=item.plant_id) }}">{{ item.name }}</a></h3>
+                                            <div class="cart-row__remove-form">
+                                                <button
+                                                    name="action"
+                                                    value="remove"
+                                                    formaction="{{ url_for('update_cart_item', item_id=item.id) }}"
+                                                    formmethod="post"
+                                                    class="button-secondary cart-row__remove-button"
+                                                    type="submit"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="cart-row__price">${{ '%.2f'|format(item.unit_price) }}</div>
+
+                                    <div class="cart-row__quantity">
+                                        <label class="sr-only" for="quantity-{{ item.id }}">Quantity</label>
+                                        <input
+                                            id="quantity-{{ item.id }}"
+                                            class="quantity-input quantity-input--cart"
+                                            type="number"
+                                            min="0"
+                                            name="quantity_{{ item.id }}"
+                                            value="{{ item.quantity }}"
+                                        >
+                                    </div>
+
+                                    <div class="cart-row__subtotal">${{ '%.2f'|format(item.line_total) }}</div>
+                                </article>
+                            {% endfor %}
+                        </div>
+
+                        <div class="cart-summary-row">
+                            <div class="cart-summary-row__label">
+                                <strong>{{ cart_item_count }}</strong>
+                                <span>item{% if cart_item_count != 1 %}s{% endif %}</span>
+                            </div>
+                            <div class="cart-summary-row__spacer"></div>
+                            <div class="cart-summary-row__title">Total</div>
+                            <div class="cart-summary-row__value">${{ '%.2f'|format(cart_total) }}</div>
+                        </div>
                     </div>
-                    <div class="cart-total-panel">
-                        <p><strong>Subtotal:</strong> ${{ '%.2f'|format(cart_subtotal) }}</p>
-                        <p><strong>Total:</strong> ${{ '%.2f'|format(cart_total) }}</p>
-                        <a class="button-link" href="{{ url_for('checkout') }}">Continue to checkout</a>
+
+                    <div class="cart-actions">
+                        <div class="cart-actions__buttons">
+                            <button 
+                                type="submit" 
+                                class="button-link cart-actions__update">
+                                Update cart
+                            </button>
+                            <button
+                                type="submit"
+                                formmethod="get"
+                                formaction="{{ url_for('checkout') }}"
+                                class="button-link cart-actions__checkout">
+                                Proceed to checkout
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
             {% else %}
                 <p class="muted">Your cart is empty.</p>
                 <p><a href="{{ url_for('plants_index') }}">Browse plants</a></p>
