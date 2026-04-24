@@ -418,6 +418,15 @@ html {
     border-bottom: none;
 }
 
+.taxonomy-table {
+    table-layout: fixed;
+}
+
+.taxonomy-table th:first-child,
+.taxonomy-table td:first-child {
+    width: 28%;
+}
+
 .form {
     display: grid;
     gap: 14px;
@@ -434,12 +443,15 @@ label {
 
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="number"],
+select {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
     box-sizing: border-box;
+    background: #fff;
 }
 
 button {
@@ -976,6 +988,72 @@ button:disabled {
     min-width: 0;
 }
 
+.admin-plant-form {
+    gap: 18px;
+}
+
+.admin-form-section {
+    display: grid;
+    gap: 10px;
+}
+
+.admin-form-section h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.admin-field-grid {
+    display: grid;
+    gap: 12px;
+    align-items: end;
+}
+
+.admin-field-grid--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-field-grid--three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-field-grid--four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-field-grid__wide {
+    grid-column: span 2;
+}
+
+.admin-mini-field-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(64px, 88px));
+    gap: 8px;
+}
+
+.admin-radio-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 41px;
+}
+
+.admin-radio-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+}
+
+.admin-form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.admin-pot-assign-form {
+    grid-template-columns: 1.2fr 1fr 1fr auto;
+    align-items: end;
+}
+
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1010,6 +1088,30 @@ button:disabled {
     .admin-sidebar {
         position: static;
         height: auto;
+    }
+
+    .admin-field-grid--two,
+    .admin-field-grid--three,
+    .admin-field-grid--four,
+    .admin-pot-assign-form {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-field-grid__wide {
+        grid-column: auto;
+    }
+
+    .admin-mini-field-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-form-actions {
+        justify-content: stretch;
+    }
+
+    .admin-form-actions button,
+    .admin-pot-assign-form button {
+        width: 100%;
     }
 }
 

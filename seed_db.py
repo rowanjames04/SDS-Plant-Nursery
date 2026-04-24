@@ -1,5 +1,21 @@
+from datetime import datetime
+from decimal import Decimal
+
 from app import app, db
-from models import Category, Plant, PlantPot, Pot, Species, User, Variety
+from models import (
+    Cart,
+    CartItem,
+    Category,
+    Order,
+    OrderItem,
+    Plant,
+    PlantPot,
+    Pot,
+    Species,
+    User,
+    Variety,
+    Wishlist,
+)
 
 
 CATEGORY_SEEDS = [
@@ -59,7 +75,7 @@ VARIETY_SEEDS = [
 USER_SEEDS = [
     {
         "email": "staff@littlejillsplantnursery.com",
-        "full_name": "Nursery Staff",
+        "full_name": "Morgan Lee",
         "password": "staff123",
         "is_staff": True,
     },
@@ -287,10 +303,64 @@ PLANT_SEEDS = [
     },
 ]
 
+ACTIVITY_SEEDS = [
+    {
+        "email": "customer@example.com",
+        "wishlist": ["Swiss Cheese Plant", "English Lavender", "Frangipani"],
+        "active_cart": {
+            "created_at": datetime(2026, 4, 18, 10, 15),
+            "items": [
+                {"plant": "Sweet Basil", "quantity": 2},
+                {"plant": "Aloe Vera", "quantity": 1},
+            ],
+        },
+        "orders": [
+            {
+                "status": "paid",
+                "payment_status": "paid",
+                "created_at": datetime(2026, 4, 12, 14, 30),
+                "stripe_checkout_session_id": "cs_test_seed_alex_001",
+                "stripe_payment_intent_id": "pi_test_seed_alex_001",
+                "items": [
+                    {"plant": "Fiddle Leaf Fig", "quantity": 1},
+                    {"plant": "Boston Fern", "quantity": 2},
+                ],
+            }
+        ],
+    },
+    {
+        "email": "buyer@example.com",
+        "wishlist": ["Maidenhair Fern", "Rosemary"],
+        "active_cart": {
+            "created_at": datetime(2026, 4, 20, 9, 45),
+            "items": [
+                {"plant": "English Lavender", "quantity": 3},
+                {"plant": "Rosemary", "quantity": 1},
+            ],
+        },
+        "orders": [
+            {
+                "status": "pending",
+                "payment_status": "pending",
+                "created_at": datetime(2026, 4, 21, 16, 5),
+                "stripe_checkout_session_id": "cs_test_seed_jamie_001",
+                "stripe_payment_intent_id": None,
+                "items": [
+                    {"plant": "Swiss Cheese Plant", "quantity": 1},
+                    {"plant": "Sweet Basil", "quantity": 4},
+                ],
+            }
+        ],
+    },
+]
+
 
 def get_or_create(model, lookup, defaults=None):
     instance = model.query.filter_by(**lookup).one_or_none()
     if instance is not None:
+        if defaults:
+            for key, value in defaults.items():
+                setattr(instance, key, value)
         return instance, False
     params = dict(lookup)
     if defaults:
@@ -298,6 +368,108 @@ def get_or_create(model, lookup, defaults=None):
     instance = model(**params)
     db.session.add(instance)
     return instance, True
+
+
+def plant_price_and_image(plant):
+    plant_pot = (
+        PlantPot.query.filter_by(plant_id=plant.id)
+        .join(Pot)
+        .order_by(Pot.size)
+        .first()
+    )
+    return Decimal(plant_pot.price).quantize(Decimal("0.01")), plant_pot.image_filename
+
+
+def clear_seeded_activity(users):
+    user_ids = [user.id for user in users]
+    cart_ids = [
+        cart_id
+        for (cart_id,) in db.session.query(Cart.id).filter(Cart.user_id.in_(user_ids)).all()
+    ]
+    order_ids = [
+        order_id
+        for (order_id,) in db.session.query(Order.id).filter(Order.user_id.in_(user_ids)).all()
+    ]
+
+    if order_ids:
+        OrderItem.query.filter(OrderItem.order_id.in_(order_ids)).delete(synchronize_session=False)
+        Order.query.filter(Order.id.in_(order_ids)).delete(synchronize_session=False)
+    if cart_ids:
+        CartItem.query.filter(CartItem.cart_id.in_(cart_ids)).delete(synchronize_session=False)
+        Cart.query.filter(Cart.id.in_(cart_ids)).delete(synchronize_session=False)
+
+    Wishlist.query.filter(Wishlist.user_id.in_(user_ids)).delete(synchronize_session=False)
+
+
+def make_cart(user, status, created_at, items, plants):
+    cart = Cart(user_id=user.id, status=status, created_at=created_at, updated_at=created_at)
+    db.session.add(cart)
+    db.session.flush()
+
+    for item_seed in items:
+        plant = plants[item_seed["plant"]]
+        price, image_filename = plant_price_and_image(plant)
+        db.session.add(
+            CartItem(
+                cart_id=cart.id,
+                plant_id=plant.id,
+                quantity=item_seed["quantity"],
+                unit_price_snapshot=price,
+                plant_name_snapshot=plant.common_name,
+                image_snapshot=image_filename,
+                created_at=created_at,
+                updated_at=created_at,
+            )
+        )
+
+    return cart
+
+
+def make_order(user, order_seed, plants):
+    cart = make_cart(
+        user,
+        "checked_out",
+        order_seed["created_at"],
+        order_seed["items"],
+        plants,
+    )
+    order = Order(
+        user_id=user.id,
+        cart_id=cart.id,
+        status=order_seed["status"],
+        subtotal_amount=Decimal("0.00"),
+        total_amount=Decimal("0.00"),
+        stripe_checkout_session_id=order_seed["stripe_checkout_session_id"],
+        stripe_payment_intent_id=order_seed["stripe_payment_intent_id"],
+        payment_status=order_seed["payment_status"],
+        created_at=order_seed["created_at"],
+        updated_at=order_seed["created_at"],
+    )
+    db.session.add(order)
+    db.session.flush()
+
+    subtotal = Decimal("0.00")
+    for item_seed in order_seed["items"]:
+        plant = plants[item_seed["plant"]]
+        price, image_filename = plant_price_and_image(plant)
+        quantity = item_seed["quantity"]
+        subtotal += price * quantity
+        db.session.add(
+            OrderItem(
+                order_id=order.id,
+                plant_id=plant.id,
+                quantity=quantity,
+                unit_price_snapshot=price,
+                plant_name_snapshot=plant.common_name,
+                image_snapshot=image_filename,
+                created_at=order_seed["created_at"],
+                updated_at=order_seed["created_at"],
+            )
+        )
+
+    order.subtotal_amount = subtotal
+    order.total_amount = subtotal
+    return order
 
 
 def seed():
@@ -331,6 +503,7 @@ def seed():
             )
             varieties[seed["name"]] = item
 
+        users = {}
         for seed in USER_SEEDS:
             user, created = get_or_create(
                 User,
@@ -340,11 +513,12 @@ def seed():
                     "is_staff": seed["is_staff"],
                 },
             )
-            if created:
-                user.set_password(seed["password"])
+            user.set_password(seed["password"])
+            users[seed["email"]] = user
 
         db.session.flush()
 
+        plants = {}
         for seed in PLANT_SEEDS:
             lookup = {"common_name": seed["common_name"]}
             defaults = {
@@ -367,6 +541,7 @@ def seed():
             }
             plant, _ = get_or_create(Plant, lookup, defaults)
             db.session.flush()
+            plants[seed["common_name"]] = plant
 
             pot, _ = get_or_create(Pot, {"size": seed["size"]})
             db.session.flush()
@@ -381,9 +556,26 @@ def seed():
                 },
             )
 
+        db.session.flush()
+        clear_seeded_activity(users.values())
+
+        for seed in ACTIVITY_SEEDS:
+            user = users[seed["email"]]
+            make_cart(
+                user,
+                "active",
+                seed["active_cart"]["created_at"],
+                seed["active_cart"]["items"],
+                plants,
+            )
+            for plant_name in seed["wishlist"]:
+                db.session.add(Wishlist(user_id=user.id, plant_id=plants[plant_name].id))
+            for order_seed in seed["orders"]:
+                make_order(user, order_seed, plants)
+
         db.session.commit()
 
 
 if __name__ == "__main__":
     seed()
-    print("Seeded nursery.db with sample users, categories, species, varieties, and plants.")
+    print("Seeded nursery.db with sample users, catalog data, inventory, carts, orders, and wishlists.")

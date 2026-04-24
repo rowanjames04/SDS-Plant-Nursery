@@ -28,9 +28,11 @@
                 <td>{{ pot.size }}mm</td>
                 <td>{{ pot.plant_pots|length }}</td>
                 <td style="display:flex;gap:8px;align-items:center;">
-                    <a class="button-link button-secondary" href="{{ url_for('admin.edit_pot', id=pot.id) }}">Edit</a>
+                    <form method="get" action="{{ url_for('admin.edit_pot', id=pot.id) }}" style="display:inline">
+                        <button class="button-link button-secondary" type="submit">Edit</button>
+                    </form>
                     <form method="post" action="{{ url_for('admin.delete_pot', id=pot.id) }}" style="display:inline">
-                        <button type="submit">Delete</button>
+                        <button class="button-link" type="submit">Delete</button>
                     </form>
                 </td>
             </tr>

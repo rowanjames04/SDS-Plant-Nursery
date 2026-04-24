@@ -15,7 +15,7 @@
         <a class="button-link" href="{{ url_for('admin.create_category') }}">Add category</a>
     </div>
     {% if categories %}
-    <table class="data-table">
+    <table class="data-table taxonomy-table">
         <thead>
             <tr>
                 <th>Name</th>
@@ -42,7 +42,7 @@
         <a class="button-link" href="{{ url_for('admin.create_species') }}">Add species</a>
     </div>
     {% if species %}
-    <table class="data-table">
+    <table class="data-table taxonomy-table">
         <thead>
             <tr>
                 <th>Name</th>
@@ -69,7 +69,7 @@
         <a class="button-link" href="{{ url_for('admin.create_variety') }}">Add variety</a>
     </div>
     {% if varieties %}
-    <table class="data-table">
+    <table class="data-table taxonomy-table">
         <thead>
             <tr>
                 <th>Name</th>
