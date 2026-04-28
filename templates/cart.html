@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart | Little Jill's Plant Nursery</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
@@ -24,33 +25,20 @@
                             <div>Unit Price</div>
                             <div>Quantity</div>
                             <div>Subtotal</div>
+                            <div></div>
                         </div>
 
                         <div class="cart-list cart-list--table">
                             {% for item in cart_items %}
                                 <article class="cart-row">
                                     <div class="cart-row__product">
+                                        {% if item.image_filename %}
                                         <div class="cart-row__thumb">
-                                            {% if item.image_filename %}
-                                                <img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}" alt="">
-                                            {% else %}
-                                                <span aria-hidden="true">Plant</span>
-                                            {% endif %}
+                                            <img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}" alt="{{ item.name }}">
                                         </div>
+                                        {% endif %}
                                         <div class="cart-row__details">
-                                            <h3><a href="{{ url_for('plant_detail', id=item.plant_id) }}">{{ item.name }}</a></h3>
-                                            <div class="cart-row__remove-form">
-                                                <button
-                                                    name="action"
-                                                    value="remove"
-                                                    formaction="{{ url_for('update_cart_item', item_id=item.id) }}"
-                                                    formmethod="post"
-                                                    class="button-secondary cart-row__remove-button"
-                                                    type="submit"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
+                                            <h3><a class="cart-row__name-link" href="{{ url_for('plant_detail', id=item.plant_id) }}">{{ item.name }}</a></h3>
                                         </div>
                                     </div>
 
@@ -69,6 +57,18 @@
                                     </div>
 
                                     <div class="cart-row__subtotal">${{ '%.2f'|format(item.line_total) }}</div>
+
+                                    <div class="cart-row__remove">
+                                        <button
+                                            name="action"
+                                            value="remove"
+                                            formaction="{{ url_for('update_cart_item', item_id=item.id) }}"
+                                            formmethod="post"
+                                            class="cart-remove-btn"
+                                            type="submit"
+                                            aria-label="Remove {{ item.name }}"
+                                        >✕</button>
+                                    </div>
                                 </article>
                             {% endfor %}
                         </div>
@@ -86,24 +86,21 @@
 
                     <div class="cart-actions">
                         <div class="cart-actions__buttons">
-                            <button 
-                                type="submit" 
-                                class="button-link cart-actions__update">
-                                Update cart
-                            </button>
+                            <button type="submit" class="button-link button-secondary cart-actions__update">Update cart</button>
                             <button
                                 type="submit"
                                 formmethod="get"
                                 formaction="{{ url_for('checkout') }}"
-                                class="button-link cart-actions__checkout">
-                                Proceed to checkout
-                            </button>
+                                class="button-link cart-actions__checkout"
+                            >Proceed to checkout</button>
                         </div>
                     </div>
                 </form>
             {% else %}
-                <p class="muted">Your cart is empty.</p>
-                <p><a href="{{ url_for('plants_index') }}">Browse plants</a></p>
+                <div class="empty-state">
+                    <p class="empty-state__msg">Your cart is empty.</p>
+                    <a class="button-link" href="{{ url_for('plants_index') }}">Browse plants</a>
+                </div>
             {% endif %}
         </section>
     </main>

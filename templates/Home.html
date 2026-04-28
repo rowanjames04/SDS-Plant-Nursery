@@ -4,41 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Little Jill's Plant Nursery</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     {% include '_header.html' %}
 
     <main class="container">
-        <section class="card hero">
-            <div>
-                <h1>Little Jill's Plant Nursery</h1>
-                <p class="muted">A simple catalogue for your nursery stock.</p>
-                <p>Start with a category, then drill into the matching plants.</p>
-            </div>
-            <div class="card hero-panel">
-                <h2>Quick view</h2>
-                <p><strong>{{ categories|length }}</strong> categor{% if categories|length != 1 %}ies{% else %}y{% endif %}</p>
-            </div>
-        </section>
+        <div class="page-header">
+            <p class="page-header__eyebrow">❁ &ensp; Little Jill's Plant Nursery</p>
+            <h1>Find your next plant</h1>
+            <p class="muted">Browse our handpicked collection of {{ plants|length }} plant{% if plants|length != 1 %}s{% endif %} across {{ categories|length }} categor{% if categories|length != 1 %}ies{% else %}y{% endif %}.</p>
+        </div>
 
-        <section class="card">
-            <h2>Categories</h2>
-            {% if categories %}
-                <div class="compact-list">
-                    {% for category in categories %}
-                        <article class="compact-card">
-                            <h3><a href="{{ url_for('plants_index', category=category.id) }}">{{ category.name }}</a></h3>
+        {% if categories %}
+            <div class="plant-grid">
+                {% for category in categories %}
+                    <article class="plant-card">
+                        <div class="plant-card__body">
+                            <h3 class="plant-card__name">{{ category.name }}</h3>
                             {% if category.description %}
-                                <p class="muted">{{ category.description }}</p>
+                                <p class="plant-card__desc">{{ category.description }}</p>
                             {% endif %}
-                        </article>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="muted">No categories have been added yet.</p>
-            {% endif %}
-        </section>
+                        </div>
+                        <div class="plant-card__footer">
+                            <a class="button-link" href="{{ url_for('plants_index', category=category.id) }}">Browse</a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="muted">No categories have been added yet.</p>
+        {% endif %}
     </main>
 </body>
 </html>
