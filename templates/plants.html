@@ -4,70 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plants | Little Jill's Plant Nursery</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     {% include '_header.html' %}
 
     <main class="container">
-        <section class="card hero">
-            <div>
-                <h1>Plants</h1>
-                <p class="muted">A simple list of everything in the nursery.</p>
-            </div>
-            <div class="card hero-panel">
-                <h2>Counts</h2>
-                <p><strong>{{ plants|length }}</strong> plant{% if plants|length != 1 %}s{% endif %}</p>
-                <p><strong>{{ categories|length }}</strong> categor{% if categories|length != 1 %}ies{% else %}y{% endif %}</p>
-                <p><strong>{{ species|length }}</strong> species</p>
-                <p><strong>{{ varieties|length }}</strong> variet{% if varieties|length != 1 %}ies{% else %}y{% endif %}</p>
-            </div>
-        </section>
+        <div class="page-header">
+            <p class="page-header__eyebrow">❁ &ensp; grown with care</p>
+            <h1>Our Plants</h1>
+            <p class="muted">{{ plants|length }} variet{% if plants|length != 1 %}ies{% else %}y{% endif %} ready to grow. Find what suits your space.</p>
+        </div>
 
         {% if categories %}
-        <div>
+        <div class="filter-bar">
+            <a class="filter-chip {% if not active_categories %}filter-chip--active{% endif %}" href="{{ url_for('plants_index') }}">All <span class="filter-chip__count">{{ plants|length if not active_categories else (cat_counts.values()|sum) }}</span></a>
             {% for cat in categories %}
             {% if cat_counts.get(cat.id, 0) > 0 %}
-                {% if active_category == cat.id %}
-                <a href="{{ url_for('plants_index') }}">{{ cat.name }} ({{ cat_counts.get(cat.id, 0) }})</a>
-                {% else %}
-                <a href="?category={{ cat.id }}">{{ cat.name }} ({{ cat_counts.get(cat.id, 0) }})</a>
-                {% endif %}
+            <a class="filter-chip {% if cat.id in active_categories %}filter-chip--active{% endif %}" href="{{ toggle_category_url(active_categories, cat.id) }}">{{ cat.name }} <span class="filter-chip__count">{{ cat_counts.get(cat.id, 0) }}</span></a>
             {% endif %}
             {% endfor %}
         </div>
         {% endif %}
 
-        <section class="card">
-            {% if plants %}
-                <div class="plant-list">
-                    {% for plant in plants %}
-                        <article class="plant-card">
-                            <h3><a href="{{ url_for('plant_detail', id=plant.id) }}">{{ plant.common_name }}</a></h3>
-                            {% if plant.scientific_name %}
-                                <p><em>{{ plant.scientific_name }}</em></p>
-                            {% endif %}
-                            <div class="tag-row">
-                                {% if plant.category_name %}
-                                    <span class="tag">{{ plant.category_name }}</span>
-                                {% endif %}
-                                {% if plant.species_name %}
-                                    <span class="tag">{{ plant.species_name }}</span>
-                                {% endif %}
-                                {% if plant.variety_name %}
-                                    <span class="tag">{{ plant.variety_name }}</span>
-                                {% endif %}
+        {% if plants %}
+            <div class="plant-grid">
+                {% for plant in plants %}
+                    <article class="plant-card">
+                        <div class="plant-card__body">
+                            <div class="plant-card__meta">
+                                {% if plant.category_name %}<span class="tag">{{ plant.category_name }}</span>{% endif %}
+                                {% if plant.variety_name %}<span class="tag">{{ plant.variety_name }}</span>{% endif %}
                             </div>
-                            {% if plant.description %}
-                                <p>{{ plant.description }}</p>
+                            <h3 class="plant-card__name">{{ plant.common_name }}</h3>
+                            {% if plant.scientific_name %}
+                                <p class="plant-card__sci"><em>{{ plant.scientific_name }}</em></p>
                             {% endif %}
-                        </article>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="muted">No plants have been added yet.</p>
-            {% endif %}
-        </section>
+                            {% if plant.description %}
+                                <p class="plant-card__desc">{{ plant.description }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="plant-card__footer">
+                            {% if plant.min_price %}
+                                <span class="plant-card__price">from ${{ '%.2f'|format(plant.min_price) }}</span>
+                            {% endif %}
+                            <a class="button-link" href="{{ url_for('plant_detail', id=plant.id) }}">View plant</a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="muted">No plants found.</p>
+        {% endif %}
     </main>
 </body>
 </html>

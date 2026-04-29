@@ -1,11 +1,39 @@
-.DS_Store
-.env
-.env.*
-venv/
-.venv/
+# Python
 __pycache__/
 *.pyc
 *.pyo
-.vscode/
+*.pyd
+
+# Virtualenvs
+venv/
+.venv/
+env/
+
+# Environment
+.env
+.env.*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
 instance/
+
+# Uploads (user-submitted images)
+static/images/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.slnx.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keys / certs
 *.pem
+*.key

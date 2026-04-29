@@ -4,55 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | Little Jill's Plant Nursery</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     {% include '_header.html' %}
 
     <main class="container">
-        <section class="card hero">
-            <div>
-                <h1>Checkout</h1>
-                <p class="muted">This review page is backed by a pending order snapshot so Stripe can be connected later without changing the checkout flow.</p>
-            </div>
-            <div class="card hero-panel">
-                <h2>Order {{ order.id }}</h2>
-                <p><strong>Status:</strong> {{ order.status }}</p>
-                <p><strong>Items:</strong> {{ checkout_item_count }}</p>
-                <p><strong>Total:</strong> ${{ '%.2f'|format(checkout_total) }}</p>
-                <p><a href="{{ url_for('cart') }}">Back to cart</a></p>
-            </div>
-        </section>
+        <div class="page-header">
+            <p class="page-header__eyebrow">❁ &ensp; almost there</p>
+            <h1>Checkout</h1>
+            <p class="muted">Review your order below.</p>
+        </div>
 
-        <section class="card">
-            <h2>Order summary</h2>
-            <div class="cart-list">
-                {% for item in checkout_items %}
-                    <article class="plant-card cart-item">
-                        <div>
-                            <h3>{{ item.name }}</h3>
-                            <p class="muted">Unit price: ${{ '%.2f'|format(item.unit_price) }}</p>
-                        </div>
-                        <div class="checkout-line">
-                            <p><strong>Qty:</strong> {{ item.quantity }}</p>
-                            <p><strong>Line total:</strong> ${{ '%.2f'|format(item.line_total) }}</p>
-                        </div>
-                    </article>
-                {% endfor %}
-            </div>
-        </section>
+        <div class="checkout-layout">
 
-        <section class="card checkout-grid">
-            <div>
-                <h2>Next step</h2>
-                <p class="muted">When Stripe is added, this order record can be used to generate Checkout Session line items and store the resulting Stripe session and payment intent IDs.</p>
+            <!-- Order items -->
+            <div class="checkout-items-col">
+                <div class="card" style="padding:0;overflow:hidden;">
+                    <div class="checkout-items-head">
+                        <span>Item</span>
+                        <span>Qty</span>
+                        <span>Price</span>
+                    </div>
+                    {% for item in checkout_items %}
+                    <div class="checkout-item-row">
+                        <div class="checkout-item-row__info">
+                            {% if item.image_filename %}
+                            <div class="cart-row__thumb checkout-thumb">
+                                <img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}" alt="{{ item.name }}">
+                            </div>
+                            {% endif %}
+                            <div>
+                                <p class="checkout-item-row__name">{{ item.name }}</p>
+                                <p class="checkout-item-row__unit muted">${{ '%.2f'|format(item.unit_price) }} each</p>
+                            </div>
+                        </div>
+                        <span class="checkout-item-row__qty">{{ item.quantity }}</span>
+                        <span class="checkout-item-row__total">${{ '%.2f'|format(item.line_total) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="cart-total-panel">
-                <p><strong>Subtotal:</strong> ${{ '%.2f'|format(checkout_subtotal) }}</p>
-                <p><strong>Total:</strong> ${{ '%.2f'|format(checkout_total) }}</p>
-                <button type="button" disabled>Stripe payment coming soon</button>
+
+            <!-- Summary panel -->
+            <div class="checkout-summary-col">
+                <div class="card checkout-summary-panel">
+                    <h2 class="checkout-summary-panel__title">Order summary</h2>
+
+                    <div class="checkout-summary-panel__rows">
+                        <div class="checkout-summary-panel__row">
+                            <span>Items ({{ checkout_item_count }})</span>
+                            <span>${{ '%.2f'|format(checkout_subtotal) }}</span>
+                        </div>
+                        <div class="checkout-summary-panel__row checkout-summary-panel__row--total">
+                            <span>Total</span>
+                            <span>${{ '%.2f'|format(checkout_total) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="checkout-summary-panel__actions">
+                        <button type="button" class="button-link checkout-pay-btn" disabled>Pay now (coming soon)</button>
+                        <a class="button-link button-secondary checkout-back-btn" href="{{ url_for('cart') }}">← Back to cart</a>
+                    </div>
+                </div>
+
+                <div class="checkout-thankyou">
+                    <p>❁ &nbsp; Thanks for shopping with Little Jill's &nbsp; ❁</p>
+                </div>
             </div>
-        </section>
+
+        </div>
     </main>
 </body>
 </html>
