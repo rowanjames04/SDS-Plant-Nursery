@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData, inspect, text
+from sqlalchemy import MetaData, inspect, text, func
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
@@ -294,7 +294,7 @@ def home():
 
 @app.route("/plants")
 def plants_index():
-    category_id = request.args.get('category', type=int)
+    active_categories = set(request.args.getlist('category', type=int))
 
     categories = Category.query.order_by(Category.name).all()
     species_list = Species.query.order_by(Species.name).all()
@@ -307,9 +307,15 @@ def plants_index():
     all_plants = Plant.query.all()
     cat_counts = Counter(p.category_id for p in all_plants if p.category_id)
 
+    min_prices = dict(
+        db.session.query(PlantPot.plant_id, func.min(PlantPot.price))
+        .group_by(PlantPot.plant_id)
+        .all()
+    )
+
     q = Plant.query
-    if category_id:
-        q = q.filter_by(category_id=category_id)
+    if active_categories:
+        q = q.filter(Plant.category_id.in_(active_categories))
 
     plant_rows = []
     for plant in q.order_by(Plant.common_name).all():
@@ -321,7 +327,19 @@ def plants_index():
             "species_name": species_map.get(plant.species_id),
             "variety_name": variety_map.get(plant.variety_id),
             "description": plant.description,
+            "min_price": min_prices.get(plant.id),
         })
+
+    def toggle_category_url(active_cats, cat_id):
+        cats = set(active_cats)
+        if cat_id in cats:
+            cats.discard(cat_id)
+        else:
+            cats.add(cat_id)
+        if cats:
+            params = '&'.join(f'category={c}' for c in sorted(cats))
+            return url_for('plants_index') + '?' + params
+        return url_for('plants_index')
 
     return render_template(
         "plants.html",
@@ -330,7 +348,8 @@ def plants_index():
         species=species_list,
         varieties=varieties,
         cat_counts=cat_counts,
-        active_category=category_id,
+        active_categories=active_categories,
+        toggle_category_url=toggle_category_url,
     )
 
 @app.route("/profile")

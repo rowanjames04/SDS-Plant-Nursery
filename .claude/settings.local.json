@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m flask run)",
+      "Bash(python app.py --port 5001)",
+      "Bash(flask run *)",
+      "Bash(python -m flask run --port 5001)"
+    ]
+  }
+}
