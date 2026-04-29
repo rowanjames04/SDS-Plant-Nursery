@@ -12,6 +12,7 @@ env/
 # Environment
 .env
 .env.*
+google_maps_api_key.txt
 
 # Database
 *.db

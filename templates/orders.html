@@ -8,68 +8,66 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
 
-    <body>
-        {% include '_header.html' %}
+<body>
+    {% include '_header.html' %}
 
-        <div class="ordercontainer">
-            <h2 class="ordertitle">My Orders</h2>
-
-            <div class="orderslist">
-
-                <div class="orderhistory">
-                    <div class="orderheading">
-                        <h3>Order #N/A</h3>
-                        <span class="status delivered">Delivered</span>
-                    </div>
-
-                    <p><strong>Date:</strong> (DD/MM/YYYY)</p>
-
-                    <div class="orderitems">
-                        <strong>Items:</strong>
-                        <ul>
-                            <li>N/A</li>
-                            <li>N/A</li>
-                        </ul>
-                    </div>
-
-                    <p><strong>Total:</strong> N/A</p>
-
-                    <p><strong>Payment Type:</strong> N/A</p>
-
-                    <p><strong>Delivery Address:</strong><br>
-                        N/A</p>
-
-                    <button class="detailsbtn">View Details</button>
-                </div>
-
-                <div class="orderhistory">
-                    <div class="orderheading">
-                        <h3>Order #N/A</h3>
-                        <span class="status pending">Pending</span>
-                </div>
-
-                <p><strong>Date:</strong> (DD/MM/YYYY)</p>
-
-                <div class="orderitems">
-                    <strong>Items:</strong>
-                    <ul>
-                        <li>N/A</li>
-                    </ul>
-                </div>
-
-                <p><strong>Total:</strong> N/A</p>
-
-                <p><strong>Payment Type:</strong> N/A</p>
-
-                <p><strong>Delivery Address:</strong><br>
-                    N/A
-                </p>
-
-                <button class="detailsbtn">View Details</button>
-                </div>
-
+    <main class="container order-page">
+        <section class="profile-hero">
+            <div>
+                <p class="eyebrow">Account</p>
+                <h1>Order History</h1>
+                <p class="muted">Your nursery orders, totals, items, and payment status.</p>
             </div>
-        </div>
+            <a class="button-secondary profile-orders__link" href="{{ url_for('profile') }}">Back to profile</a>
+        </section>
 
-    </body>
+        {% if orders %}
+            <div class="orderslist">
+                {% for order in orders %}
+                    <article class="orderhistory">
+                        <div class="orderheading">
+                            <div>
+                                <h3>Order #{{ order.id }}</h3>
+                                <p class="muted">{{ order.created_at.strftime('%d %b %Y') }}</p>
+                            </div>
+                            <span class="status {{ 'delivered' if order.status == 'completed' else 'cancelled' if order.status == 'cancelled' else 'pending' }}">{{ order.status|title }}</span>
+                        </div>
+
+                        <div class="order-meta-grid">
+                            <div>
+                                <span class="meta-label">Payment</span>
+                                <strong>{{ order.payment_status|default('Pending', true)|title }}</strong>
+                            </div>
+                            <div>
+                                <span class="meta-label">Items</span>
+                                <strong>{{ order.items|length }}</strong>
+                            </div>
+                            <div>
+                                <span class="meta-label">Total</span>
+                                <strong>${{ '%.2f'|format(order.total_amount) }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="orderitems">
+                            <strong>Items</strong>
+                            <ul>
+                                {% for item in order.items %}
+                                    <li>
+                                        <span>{{ item.quantity }} x {{ item.plant_name_snapshot }}</span>
+                                        <span>${{ '%.2f'|format(item.unit_price_snapshot * item.quantity) }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <section class="card profile-panel">
+                <p class="muted">No orders yet.</p>
+                <a class="button-link" href="{{ url_for('plants_index') }}">Browse plants</a>
+            </section>
+        {% endif %}
+    </main>
+</body>
 </html>

@@ -1,4 +1,7 @@
 import os
+import json
+import urllib.parse
+import urllib.request
 from collections import Counter
 from datetime import datetime
 from decimal import Decimal
@@ -16,12 +19,28 @@ UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 MAX_CONTENT_LENGTH = 16 * 1000 * 1000  # 16 MB lmit for uploaded images
 DEFAULT_DEV_SECRET_KEY = "dev-secret-key-change-me"
+GOOGLE_MAPS_API_KEY_FILE = "google_maps_api_key.txt"
+
+
+def load_google_maps_api_key():
+    key_path = os.path.join(os.path.dirname(__file__), GOOGLE_MAPS_API_KEY_FILE)
+    try:
+        with open(key_path, "r", encoding="utf-8") as key_file:
+            key = key_file.read().strip()
+    except OSError:
+        key = ""
+
+    if key and key != "PUT-API-KEY-HERE":
+        return key
+
+    return os.getenv("GOOGLE_MAPS_API_KEY", "").strip()
 
 app = Flask(__name__, instance_relative_config=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI', 'sqlite:///nursery.db')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or DEFAULT_DEV_SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+app.config['GOOGLE_MAPS_API_KEY'] = load_google_maps_api_key()
 
 convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
@@ -43,7 +62,7 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-from models import Cart, CartItem, Category, Order, OrderItem, Plant, PlantPot, Pot, Species, User, Variety, Wishlist
+from models import Cart, CartItem, Category, Order, OrderItem, Plant, PlantPot, Pot, Species, User, UserAddress, Variety, Wishlist
 from admin import admin_bp
 app.register_blueprint(admin_bp)
     
@@ -207,6 +226,73 @@ def build_order_summary(order):
     }
 
 
+def get_place_component(components, component_type, use_short_name=False):
+    for component in components:
+        if component_type in component.get("types", []):
+            key = "short_name" if use_short_name else "long_name"
+            return component.get(key, "")
+    return ""
+
+
+def verified_address_from_place(place_id):
+    api_key = app.config.get("GOOGLE_MAPS_API_KEY")
+    if not api_key:
+        return None, "Google Maps address verification is not configured."
+
+    params = urllib.parse.urlencode({
+        "place_id": place_id,
+        "fields": "address_components,formatted_address,geometry,place_id",
+        "key": api_key,
+    })
+    url = f"https://maps.googleapis.com/maps/api/place/details/json?{params}"
+
+    try:
+        with urllib.request.urlopen(url, timeout=8) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except (OSError, ValueError):
+        return None, "We could not verify that address. Please try the search again."
+
+    if payload.get("status") != "OK":
+        return None, "Please choose a verified address from the search results."
+
+    result = payload.get("result", {})
+    components = result.get("address_components", [])
+    street_number = get_place_component(components, "street_number")
+    route = get_place_component(components, "route")
+    line1 = " ".join(part for part in [street_number, route] if part).strip()
+    city = (
+        get_place_component(components, "locality")
+        or get_place_component(components, "postal_town")
+        or get_place_component(components, "sublocality")
+        or get_place_component(components, "administrative_area_level_2")
+    )
+    state = get_place_component(components, "administrative_area_level_1", use_short_name=True)
+    postal_code = get_place_component(components, "postal_code")
+    country = get_place_component(components, "country")
+    country_code = get_place_component(components, "country", use_short_name=True)
+    line2 = get_place_component(components, "subpremise")
+    location = result.get("geometry", {}).get("location", {})
+
+    if not all([line1, city, state, postal_code, country, result.get("formatted_address")]):
+        return None, "Please choose a complete street address from the search results."
+
+    if country_code != "AU":
+        return None, "Please choose an address in Australia."
+
+    return {
+        "line1": line1,
+        "line2": line2,
+        "city": city,
+        "state": state,
+        "postal_code": postal_code,
+        "country": country,
+        "formatted_address": result["formatted_address"],
+        "google_place_id": result.get("place_id", place_id),
+        "latitude": location.get("lat"),
+        "longitude": location.get("lng"),
+    }, None
+
+
 def get_active_cart(user):
     return (
         Cart.query.filter_by(user_id=user.id, status="active")
@@ -352,10 +438,45 @@ def plants_index():
         toggle_category_url=toggle_category_url,
     )
 
-@app.route("/profile")
+@app.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    return render_template('profile.html', user=current_user)
+    if request.method == "POST":
+        place_id = request.form.get("google_place_id", "").strip()
+        if not place_id:
+            flash("Please choose an address from the search results.", "error")
+            return redirect(url_for("profile"))
+
+        verified_address, error = verified_address_from_place(place_id)
+        if error:
+            flash(error, "error")
+            return redirect(url_for("profile"))
+
+        verified_address["line2"] = request.form.get("line2", "").strip()
+        verified_address["is_default"] = True
+
+        if current_user.address is None:
+            current_user.address = UserAddress(**verified_address)
+        else:
+            for field, value in verified_address.items():
+                setattr(current_user.address, field, value)
+
+        db.session.commit()
+        flash("Your default address has been saved.", "success")
+        return redirect(url_for("profile"))
+
+    user_orders = (
+        Order.query.filter_by(user_id=current_user.id)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
+    return render_template(
+        'profile.html',
+        user=current_user,
+        address=current_user.address,
+        orders=user_orders,
+        google_maps_api_key=app.config.get("GOOGLE_MAPS_API_KEY"),
+    )
 
 @app.route("/orders")
 @login_required

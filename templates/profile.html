@@ -10,21 +10,220 @@
     <body>
         {% include '_header.html' %}
 
-<div class="boxcon">
-  <h2 class="titleprof">My Profile</h2>
-
-            <div class="info"><span class="label">Full Name:</span> {{ current_user.full_name }}</div>
-            <div class="info"><span class="label">Email:</span> {{ current_user.email }}</div>
-
-            <form action="{{ url_for('logout') }}" method="POST" style="margin-top: 20px;">
-                <button type="submit" class="logout-btn">Logout</button> 
-
-                <nav class="site-nav site-nav--utility">
-                    <a class="nav-button nav-button--icon" href="{{ url_for('orders') }}">
-                        <span class="nav-icon-chip" aria-hidden="true"></span>
-                        <span>orders</span>
+    <main class="container profile-page">
+        <section class="profile-hero">
+            <div>
+                <p class="eyebrow">Account</p>
+                <h1>My Profile</h1>
+                <p class="muted">Manage your default delivery address and view your nursery orders.</p>
+            </div>
+            <form action="{{ url_for('logout') }}" method="post">
+                <button type="submit" class="button-secondary profile-logout">Logout</button>
             </form>
+        </section>
+
+        <div class="profile-layout">
+            <section class="card profile-panel">
+                <div class="section-heading">
+                    <h2>Customer Details</h2>
+                </div>
+                <dl class="profile-details">
+                    <div>
+                        <dt>Full name</dt>
+                        <dd>{{ user.full_name }}</dd>
+                    </div>
+                    <div>
+                        <dt>Email</dt>
+                        <dd>{{ user.email }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="card profile-panel profile-panel--address">
+                <div class="section-heading">
+                    <div>
+                        <h2>Default Address</h2>
+                        <p class="muted">Search for an existing address, then add unit or apartment details if needed.</p>
+                    </div>
+                    {% if address %}
+                        <span class="status delivered">Default</span>
+                    {% endif %}
+                </div>
+
+                {% if not google_maps_api_key %}
+                    <p class="flash flash-error">Google Maps address search needs google_maps_api_key.txt in the project folder.</p>
+                {% endif %}
+
+                <form class="address-form" method="post" action="{{ url_for('profile') }}">
+                    <div class="form-field form-field--wide">
+                        <label for="address-search">Address search</label>
+                        <input
+                            id="address-search"
+                            type="text"
+                            name="address_search"
+                            placeholder="Start typing your street address"
+                            autocomplete="off"
+                        >
+                        <p id="address-search-message" class="address-form__message" aria-live="polite">
+                            {% if not google_maps_api_key %}Address search needs google_maps_api_key.txt in the project folder.{% endif %}
+                        </p>
+                    </div>
+
+                    <input id="google-place-id" type="hidden" name="google_place_id" value="{{ address.google_place_id if address else '' }}">
+
+                    <div class="form-field form-field--wide">
+                        <label for="line1">Address line 1</label>
+                        <input id="line1" name="line1" value="{{ address.line1 if address else '' }}" readonly required>
+                    </div>
+                    <div class="form-field form-field--wide">
+                        <label for="line2">Address line 2</label>
+                        <input id="line2" name="line2" value="{{ address.line2 if address and address.line2 else '' }}" placeholder="Unit, suite, building">
+                    </div>
+                    <div class="form-field">
+                        <label for="city">City</label>
+                        <input id="city" name="city" value="{{ address.city if address else '' }}" readonly required>
+                    </div>
+                    <div class="form-field">
+                        <label for="state">State</label>
+                        <input id="state" name="state" value="{{ address.state if address else '' }}" readonly required>
+                    </div>
+                    <div class="form-field">
+                        <label for="postal-code">Postcode</label>
+                        <input id="postal-code" name="postal_code" value="{{ address.postal_code if address else '' }}" readonly required>
+                    </div>
+                    <div class="form-field">
+                        <label for="country">Country</label>
+                        <input id="country" name="country" value="{{ address.country if address else '' }}" readonly required>
+                    </div>
+
+                    <button id="address-submit" class="button-link address-form__submit" type="submit" {% if not google_maps_api_key %}disabled{% endif %}>
+                        Save default address
+                    </button>
+                </form>
+            </section>
         </div>
 
-    </body>
+        <section class="card profile-panel profile-orders">
+            <div class="section-heading">
+                <div>
+                    <h2>Order History</h2>
+                    <p class="muted">Your actual orders are listed newest first.</p>
+                </div>
+                <a class="button-secondary profile-orders__link" href="{{ url_for('orders') }}">All orders</a>
+            </div>
+
+            {% if orders %}
+                <div class="profile-order-list">
+                    {% for order in orders[:4] %}
+                        <article class="profile-order">
+                            <div class="profile-order__summary">
+                                <h3>Order #{{ order.id }}</h3>
+                                <span class="status {{ 'delivered' if order.status == 'completed' else 'cancelled' if order.status == 'cancelled' else 'pending' }}">{{ order.status|title }}</span>
+                            </div>
+                            <p class="muted">{{ order.created_at.strftime('%d %b %Y') }} &middot; {{ order.items|length }} item{% if order.items|length != 1 %}s{% endif %}</p>
+                            <ul class="compact-list">
+                                {% for item in order.items %}
+                                    <li>{{ item.quantity }} x {{ item.plant_name_snapshot }}</li>
+                                {% endfor %}
+                            </ul>
+                            <strong>${{ '%.2f'|format(order.total_amount) }}</strong>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">No orders yet.</p>
+            {% endif %}
+        </section>
+    </main>
+
+    {% if google_maps_api_key %}
+        <script>
+            window.gm_authFailure = function () {
+                const message = document.getElementById("address-search-message");
+                const submit = document.getElementById("address-submit");
+                if (message) {
+                    message.textContent = "Google address search could not load. Check that the API key and Places API are enabled.";
+                    message.classList.add("address-form__message--error");
+                }
+                if (submit) submit.disabled = true;
+            };
+
+            function addressScriptFailed() {
+                window.gm_authFailure();
+            }
+
+            function initAddressAutocomplete() {
+                const searchInput = document.getElementById("address-search");
+                const message = document.getElementById("address-search-message");
+                const submit = document.getElementById("address-submit");
+                if (!searchInput || !window.google || !window.google.maps || !window.google.maps.places) {
+                    window.gm_authFailure();
+                    return;
+                }
+
+                const fields = {
+                    placeId: document.getElementById("google-place-id"),
+                    line1: document.getElementById("line1"),
+                    line2: document.getElementById("line2"),
+                    city: document.getElementById("city"),
+                    state: document.getElementById("state"),
+                    postalCode: document.getElementById("postal-code"),
+                    country: document.getElementById("country"),
+                };
+
+                const component = (components, type, shortName = false) => {
+                    const match = components.find((item) => item.types.includes(type));
+                    return match ? match[shortName ? "short_name" : "long_name"] : "";
+                };
+
+                searchInput.addEventListener("input", () => {
+                    fields.placeId.value = "";
+                    fields.line1.value = "";
+                    fields.city.value = "";
+                    fields.state.value = "";
+                    fields.postalCode.value = "";
+                    fields.country.value = "";
+                    if (submit) submit.disabled = true;
+                    if (message) {
+                        message.textContent = "Choose one of the address suggestions to verify it.";
+                        message.classList.remove("address-form__message--error");
+                    }
+                });
+
+                const autocomplete = new google.maps.places.Autocomplete(searchInput, {
+                    componentRestrictions: { country: "au" },
+                    fields: ["address_components", "formatted_address", "place_id"],
+                    types: ["address"],
+                });
+
+                autocomplete.addListener("place_changed", () => {
+                    const place = autocomplete.getPlace();
+                    const components = place.address_components || [];
+                    const streetNumber = component(components, "street_number");
+                    const route = component(components, "route");
+                    const line1 = [streetNumber, route].filter(Boolean).join(" ");
+                    const city = component(components, "locality")
+                        || component(components, "postal_town")
+                        || component(components, "sublocality")
+                        || component(components, "administrative_area_level_2");
+
+                    fields.placeId.value = place.place_id || "";
+                    fields.line1.value = line1;
+                    fields.line2.value = component(components, "subpremise");
+                    fields.city.value = city;
+                    fields.state.value = component(components, "administrative_area_level_1", true);
+                    fields.postalCode.value = component(components, "postal_code");
+                    fields.country.value = component(components, "country");
+
+                    if (submit) submit.disabled = !fields.placeId.value;
+                    if (message) {
+                        message.textContent = fields.placeId.value ? "Address verified by Google." : "Please choose a complete address suggestion.";
+                        message.classList.toggle("address-form__message--error", !fields.placeId.value);
+                    }
+                });
+            }
+        </script>
+        <script async defer onerror="addressScriptFailed()" src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key|urlencode }}&libraries=places&callback=initAddressAutocomplete"></script>
+    {% endif %}
+</body>
 </html>

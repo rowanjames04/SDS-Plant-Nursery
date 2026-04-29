@@ -74,12 +74,12 @@
                         </div>
 
                         <div class="cart-summary-row">
+                            <div class="cart-summary-row__title">Total</div>
+                            <div class="cart-summary-row__spacer"></div>
                             <div class="cart-summary-row__label">
                                 <strong>{{ cart_item_count }}</strong>
                                 <span>item{% if cart_item_count != 1 %}s{% endif %}</span>
                             </div>
-                            <div class="cart-summary-row__spacer"></div>
-                            <div class="cart-summary-row__title">Total</div>
                             <div class="cart-summary-row__value">${{ '%.2f'|format(cart_total) }}</div>
                         </div>
                     </div>

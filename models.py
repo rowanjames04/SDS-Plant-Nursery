@@ -60,6 +60,11 @@ class User(db.Model, UserMixin):
     is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
     carts: Mapped[list["Cart"]] = relationship(back_populates="user")
     orders: Mapped[list["Order"]] = relationship(back_populates="user")
+    address: Mapped[Optional["UserAddress"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
     wishlist: Mapped[list["Wishlist"]] = relationship(back_populates="user")
 
     def set_password(self, password):
@@ -67,6 +72,31 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+class UserAddress(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False, unique=True, index=True)
+    line1: Mapped[str] = mapped_column(String(255), nullable=False)
+    line2: Mapped[Optional[str]] = mapped_column(String(255))
+    city: Mapped[str] = mapped_column(String(120), nullable=False)
+    state: Mapped[str] = mapped_column(String(120), nullable=False)
+    postal_code: Mapped[str] = mapped_column(String(20), nullable=False)
+    country: Mapped[str] = mapped_column(String(120), nullable=False)
+    formatted_address: Mapped[str] = mapped_column(String(500), nullable=False)
+    google_place_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    latitude: Mapped[Optional[float]] = mapped_column(Float)
+    longitude: Mapped[Optional[float]] = mapped_column(Float)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False,
+    )
+
+    user: Mapped["User"] = relationship(back_populates="address")
 
 class Species(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
