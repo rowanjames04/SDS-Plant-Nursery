@@ -2,144 +2,123 @@
 {% block title %}{{ plant.common_name }}{% endblock %}
 
 {% block content %}
-<section class="card hero" style="margin-bottom:20px;">
-    <div>
-        <h1>{{ plant.common_name }}</h1>
-        {% if plant.scientific_name %}<p class="muted"><em>{{ plant.scientific_name }}</em></p>{% endif %}
+<div class="profile-hero" style="margin-bottom:20px;">
+    <div style="display:flex;gap:14px;align-items:center;">
+        <a class="button-link button-secondary" href="{{ url_for('admin.plants') }}" style="font-size:1.1rem;padding:8px 14px;">&#8592;</a>
+        <div>
+            <p class="page-header__eyebrow">Plants</p>
+            <h1>{{ plant.common_name }}</h1>
+            {% if plant.scientific_name %}<p class="muted"><em>{{ plant.scientific_name }}</em></p>{% endif %}
+        </div>
     </div>
-    <div class="card hero-panel">
-        <a class="button-link button-secondary" href="{{ url_for('admin.plants') }}">Back to plants</a>
-    </div>
-</section>
+    <button class="button-link" type="submit" form="plant-detail-form" style="width:auto;">Save details</button>
+</div>
 
-<section class="card" style="margin-bottom:20px;">
-    <h2>Plant Details</h2>
-    <form method="post" action="{{ url_for('admin.plant_detail', id=plant.id) }}" class="form admin-plant-form">
-        <div class="admin-form-section">
-            <h3>Identity</h3>
-            <div class="admin-field-grid admin-field-grid--two">
-                <div class="input-group">
-                    <label>Common name</label>
-                    <input type="text" name="common_name" value="{{ plant.common_name }}" required>
-                </div>
-                <div class="input-group">
-                    <label>Scientific name</label>
-                    <input type="text" name="scientific_name" value="{{ plant.scientific_name or '' }}">
-                </div>
+<div class="admin-detail-layout">
+    <form id="plant-detail-form" method="post" action="{{ url_for('admin.plant_detail', id=plant.id) }}" class="admin-plant-form">
+        <section class="card profile-panel admin-detail-main">
+            <div class="input-group">
+                <label>Common name</label>
+                <input type="text" name="common_name" value="{{ plant.common_name }}" required>
             </div>
-        </div>
-
-        <div class="admin-form-section">
-            <h3>Classification</h3>
-            <div class="admin-field-grid admin-field-grid--three">
-                <div class="input-group">
-                    <label>Category</label>
-                    <select name="category_id">
-                        <option value="">—</option>
-                        {% for c in categories %}
-                        <option value="{{ c.id }}" {{ 'selected' if plant.category_id == c.id }}>{{ c.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Species</label>
-                    <select name="species_id">
-                        <option value="">—</option>
-                        {% for s in species %}
-                        <option value="{{ s.id }}" {{ 'selected' if plant.species_id == s.id }}>{{ s.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Variety</label>
-                    <select name="variety_id">
-                        <option value="">—</option>
-                        {% for v in varieties %}
-                        <option value="{{ v.id }}" {{ 'selected' if plant.variety_id == v.id }}>{{ v.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <div class="input-group">
+                <label>Scientific name</label>
+                <input type="text" name="scientific_name" value="{{ plant.scientific_name or '' }}">
             </div>
-        </div>
-
-        <div class="admin-form-section">
-            <h3>Plant Profile</h3>
-            <div class="admin-field-grid admin-field-grid--four">
-                <div class="input-group admin-field-grid__wide">
-                    <label>Description</label>
-                    <input type="text" name="description" value="{{ plant.description or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Colour</label>
-                    <input type="text" name="colour" value="{{ plant.colour or '' }}">
-                </div>
-                <div class="input-group">
-                    <label>Growth size (m)</label>
-                    <div class="admin-mini-field-row">
-                        <input type="number" name="growth_width" step="0.1" value="{{ plant.growth_width or '' }}" aria-label="Growth width">
-                        <input type="number" name="growth_height" step="0.1" value="{{ plant.growth_height or '' }}" aria-label="Growth height">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>Fragrant</label>
-                    <div class="admin-radio-group">
-                        <label><input type="radio" name="fragrant" value="false" {{ 'checked' if not plant.fragrant }}> No</label>
-                        <label><input type="radio" name="fragrant" value="true" {{ 'checked' if plant.fragrant }}> Yes</label>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>Frost sensitive</label>
-                    <div class="admin-radio-group">
-                        <label><input type="radio" name="frost_sensitive" value="false" {{ 'checked' if not plant.frost_sensitive }}> No</label>
-                        <label><input type="radio" name="frost_sensitive" value="true" {{ 'checked' if plant.frost_sensitive }}> Yes</label>
-                    </div>
-                </div>
+            <div class="input-group">
+                <label>Description</label>
+                <textarea name="description" rows="5">{{ plant.description or '' }}</textarea>
             </div>
-        </div>
+        </section>
 
-        <div class="admin-form-section">
-            <h3>Growing Conditions</h3>
+        <section class="card profile-panel admin-form-section">
+            <h3>Conditions & Care</h3>
             <div class="admin-field-grid admin-field-grid--three">
                 <div class="input-group">
                     <label>Flowering period</label>
-                    <input type="text" name="flowering_period" value="{{ plant.flowering_period or '' }}">
+                    <textarea name="flowering_period" rows="2">{{ plant.flowering_period or '' }}</textarea>
                 </div>
                 <div class="input-group">
                     <label>Light requirements</label>
-                    <input type="text" name="light_requirements" value="{{ plant.light_requirements or '' }}">
+                    <textarea name="light_requirements" rows="2">{{ plant.light_requirements or '' }}</textarea>
                 </div>
                 <div class="input-group">
                     <label>Soil requirements</label>
-                    <input type="text" name="soil_requirements" value="{{ plant.soil_requirements or '' }}">
+                    <textarea name="soil_requirements" rows="2">{{ plant.soil_requirements or '' }}</textarea>
                 </div>
-            </div>
-        </div>
-
-        <div class="admin-form-section">
-            <h3>Care</h3>
-            <div class="admin-field-grid admin-field-grid--three">
                 <div class="input-group">
                     <label>Planting advice</label>
-                    <input type="text" name="planting_advice" value="{{ plant.planting_advice or '' }}">
+                    <textarea name="planting_advice" rows="2">{{ plant.planting_advice or '' }}</textarea>
                 </div>
                 <div class="input-group">
                     <label>Watering needs</label>
-                    <input type="text" name="watering_needs" value="{{ plant.watering_needs or '' }}">
+                    <textarea name="watering_needs" rows="2">{{ plant.watering_needs or '' }}</textarea>
                 </div>
                 <div class="input-group">
                     <label>Pruning needs</label>
-                    <input type="text" name="pruning_needs" value="{{ plant.pruning_needs or '' }}">
+                    <textarea name="pruning_needs" rows="2">{{ plant.pruning_needs or '' }}</textarea>
                 </div>
             </div>
-        </div>
-
-        <div class="admin-form-actions">
-            <button type="submit">Save</button>
-        </div>
+        </section>
     </form>
-</section>
 
-<section class="card" style="margin-bottom:20px;">
+    <section class="card profile-panel admin-detail-sidebar">
+        <div class="input-group">
+            <label>Category</label>
+            <select name="category_id" form="plant-detail-form">
+                <option value="">—</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}" {{ 'selected' if plant.category_id == c.id }}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Species</label>
+            <select name="species_id" form="plant-detail-form">
+                <option value="">—</option>
+                {% for s in species %}
+                <option value="{{ s.id }}" {{ 'selected' if plant.species_id == s.id }}>{{ s.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Variety</label>
+            <select name="variety_id" form="plant-detail-form">
+                <option value="">—</option>
+                {% for v in varieties %}
+                <option value="{{ v.id }}" {{ 'selected' if plant.variety_id == v.id }}>{{ v.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Colour</label>
+            <input type="text" name="colour" form="plant-detail-form" value="{{ plant.colour or '' }}">
+        </div>
+        <div class="input-group">
+            <label>Growth size (m)</label>
+            <div class="admin-mini-field-row">
+                <input type="number" name="growth_width" form="plant-detail-form" step="0.1" value="{{ plant.growth_width or '' }}" aria-label="Width">
+                <input type="number" name="growth_height" form="plant-detail-form" step="0.1" value="{{ plant.growth_height or '' }}" aria-label="Height">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Fragrant</label>
+            <div class="admin-radio-group">
+                <label><input type="radio" name="fragrant" form="plant-detail-form" value="false" {{ 'checked' if not plant.fragrant }}> No</label>
+                <label><input type="radio" name="fragrant" form="plant-detail-form" value="true" {{ 'checked' if plant.fragrant }}> Yes</label>
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Frost sensitive</label>
+            <div class="admin-radio-group">
+                <label><input type="radio" name="frost_sensitive" form="plant-detail-form" value="false" {{ 'checked' if not plant.frost_sensitive }}> No</label>
+                <label><input type="radio" name="frost_sensitive" form="plant-detail-form" value="true" {{ 'checked' if plant.frost_sensitive }}> Yes</label>
+            </div>
+        </div>
+    </section>
+</div>
+
+<section class="card">
     <h2>Images</h2>
     {% if plant.images %}
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
@@ -179,33 +158,55 @@
     </form>
 </section>
 
-<section class="card">
-    <h2>Pot Sizes</h2>
+<section class="card" id="pot-sizes">
+    <h2>Pot Sizes & Stock</h2>
     {% if plant.plant_pots %}
     <table class="data-table">
+        <colgroup>
+            <col style="width:15%;">
+            <col style="width:20%;">
+            <col style="width:30%;">
+            <col style="width:1%;white-space:nowrap;">
+            <col style="width:1%;white-space:nowrap;">
+        </colgroup>
         <thead>
             <tr>
-                <th>Pot size (mm)</th>
+                <th>Pot size</th>
                 <th>Price</th>
-                <th>Stock qty</th>
-                <th>Actions</th>
+                <th>Stock</th>
+                <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            {% for pp in plant.plant_pots %}
+            {% for pp in plant.plant_pots | sort(attribute='pot.size') %}
+            {% set form_id = 'update-pot-' ~ pp.pot_id %}
             <tr>
                 <td>{{ pp.pot.size }}mm</td>
-                <td>${{ pp.price }}</td>
-                <td>{{ pp.stock_qty }}</td>
-                <td>
-                    <form method="post" action="{{ url_for('admin.unassign_pot', id=plant.id, pot_id=pp.pot_id) }}">
-                        <button type="submit">Remove</button>
+                <td><input form="{{ form_id }}" type="number" name="price" step="0.01" min="0" value="{{ pp.price }}" style="width:90px;"></td>
+                <td style="white-space:nowrap;">
+                    <input form="{{ form_id }}" type="number" name="stock_qty" min="0" value="{{ pp.stock_qty }}" style="width:72px;">
+                    {% if pp.stock_qty == 0 %}
+                        <span class="status cancelled" style="margin-left:8px;">Out of stock</span>
+                    {% elif pp.stock_qty < 5 %}
+                        <span class="status pending" style="margin-left:8px;">Low</span>
+                    {% endif %}
+                </td>
+                <td style="white-space:nowrap;">
+                    <button form="{{ form_id }}" class="button-link button-link--sm" type="submit" style="width:auto;">Save</button>
+                </td>
+                <td style="white-space:nowrap;">
+                    <form method="post" action="{{ url_for('admin.unassign_pot', id=plant.id, pot_id=pp.pot_id) }}" onsubmit="return confirm('Remove this pot size?');">
+                        <button class="button-link button-link--sm button-secondary" type="submit" style="width:auto;">Remove</button>
                     </form>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    {% for pp in plant.plant_pots %}
+    <form id="update-pot-{{ pp.pot_id }}" method="post" action="{{ url_for('admin.update_pot', id=plant.id, pot_id=pp.pot_id) }}"></form>
+    {% endfor %}
     {% else %}
     <p class="muted">No pot sizes assigned yet.</p>
     {% endif %}

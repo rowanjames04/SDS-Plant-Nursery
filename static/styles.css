@@ -590,6 +590,7 @@ input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="number"],
+textarea,
 select {
     width: 100%;
     padding: 10px;
@@ -597,6 +598,12 @@ select {
     border-radius: 6px;
     box-sizing: border-box;
     background: #fff;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+textarea {
+    resize: vertical;
 }
 
 button {
@@ -1339,7 +1346,19 @@ button:disabled {
 }
 
 .admin-plant-form {
-    gap: 18px;
+    display: grid;
+    gap: 20px;
+}
+
+
+.admin-detail-main .input-group > label,
+.admin-detail-sidebar .input-group > label,
+.admin-form-section .input-group > label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #60785b;
 }
 
 .admin-form-section {
@@ -1399,6 +1418,25 @@ button:disabled {
     justify-content: flex-end;
 }
 
+.admin-detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 20px;
+    align-items: stretch;
+    margin-bottom: 20px;
+}
+
+.admin-detail-layout .card {
+    margin-bottom: 0;
+}
+
+.admin-detail-main,
+.admin-detail-sidebar {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+}
+
 .admin-pot-assign-form {
     grid-template-columns: 1.2fr 1fr 1fr auto;
     align-items: end;
@@ -1443,7 +1481,8 @@ button:disabled {
     .admin-field-grid--two,
     .admin-field-grid--three,
     .admin-field-grid--four,
-    .admin-pot-assign-form {
+    .admin-pot-assign-form,
+    .admin-detail-layout {
         grid-template-columns: 1fr;
     }
 

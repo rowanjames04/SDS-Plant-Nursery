@@ -1,7 +1,7 @@
 import os
 import uuid
 from functools import wraps
-from flask import Blueprint, abort, render_template, request, redirect, url_for
+from flask import Blueprint, abort, flash, render_template, request, redirect, url_for
 from flask_login import current_user, login_required
 
 PLANT_IMAGE_DIR = os.path.join("static", "images", "plants")
@@ -329,6 +329,28 @@ def delete_plant_image(id):
         os.remove(file_path)
 
     return redirect(url_for("admin.plant_detail", id=id))
+
+
+@admin_bp.route("/plants/<int:id>/pots/<int:pot_id>/update", methods=["POST"])
+@staff_required
+def update_pot(id, pot_id):
+    from app import db
+    from models import PlantPot
+
+    plant_pot = PlantPot.query.get_or_404((id, pot_id))
+    stock_qty = request.form.get("stock_qty", type=int)
+    price = request.form.get("price")
+
+    if stock_qty is None or stock_qty < 0:
+        flash("Invalid stock quantity.", "error")
+        return redirect(url_for("admin.plant_detail", id=id) + "#pot-sizes")
+
+    plant_pot.stock_qty = stock_qty
+    if price:
+        plant_pot.price = price
+    db.session.commit()
+    flash("Pot updated.", "success")
+    return redirect(url_for("admin.plant_detail", id=id) + "#pot-sizes")
 
 
 @admin_bp.route("/plants/<int:id>/images/reorder", methods=["POST"])
