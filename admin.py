@@ -331,17 +331,16 @@ def delete_plant_image(id):
     return redirect(url_for("admin.plant_detail", id=id))
 
 
-@admin_bp.route("/plants/<int:id>/images/set-primary", methods=["POST"])
+@admin_bp.route("/plants/<int:id>/images/reorder", methods=["POST"])
 @staff_required
-def set_primary_image(id):
+def reorder_plant_images(id):
     from app import db
     from models import Plant
 
     plant = Plant.query.get_or_404(id)
-    filename = request.form.get("filename")
-    images = plant.images or []
-    if filename in images:
-        plant.images = [filename] + [f for f in images if f != filename]
-        db.session.commit()
+    ordered = request.form.getlist("images[]")
+    existing = set(plant.images or [])
+    plant.images = [f for f in ordered if f in existing]
+    db.session.commit()
     return redirect(url_for("admin.plant_detail", id=id))
 
