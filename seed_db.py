@@ -377,7 +377,7 @@ def plant_price_and_image(plant):
         .order_by(Pot.size)
         .first()
     )
-    return Decimal(plant_pot.price).quantize(Decimal("0.01")), plant_pot.image_filename
+    return Decimal(plant_pot.price).quantize(Decimal("0.01")), plant.primary_image
 
 
 def clear_seeded_activity(users):
@@ -538,6 +538,7 @@ def seed():
                 "planting_advice": seed["planting_advice"],
                 "watering_needs": seed["watering_needs"],
                 "pruning_needs": seed["pruning_needs"],
+                "images": [seed["image_filename"]],
             }
             plant, _ = get_or_create(Plant, lookup, defaults)
             db.session.flush()
@@ -551,7 +552,6 @@ def seed():
                 {"plant_id": plant.id, "pot_id": pot.id},
                 {
                     "price": seed["price"],
-                    "image_filename": seed["image_filename"],
                     "stock_qty": 10,
                 },
             )

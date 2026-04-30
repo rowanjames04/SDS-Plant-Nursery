@@ -109,6 +109,7 @@ def load_catalog():
             "watering_needs": plant.watering_needs,
             "pruning_needs": plant.pruning_needs,
             "plant_pots": plant.plant_pots,
+            "primary_image": plant.primary_image,
         })
 
     return {
@@ -414,6 +415,7 @@ def plants_index():
             "variety_name": variety_map.get(plant.variety_id),
             "description": plant.description,
             "min_price": min_prices.get(plant.id),
+            "primary_image": plant.primary_image,
         })
 
     def toggle_category_url(active_cats, cat_id):
@@ -587,7 +589,7 @@ def add_to_cart():
         existing_item.quantity += quantity
         existing_item.unit_price_snapshot = decimal_price(plant_pot.price)
         existing_item.plant_name_snapshot = plant.common_name
-        existing_item.image_snapshot = plant_pot.image_filename
+        existing_item.image_snapshot = plant.primary_image
     else:
         db.session.add(
             CartItem(
@@ -596,7 +598,7 @@ def add_to_cart():
                 quantity=quantity,
                 unit_price_snapshot=decimal_price(plant_pot.price),
                 plant_name_snapshot=plant.common_name,
-                image_snapshot=plant_pot.image_filename,
+                image_snapshot=plant.primary_image,
             )
         )
 

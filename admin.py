@@ -1,6 +1,19 @@
+import os
+import uuid
 from functools import wraps
 from flask import Blueprint, abort, render_template, request, redirect, url_for
 from flask_login import current_user, login_required
+
+PLANT_IMAGE_DIR = os.path.join("static", "images", "plants")
+_ALLOWED_EXTS = {"png", "jpg", "jpeg", "webp"}
+
+
+def _save_plant_image(file):
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    filename = f"plants/{uuid.uuid4().hex}.{ext}"
+    os.makedirs(PLANT_IMAGE_DIR, exist_ok=True)
+    file.save(os.path.join("static", "images", filename))
+    return filename
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -279,4 +292,56 @@ def create_variety():
         db.session.commit()
         return redirect(url_for("admin.home"))
     return render_template("admin/variety_form.html", variety=None)
+
+
+@admin_bp.route("/plants/<int:id>/images/upload", methods=["POST"])
+@staff_required
+def upload_plant_images(id):
+    from app import db
+    from models import Plant
+
+    plant = Plant.query.get_or_404(id)
+    files = request.files.getlist("images")
+    new_images = []
+    for file in files:
+        if file and file.filename and file.filename.rsplit(".", 1)[-1].lower() in _ALLOWED_EXTS:
+            new_images.append(_save_plant_image(file))
+
+    plant.images = (plant.images or []) + new_images
+    db.session.commit()
+    return redirect(url_for("admin.plant_detail", id=id))
+
+
+@admin_bp.route("/plants/<int:id>/images/delete", methods=["POST"])
+@staff_required
+def delete_plant_image(id):
+    from app import db
+    from models import Plant
+
+    plant = Plant.query.get_or_404(id)
+    filename = request.form.get("filename")
+    file_path = os.path.join("static", "images", filename) if filename else None
+
+    plant.images = [f for f in (plant.images or []) if f != filename]
+    db.session.commit()
+
+    if file_path and os.path.exists(file_path):
+        os.remove(file_path)
+
+    return redirect(url_for("admin.plant_detail", id=id))
+
+
+@admin_bp.route("/plants/<int:id>/images/set-primary", methods=["POST"])
+@staff_required
+def set_primary_image(id):
+    from app import db
+    from models import Plant
+
+    plant = Plant.query.get_or_404(id)
+    filename = request.form.get("filename")
+    images = plant.images or []
+    if filename in images:
+        plant.images = [filename] + [f for f in images if f != filename]
+        db.session.commit()
+    return redirect(url_for("admin.plant_detail", id=id))
 

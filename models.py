@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
-from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Numeric, Float
+from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Numeric, Float, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -31,8 +31,14 @@ class Plant(db.Model):
     watering_needs: Mapped[Optional[str]] = mapped_column(String(200))
     pruning_needs: Mapped[Optional[str]] = mapped_column(String(200))
 
+    images: Mapped[Optional[list]] = mapped_column(JSON, default=list)
+
     plant_pots: Mapped[list["PlantPot"]] = relationship(back_populates="plant")
     cart_items: Mapped[list["CartItem"]] = relationship(back_populates="plant")
+
+    @property
+    def primary_image(self) -> Optional[str]:
+        return self.images[0] if self.images else None
 
 
 class Pot(db.Model):
@@ -46,7 +52,6 @@ class PlantPot(db.Model):
     plant_id: Mapped[int] = mapped_column(ForeignKey("plant.id"), primary_key=True)
     pot_id: Mapped[int] = mapped_column(ForeignKey("pot.id"), primary_key=True)
     stock_qty: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    image_filename: Mapped[Optional[str]] = mapped_column(String(255))
     price: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), default=Decimal("0.00"))
 
     plant: Mapped["Plant"] = relationship(back_populates="plant_pots")
