@@ -17,7 +17,7 @@ from werkzeug.utils import secure_filename
 load_dotenv()
 UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-MAX_CONTENT_LENGTH = 16 * 1000 * 1000  # 16 MB lmit for uploaded images
+MAX_CONTENT_LENGTH = 5 * 1000 * 1000  # 5 MB limit for uploaded images
 DEFAULT_DEV_SECRET_KEY = "dev-secret-key-change-me"
 GOOGLE_MAPS_API_KEY_FILE = "google_maps_api_key.txt"
 

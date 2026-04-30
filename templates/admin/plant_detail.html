@@ -139,6 +139,46 @@
     </form>
 </section>
 
+<section class="card" style="margin-bottom:20px;">
+    <h2>Images</h2>
+    {% if plant.images %}
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+        {% for image in plant.images %}
+        <div>
+            <img src="{{ url_for('static', filename='images/' ~ image) }}" alt="{{ plant.common_name }}" style="width:120px;height:120px;object-fit:cover;">
+            {% if loop.first %}
+            <p class="muted">Primary</p>
+            {% else %}
+            <form method="post" action="{{ url_for('admin.reorder_plant_images', id=plant.id) }}" style="margin-top:4px;">
+                <input type="hidden" name="images[]" value="{{ image }}">
+                {% for other in plant.images if other != image %}
+                <input type="hidden" name="images[]" value="{{ other }}">
+                {% endfor %}
+                <button type="submit">Set as primary</button>
+            </form>
+            {% endif %}
+            <form method="post" action="{{ url_for('admin.delete_plant_image', id=plant.id) }}" style="margin-top:4px;">
+                <input type="hidden" name="filename" value="{{ image }}">
+                <button type="submit">Delete</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted">No images yet.</p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('admin.upload_plant_images', id=plant.id) }}" enctype="multipart/form-data">
+        <div class="input-group">
+            <label>Upload images</label>
+            <input type="file" name="images" multiple accept=".png,.jpg,.jpeg,.webp">
+        </div>
+        <div>
+            <button type="submit">Upload</button>
+        </div>
+    </form>
+</section>
+
 <section class="card">
     <h2>Pot Sizes</h2>
     {% if plant.plant_pots %}

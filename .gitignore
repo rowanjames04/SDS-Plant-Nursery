@@ -20,8 +20,6 @@ google_maps_api_key.txt
 *.sqlite3
 instance/
 
-# Uploads (user-submitted images)
-static/images/
 
 # Visual Studio
 .vs/
