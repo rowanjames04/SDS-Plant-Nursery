@@ -87,13 +87,8 @@
                     <div class="cart-actions">
                         <div class="cart-actions__buttons">
                             <button type="submit" class="button-link button-secondary cart-actions__update">Update cart</button>
-                            <button
-                                type="submit"
-                                formmethod="get"
-                                formaction="{{ url_for('checkout') }}"
-                                class="button-link cart-actions__checkout"
-                            >Proceed to checkout</button>
                         </div>
+                        <a href="{{ url_for('checkout') }}" class="button-link cart-actions__checkout">Proceed to checkout</a>
                     </div>
                 </form>
             {% else %}
