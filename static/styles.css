@@ -2024,3 +2024,138 @@ button:disabled {
         width: 100%;
     }
 }
+
+/* This is the Admins order page.*/
+
+.adminsordercontainer {
+    width: 85%;
+    margin: 40px auto;
+}
+
+
+.adminsordertitle {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #1e293b;
+}
+
+
+.ordersfilters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.ordersfilters input,
+.ordersfilters select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    background: white;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.ordersfilters input:focus,
+.ordersfilters select:focus {
+    outline: none;
+    border-color: #2f5d3a;
+    box-shadow: 0 0 0 2px rgba(47,93,58,0.1);
+}
+
+
+.adminsordertable {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+}
+
+.adminsordertable th, 
+.adminsordertable td {
+    padding: 14px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.adminsordertable th {
+    background: #2f5d3a;
+    color: white;
+    font-weight: 500;
+}
+
+.adminsordertable tr {
+    transition: 0.2s;
+}
+
+.adminsordertable tr:hover {
+    background: #f1f5f3;
+}
+
+.adminsordertable tr:not(:last-child) td {
+    border-bottom: 1px solid #eef2f1;
+}
+
+
+.adminsstatus {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.adminsdelivered {
+    background: #e6f4ea;
+    color: #2e7d32;
+}
+
+.adminspending {
+    background: #fff8e1;
+    color: #b28704;
+}
+
+.adminscancelled {
+    background: #fdecea;
+    color: #c62828;
+}
+
+
+.adminsviewbtn, .adminseditbtn, .adminsdeletebtn {
+    border: none;
+    padding: 6px 12px;
+    margin-right: 6px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* Individual styles */
+.adminsviewbtn {
+    background: #2f5d3a;
+    color: white;
+}
+
+.adminsviewbtn:hover {
+    background: #244a2e;
+}
+
+.adminseditbtn {
+    background: #f59e0b;
+    color: white;
+}
+
+.adminseditbtn:hover {
+    background: #d97706;
+}
+
+.adminsdeletebtn {
+    background: #ef4444;
+    color: white;
+}
+
+.adminsdeletebtn:hover {
+    background: #dc2626;
+}

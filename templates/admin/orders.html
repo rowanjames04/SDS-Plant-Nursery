@@ -1,0 +1,86 @@
+{% extends 'admin/_base.html' %}
+{% block title %}New Plant{% endblock %}
+
+{% block content %}
+
+
+<div class="adminsordercontainer">
+
+    <div>
+        <h2 class="adminsordertitle">All Orders</h2>
+
+        <div class="ordersfilters">
+            <input type="text" placeholder="Search orders...">
+            <select>
+                <option>All Status</option>
+                <option>Pending</option>
+                <option>Delivered</option>
+                <option>Cancelled</option>
+            </select>
+        </div>
+    </div>
+
+    <table class="adminsordertable">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>#N/A</td>
+                <td>Name</td>
+                <td>Date</td>
+                <td>Price</td>
+                <td>Payment</td>
+                <td><span class="adminsstatus adminsdelivered">Delivered</span></td>
+                <td>
+                    <button class="adminsviewbtn">View</button>
+                    <button class="adminseditbtn">Update</button>
+                    <button class="adminsdeletebtn">Delete</button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>#N/A</td>
+                <td>Name</td>
+                <td>Date</td>
+                <td>Price</td>
+                <td>Payment</td>
+                <td><span class="adminsstatus adminspending">Pending</span></td>
+                <td>
+                    <button class="adminsviewbtn">View</button>
+                    <button class="adminseditbtn">Update</button>
+                    <button class="adminsdeletebtn">Delete</button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>#N/A</td>
+                <td>Name</td>
+                <td>Date</td>
+                <td>Price</td>
+                <td>Payment</td>
+                <td><span class="adminsstatus adminscancelled">Cancelled</span></td>
+                <td>
+                    <button class="adminsviewbtn">View</button>
+                    <button class="adminseditbtn">Update</button>
+                    <button class="adminsdeletebtn">Delete</button>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+{% endblock %}
