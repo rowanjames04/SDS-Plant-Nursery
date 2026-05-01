@@ -30,6 +30,10 @@
                     </span>
                 </a>
                 {% if current_user.is_authenticated %}
+                <a class="nav-button" href="{{ url_for('wishlist') }}">
+                    <span class="nav-icon-chip" aria-hidden="true">♡</span>
+                    <span>Wishlist</span>
+                </a>
                 <details class="account-menu">
                     <summary class="nav-button account-menu__summary">
                         <span class="nav-icon-chip" aria-hidden="true">👤</span>

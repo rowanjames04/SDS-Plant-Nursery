@@ -1,0 +1,198 @@
+.page-header {
+    margin-bottom: 24px;
+    padding-top: 8px;
+}
+
+.page-header__eyebrow {
+    margin: 0 0 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #5e7a58;
+}
+
+.page-header h1 {
+    margin: 0 0 6px;
+    font-size: 2rem;
+}
+
+.page-header .muted {
+    margin: 0;
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.hero h1 {
+    margin-bottom: 8px;
+    font-size: 2.2rem;
+}
+
+.hero-panel {
+    background: #f0f6ef;
+}
+
+.plant-list {
+    display: grid;
+    gap: 16px;
+}
+
+.plant-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.compact-list {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid #c7d6c3;
+    background: #fff;
+    color: #23471f;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.12s, border-color 0.12s;
+}
+
+.filter-chip:hover {
+    background: #eef5eb;
+    border-color: #b8cbb4;
+    text-decoration: none;
+}
+
+.filter-chip--active {
+    background: #2d5a27;
+    border-color: #2d5a27;
+    color: #fff;
+}
+
+.filter-chip--active:hover {
+    background: #23471f;
+    border-color: #23471f;
+}
+
+.filter-chip__count {
+    font-size: 0.78rem;
+    font-weight: 700;
+    opacity: 0.75;
+}
+
+.plant-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 22px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.15s, transform 0.15s;
+    overflow: hidden;
+}
+
+.plant-card:hover {
+    box-shadow: 0 8px 24px rgba(45, 90, 39, 0.1);
+    transform: translateY(-2px);
+}
+
+.plant-card__image {
+    margin: -22px -22px 16px;
+    border-radius: 10px 10px 0 0;
+    overflow: hidden;
+    height: 180px;
+    background: #eef5eb;
+    flex-shrink: 0;
+}
+
+.plant-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.plant-card__meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.plant-card__body {
+    flex: 1;
+}
+
+.plant-card__name {
+    margin: 0 0 4px;
+    font-size: 1.1rem;
+}
+
+.plant-card__sci {
+    margin: 0 0 4px;
+    color: #666;
+    font-size: 0.88rem;
+}
+
+.plant-card__desc {
+    margin: 10px 0 0;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+.plant-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+.plant-card__price {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2d5a27;
+}
+
+.plant-detail__image {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    max-height: 320px;
+    background: #eef5eb;
+}
+
+.plant-detail__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.wishlist-card-actions {
+    display: flex;
+    gap: 8px;
+}

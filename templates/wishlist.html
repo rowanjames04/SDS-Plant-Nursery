@@ -20,6 +20,11 @@
             <div class="plant-grid">
                 {% for item in wishlist_items %}
                     <article class="plant-card">
+                        {% if item.plant.primary_image %}
+                        <div class="plant-card__image">
+                            <img src="{{ url_for('static', filename='images/' ~ item.plant.primary_image) }}" alt="{{ item.plant.common_name }}">
+                        </div>
+                        {% endif %}
                         <div class="plant-card__body">
                             <h3 class="plant-card__name">{{ item.plant.common_name }}</h3>
                             {% if item.plant.scientific_name %}
@@ -28,7 +33,7 @@
                         </div>
                         <div class="plant-card__footer">
                             <a class="button-link button-link--sm button-secondary" href="{{ url_for('plant_detail', id=item.plant.id) }}">View</a>
-                            <div style="display:flex;gap:8px;">
+                            <div class="wishlist-card-actions">
                                 <form method="post" action="{{ url_for('remove_from_wishlist', plant_id=item.plant.id) }}">
                                     <input type="hidden" name="next" value="{{ url_for('wishlist') }}">
                                     <button type="submit" class="button-secondary button-link--sm">Remove</button>

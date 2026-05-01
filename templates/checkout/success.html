@@ -17,17 +17,17 @@
             <p class="muted">Your payment was successful. Order #{{ order.id }}</p>
         </div>
 
-        <div class="card" style="max-width: 600px; margin: 0 auto;">
-            <div style="text-align: center; padding: 2rem 0;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
-                <h2 style="margin-bottom: 0.5rem;">Payment Successful</h2>
+        <div class="card card--narrow">
+            <div class="centered-content">
+                <div class="centered-content__icon">✅</div>
+                <h2>Payment Successful</h2>
                 <p class="muted">A confirmation email will be sent to {{ current_user.email }}</p>
             </div>
 
-            <hr style="border: none; border-top: 1px solid #eee; margin: 1.5rem 0;">
+            <hr class="divider">
 
             <h3>Order Summary</h3>
-            <div class="checkout-items-head" style="margin-top: 1rem;">
+            <div class="checkout-items-head">
                 <span>Item</span>
                 <span>Qty</span>
                 <span>Price</span>
@@ -50,7 +50,7 @@
             </div>
             {% endfor %}
 
-            <div class="checkout-summary-panel__rows" style="margin-top: 1rem;">
+            <div class="checkout-summary-panel__rows">
                 <div class="checkout-summary-panel__row">
                     <span>Items ({{ order_summary.item_count }})</span>
                     <span>${{ '%.2f'|format(order_summary.subtotal) }}</span>
@@ -61,13 +61,13 @@
                 </div>
             </div>
 
-            <div style="text-align: center; margin-top: 2rem;">
+            <div class="stacked-actions">
                 <a href="{{ url_for('orders') }}" class="button-link">View Your Orders</a>
-                <a href="{{ url_for('home') }}" class="button-link button-secondary" style="display: inline-block; margin-top: 0.5rem;">Continue Shopping</a>
+                <a href="{{ url_for('home') }}" class="button-link button-secondary">Continue Shopping</a>
             </div>
         </div>
 
-        <div class="checkout-thankyou" style="text-align: center; margin-top: 2rem;">
+        <div class="checkout-thankyou page-footer-note">
             <p>❁ &nbsp; Thanks for shopping with Little Jill's &nbsp; ❁</p>
         </div>
     </main>

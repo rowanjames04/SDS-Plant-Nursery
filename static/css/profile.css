@@ -1,0 +1,240 @@
+.profile-page {
+    display: grid;
+    gap: 20px;
+    padding-top: 24px;
+    padding-bottom: 32px;
+}
+
+.profile-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    padding: 8px 0 4px;
+}
+
+.profile-hero h1 {
+    margin: 0 0 6px;
+    color: #23471f;
+    font-size: 2rem;
+}
+
+.profile-hero .muted,
+.section-heading .muted {
+    margin: 0;
+}
+
+.profile-layout {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.78fr) minmax(0, 1.22fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.profile-panel {
+    border-color: #d8e3d5;
+    box-shadow: 0 8px 22px rgba(35, 71, 31, 0.06);
+}
+
+.profile-panel--address {
+    margin-bottom: 0;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.section-heading h2 {
+    margin: 0;
+    color: #23471f;
+    font-size: 1.18rem;
+}
+
+.profile-details {
+    display: grid;
+    gap: 14px;
+    margin: 0;
+}
+
+.profile-details div {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf1ea;
+}
+
+.profile-details div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.profile-details dt,
+.meta-label,
+.form-field label {
+    display: block;
+    color: #657261;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.profile-details dd {
+    margin: 3px 0 0;
+    color: #222;
+    font-weight: 700;
+}
+
+.address-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.form-field {
+    display: grid;
+    gap: 6px;
+}
+
+.form-field--wide {
+    grid-column: 1 / -1;
+}
+
+.form-field input {
+    min-height: 42px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 11px;
+    border: 1px solid #cddbc8;
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+}
+
+#address-search {
+    appearance: none;
+}
+
+.form-field input[readonly] {
+    background: #f6faf5;
+    color: #455341;
+}
+
+.form-field input:disabled {
+    color: #777;
+    background: #f2f2f2;
+}
+
+.address-form__submit {
+    grid-column: 1 / -1;
+    justify-self: start;
+    border: 0;
+    cursor: pointer;
+}
+
+.address-form__submit:disabled {
+    background: #8da389;
+    cursor: not-allowed;
+}
+
+.address-form__message {
+    min-height: 18px;
+    margin: 0;
+    color: #60785b;
+    font-size: 0.84rem;
+}
+
+.address-form__message:empty {
+    display: none;
+}
+
+.address-form__message--error {
+    color: #a33a2d;
+}
+
+.pac-container {
+    z-index: 10000;
+    border: 1px solid #cddbc8;
+    border-radius: 8px;
+    box-shadow: 0 10px 24px rgba(35, 71, 31, 0.14);
+    font-family: Arial, sans-serif;
+}
+
+.pac-item {
+    min-height: 36px;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.profile-logout,
+.profile-orders__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.profile-orders {
+    margin-bottom: 0;
+}
+
+.profile-order-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.profile-order {
+    border: 1px solid #dfe8dc;
+    border-radius: 8px;
+    padding: 14px;
+    background: #fbfef9;
+}
+
+.profile-order__summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-order h3 {
+    margin: 0;
+    color: #23471f;
+}
+
+.profile-order .compact-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    margin: 10px 0;
+    padding-left: 18px;
+}
+
+@media (max-width: 760px) {
+    .profile-hero,
+    .section-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .profile-layout,
+    .address-form,
+    .profile-order-list {
+        grid-template-columns: 1fr;
+    }
+
+    .address-form__submit,
+    .profile-logout,
+    .profile-orders__link {
+        width: 100%;
+    }
+}

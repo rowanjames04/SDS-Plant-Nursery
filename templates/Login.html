@@ -11,16 +11,6 @@
     {% include '_header.html' %}
 
     <main class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-stack" style="margin-bottom:16px">
-                    {% for category, message in messages %}
-                        <div class="flash flash-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
         <div class="auth-wrap">
             <div class="page-header">
                 <p class="page-header__eyebrow">❁ &ensp; Welcome back</p>
@@ -40,7 +30,7 @@
                     <button type="submit">Sign in</button>
                 </form>
 
-                <p style="margin-top:14px;margin-bottom:0">
+                <p class="auth-form-footer">
                     Don't have an account? <a href="{{ url_for('register') }}">Create one</a>
                 </p>
             </div>

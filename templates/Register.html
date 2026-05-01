@@ -8,37 +8,43 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    {% include '_header.html' %}
+
     <main class="container">
-        <section class="card">
-            <h1>Register</h1>
-            <p class="muted">Create a new nursery account.</p>
+        <div class="auth-wrap">
+            <div class="page-header">
+                <p class="page-header__eyebrow">❁ &ensp; Join us</p>
+                <h1>Create account</h1>
+            </div>
 
-            <form class="form" action="{{ url_for('register') }}" method="POST">
-                <div class="input-group">
-                    <label for="fullname">Full Name</label>
-                    <input type="text" id="fullname" name="fullname" placeholder="John Doe" required>
-                </div>
+            <div class="card">
+                <form class="form" action="{{ url_for('register') }}" method="POST">
+                    <div class="input-group">
+                        <label for="fullname">Full Name</label>
+                        <input type="text" id="fullname" name="fullname" placeholder="Jane Smith" required>
+                    </div>
 
-                <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="green@thumb.com" required>
-                </div>
+                    <div class="input-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="green@thumb.com" required>
+                    </div>
 
-                <div class="input-group">
-                    <label for="password">Create Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
 
-                <div class="input-group">
-                    <label for="confirm-password">Confirm Password</label>
-                    <input type="password" id="confirm-password" name="confirm-password" required>
-                </div>
+                    <div class="input-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" name="confirm-password" required>
+                    </div>
 
-                <button type="submit">Register</button>
-            </form>
+                    <button type="submit">Create account</button>
+                </form>
 
-            <p>Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
-        </section>
+                <p class="auth-form-footer">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
+            </div>
+        </div>
     </main>
 </body>
 </html>
