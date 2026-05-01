@@ -13,6 +13,11 @@
     <main class="container">
         <section class="card hero">
             <div>
+                {% if plant.primary_image %}
+                <div class="plant-detail__image">
+                    <img src="{{ url_for('static', filename='images/' ~ plant.primary_image) }}" alt="{{ plant.common_name }}">
+                </div>
+                {% endif %}
                 <h1>{{ plant.common_name }}</h1>
                 {% if plant.scientific_name %}
                     <p><em>{{ plant.scientific_name }}</em></p>
@@ -49,7 +54,7 @@
                 {% else %}
                     <p class="muted">No sizes currently available.</p>
                 {% endif %}
-                <form class="inline-form" method="post" action="{{ url_for('add_to_wishlist', plant_id=plant.id) }}" style="margin-top: 12px;">
+                <form class="inline-form" method="post" action="{{ url_for('add_to_wishlist', plant_id=plant.id) }}">
                     <input type="hidden" name="next" value="{{ url_for('plant_detail', id=plant.id) }}">
                     <button type="submit" class="button-secondary">♡ Add to wishlist</button>
                 </form>

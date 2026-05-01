@@ -1,0 +1,163 @@
+.card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.card--flush {
+    padding: 0;
+    overflow: hidden;
+}
+
+.card--narrow {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card--medium {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.compact-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #fff;
+}
+
+.compact-card h3 {
+    margin: 0 0 4px;
+    font-size: 1rem;
+}
+
+.compact-card p {
+    margin: 0;
+}
+
+.tag-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.tag {
+    background: #eef3ed;
+    color: #2d5a27;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.85rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.data-table th {
+    font-weight: 600;
+    border-bottom: 2px solid #eee;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.taxonomy-table {
+    table-layout: fixed;
+}
+
+.taxonomy-table th:first-child,
+.taxonomy-table td:first-child {
+    width: 28%;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.stat-card__value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-card__label {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.empty-state__msg {
+    margin: 0;
+    color: #666;
+    font-size: 1rem;
+}
+
+.cart-total-panel {
+    background: #f0f6ef;
+    border: 1px solid #d8e3d5;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.centered-content {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.centered-content__icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.centered-content__body {
+    margin-bottom: 1.5rem;
+}
+
+.centered-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stacked-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 2rem;
+}

@@ -32,6 +32,11 @@
             <div class="plant-grid">
                 {% for plant in plants %}
                     <article class="plant-card">
+                        {% if plant.primary_image %}
+                        <div class="plant-card__image">
+                            <img src="{{ url_for('static', filename='images/' ~ plant.primary_image) }}" alt="{{ plant.common_name }}">
+                        </div>
+                        {% endif %}
                         <div class="plant-card__body">
                             <div class="plant-card__meta">
                                 {% if plant.category_name %}<span class="tag">{{ plant.category_name }}</span>{% endif %}

@@ -17,14 +17,14 @@
             <p class="muted">Your cart has been preserved. Ready when you are!</p>
         </div>
 
-        <div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
-            <div style="padding: 2rem 0;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🛒</div>
-                <p class="muted" style="margin-bottom: 1.5rem;">
+        <div class="card card--medium">
+            <div class="centered-content">
+                <div class="centered-content__icon">🛒</div>
+                <p class="muted centered-content__body">
                     Your items are still waiting in your cart.
                     Feel free to continue checkout whenever you're ready.
                 </p>
-                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <div class="centered-actions">
                     <a href="{{ url_for('cart') }}" class="button-link">Back to Cart</a>
                     <a href="{{ url_for('home') }}" class="button-link button-secondary">Continue Shopping</a>
                 </div>

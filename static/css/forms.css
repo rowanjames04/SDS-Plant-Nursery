@@ -1,0 +1,63 @@
+.form {
+    display: grid;
+    gap: 14px;
+}
+
+.input-group {
+    display: grid;
+    gap: 6px;
+}
+
+label {
+    font-weight: 600;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    background: #fff;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.inline-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.inline-label {
+    font-weight: 600;
+}
+
+.quantity-input {
+    width: 72px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.auth-wrap {
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.auth-form-footer {
+    margin-top: 14px;
+    margin-bottom: 0;
+}
