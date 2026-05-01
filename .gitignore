@@ -15,10 +15,8 @@ env/
 google_maps_api_key.txt
 
 # Database
-*.db
 *.sqlite
 *.sqlite3
-instance/
 
 
 # Visual Studio
