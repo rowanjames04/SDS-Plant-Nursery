@@ -356,8 +356,40 @@ def repair_legacy_user_table():
         connection.execute(text("ALTER TABLE user__migration RENAME TO user"))
 
 
+def repair_legacy_plant_table():
+    database_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+    if not database_uri.startswith("sqlite"):
+        return
+
+    inspector = inspect(db.engine)
+    if "plant" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("plant")}
+    if "images" in columns:
+        return
+
+    with db.engine.begin() as connection:
+        connection.execute(text("ALTER TABLE plant ADD COLUMN images JSON"))
+
+        if "image_filename" in columns:
+            legacy_images = connection.execute(text("""
+                SELECT id, image_filename
+                FROM plant
+                WHERE image_filename IS NOT NULL
+                  AND image_filename != ''
+            """)).mappings()
+
+            for row in legacy_images:
+                connection.execute(
+                    text("UPDATE plant SET images = :images WHERE id = :id"),
+                    {"id": row["id"], "images": json.dumps([row["image_filename"]])},
+                )
+
+
 with app.app_context():
     repair_legacy_user_table()
+    repair_legacy_plant_table()
     # Create any missing tables for a fresh local SQLite database.
     db.create_all()
 
