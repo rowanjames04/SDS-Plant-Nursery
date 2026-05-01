@@ -123,7 +123,7 @@
                             <p class="muted">{{ order.created_at.strftime('%d %b %Y') }} &middot; {{ order.items|length }} item{% if order.items|length != 1 %}s{% endif %}</p>
                             <ul class="compact-list">
                                 {% for item in order.items %}
-                                    <li>{{ item.quantity }} x {{ item.plant_name_snapshot }}</li>
+                                    <li>{{ item.quantity }} x {{ item.plant_name_snapshot }}{% if item.pot_size_snapshot %} ({{ item.pot_size_snapshot }}mm){% endif %}</li>
                                 {% endfor %}
                             </ul>
                             <strong>${{ '%.2f'|format(order.total_amount) }}</strong>

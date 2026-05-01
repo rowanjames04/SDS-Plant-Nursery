@@ -53,7 +53,7 @@
                             <ul>
                                 {% for item in order.items %}
                                     <li>
-                                        <span>{{ item.quantity }} x {{ item.plant_name_snapshot }}</span>
+                                        <span>{{ item.quantity }} x {{ item.plant_name_snapshot }}{% if item.pot_size_snapshot %} ({{ item.pot_size_snapshot }}mm){% endif %}</span>
                                         <span>${{ '%.2f'|format(item.unit_price_snapshot * item.quantity) }}</span>
                                     </li>
                                 {% endfor %}

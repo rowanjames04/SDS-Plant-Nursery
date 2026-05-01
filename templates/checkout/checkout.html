@@ -12,12 +12,111 @@
 
     <main class="container">
         <div class="page-header">
-            <p class="page-header__eyebrow">❁ &ensp; almost there</p>
-            <h1>Checkout</h1>
-            <p class="muted">Review your order below.</p>
+            <p class="page-header__eyebrow">Checkout</p>
+            <h1>Place your order</h1>
+            <p class="muted">Choose delivery or pickup, then confirm your order.</p>
         </div>
 
-        <div class="checkout-layout">
+        <form class="checkout-layout" method="post" action="{{ url_for('checkout') }}">
+            <div class="checkout-items-col">
+                <section class="card checkout-section">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Fulfilment</h2>
+                            <p class="muted">$60 delivery within {{ local_delivery_radius_km|int }}km of Jilliby Cemetery, free for {{ free_delivery_plant_count }} or more plants.</p>
+                        </div>
+                    </div>
+
+                    <div class="checkout-choice-grid">
+                        <label class="checkout-choice">
+                            <input id="delivery-method-delivery" type="radio" name="delivery_method" value="delivery" checked>
+                            <span>
+                                <strong>Delivery</strong>
+                                <small>$60{% if checkout_item_count >= free_delivery_plant_count %}, free today{% endif %}</small>
+                            </span>
+                        </label>
+                        <label class="checkout-choice">
+                            <input id="delivery-method-pickup" type="radio" name="delivery_method" value="pickup">
+                            <span>
+                                <strong>Pickup</strong>
+                                <small>Email when ready</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div
+                        id="delivery-panel"
+                        class="checkout-address-panel"
+                        data-radius-km="{{ local_delivery_radius_km }}"
+                        data-origin-lat="{{ jilliby_cemetery_latitude }}"
+                        data-origin-lng="{{ jilliby_cemetery_longitude }}"
+                        data-saved-lat="{{ saved_address.latitude if saved_address and saved_address.latitude is not none else '' }}"
+                        data-saved-lng="{{ saved_address.longitude if saved_address and saved_address.longitude is not none else '' }}"
+                    >
+                        <p class="checkout-disclaimer">Outside {{ local_delivery_radius_km|int }}km? Please email us for delivery options.</p>
+
+                        {% if saved_address %}
+                            <label class="checkout-save-address checkout-use-saved">
+                                <input id="use-saved-address" type="checkbox" name="use_saved_address" value="1" checked>
+                                <span>Use my saved address</span>
+                            </label>
+                        {% else %}
+                            <input id="use-saved-address" type="checkbox" name="use_saved_address" value="1" hidden>
+                        {% endif %}
+
+                        {% if not google_maps_api_key %}
+                            <p class="flash flash-error">Google Maps address search needs google_maps_api_key.txt in the project folder.</p>
+                        {% endif %}
+
+                        <div id="delivery-address-fields" class="address-form checkout-address-form">
+                            <div class="form-field form-field--wide">
+                                <label for="address-search">Address search</label>
+                                <input
+                                    id="address-search"
+                                    type="text"
+                                    name="address_search"
+                                    placeholder="Start typing your street address"
+                                    autocomplete="off"
+                                    value="{{ saved_address.formatted_address if saved_address else '' }}"
+                                >
+                                <p id="address-search-message" class="address-form__message" aria-live="polite">
+                                    {% if not google_maps_api_key %}Address search needs google_maps_api_key.txt in the project folder.{% endif %}
+                                </p>
+                            </div>
+                            <input id="google-place-id" type="hidden" name="google_place_id" value="{{ saved_address.google_place_id if saved_address else '' }}">
+                            <input id="address-latitude" type="hidden" value="{{ saved_address.latitude if saved_address and saved_address.latitude is not none else '' }}">
+                            <input id="address-longitude" type="hidden" value="{{ saved_address.longitude if saved_address and saved_address.longitude is not none else '' }}">
+                            <div class="form-field form-field--wide">
+                                <label for="line1">Address line 1</label>
+                                <input id="line1" name="line1" value="{{ saved_address.line1 if saved_address else '' }}" readonly>
+                            </div>
+                            <div class="form-field form-field--wide">
+                                <label for="line2">Address line 2</label>
+                                <input id="line2" name="line2" value="{{ saved_address.line2 if saved_address and saved_address.line2 else '' }}" placeholder="Unit, suite, building">
+                            </div>
+                            <div class="form-field">
+                                <label for="city">City</label>
+                                <input id="city" name="city" value="{{ saved_address.city if saved_address else '' }}" readonly>
+                            </div>
+                            <div class="form-field">
+                                <label for="state">State</label>
+                                <input id="state" name="state" value="{{ saved_address.state if saved_address else '' }}" readonly>
+                            </div>
+                            <div class="form-field">
+                                <label for="postal-code">Postcode</label>
+                                <input id="postal-code" name="postal_code" value="{{ saved_address.postal_code if saved_address else '' }}" readonly>
+                            </div>
+                            <div class="form-field">
+                                <label for="country">Country</label>
+                                <input id="country" name="country" value="{{ saved_address.country if saved_address else '' }}" readonly>
+                            </div>
+                            <label id="save-address-option" class="checkout-save-address" {% if saved_address %}hidden{% endif %}>
+                                <input type="checkbox" name="save_address" value="1">
+                                <span>Save this as my default address</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
 
             <!-- Order items -->
             <div class="checkout-items-col">
@@ -28,41 +127,48 @@
                         <span>Price</span>
                     </div>
                     {% for item in checkout_items %}
-                    <div class="checkout-item-row">
-                        <div class="checkout-item-row__info">
-                            {% if item.image_filename %}
-                            <div class="cart-row__thumb checkout-thumb">
-                                <img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}" alt="{{ item.name }}">
+                        <div class="checkout-item-row">
+                            <div class="checkout-item-row__info">
+                                {% if item.image_filename %}
+                                    <div class="cart-row__thumb checkout-thumb">
+                                        <img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}" alt="{{ item.name }}">
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <p class="checkout-item-row__name">{{ item.name }}</p>
+                                    <p class="checkout-item-row__unit muted">${{ '%.2f'|format(item.unit_price) }} each{% if item.pot_size %} · {{ item.pot_size }}mm pot{% endif %}</p>
+                                </div>
                             </div>
-                            {% endif %}
-                            <div>
-                                <p class="checkout-item-row__name">{{ item.name }}</p>
-                                <p class="checkout-item-row__unit muted">${{ '%.2f'|format(item.unit_price) }} each</p>
-                            </div>
+                            <span class="checkout-item-row__qty">{{ item.quantity }}</span>
+                            <span class="checkout-item-row__total">${{ '%.2f'|format(item.line_total) }}</span>
                         </div>
-                        <span class="checkout-item-row__qty">{{ item.quantity }}</span>
-                        <span class="checkout-item-row__total">${{ '%.2f'|format(item.line_total) }}</span>
-                    </div>
                     {% endfor %}
-                </div>
+                </section>
             </div>
 
-            <!-- Summary panel -->
             <div class="checkout-summary-col">
-                <div class="card checkout-summary-panel">
+                <aside class="card checkout-summary-panel">
                     <h2 class="checkout-summary-panel__title">Order summary</h2>
-
                     <div class="checkout-summary-panel__rows">
                         <div class="checkout-summary-panel__row">
-                            <span>Items ({{ checkout_item_count }})</span>
+                            <span>Plants ({{ checkout_item_count }})</span>
                             <span>${{ '%.2f'|format(checkout_subtotal) }}</span>
+                        </div>
+                        <div class="checkout-summary-panel__row">
+                            <span>Delivery</span>
+                            <span id="checkout-delivery-summary" data-delivery-fee="{{ '%.2f'|format(delivery_fee) }}" data-free-delivery="{{ '1' if checkout_item_count >= free_delivery_plant_count else '0' }}">
+                                {% if checkout_item_count >= free_delivery_plant_count %}Free{% else %}${{ '%.2f'|format(delivery_fee) }}{% endif %}
+                            </span>
                         </div>
                         <div class="checkout-summary-panel__row checkout-summary-panel__row--total">
                             <span>Total</span>
-                            <span>${{ '%.2f'|format(checkout_total) }}</span>
+                            <span id="checkout-total-summary" data-subtotal="{{ '%.2f'|format(checkout_total) }}">
+                                {% if checkout_item_count >= free_delivery_plant_count %}${{ '%.2f'|format(checkout_total) }}{% else %}${{ '%.2f'|format(checkout_total + delivery_fee) }}{% endif %}
+                            </span>
                         </div>
                     </div>
 
+<<<<<<< Updated upstream:templates/checkout/checkout.html
                     <div class="checkout-summary-panel__actions">
                         <button type="button" class="button-link checkout-pay-btn" disabled>Pay now</button>
                         <a class="button-link button-secondary checkout-back-btn" href="{{ url_for('cart') }}">← Back to cart</a>
@@ -72,9 +178,246 @@
                 <div class="checkout-thankyou">
                     <p>❁ &nbsp; Thanks for shopping with Little Jill's &nbsp; ❁</p>
                 </div>
+=======
+                    <input type="hidden" name="stripe_checkout_session_id" value="">
+                    <input type="hidden" name="stripe_payment_intent_id" value="">
+                    <button id="checkout-submit" type="submit" class="button-link checkout-pay-btn">Place order</button>
+                    <p id="checkout-submit-message" class="checkout-submit-message" aria-live="polite"></p>
+                    <p class="checkout-payment-note">Payment is mocked for now. The hidden Stripe fields are ready for checkout session metadata later.</p>
+                    <a class="button-link button-secondary checkout-back-btn" href="{{ url_for('cart') }}">Back to cart</a>
+                </aside>
+>>>>>>> Stashed changes:templates/checkout.html
             </div>
-
-        </div>
+        </form>
     </main>
+
+    <script>
+        const deliveryRadios = document.querySelectorAll('input[name="delivery_method"]');
+        const deliveryPanel = document.getElementById("delivery-panel");
+        const useSavedAddress = document.getElementById("use-saved-address");
+        const saveAddressOption = document.getElementById("save-address-option");
+        const addressSearch = document.getElementById("address-search");
+        const addressLatitude = document.getElementById("address-latitude");
+        const addressLongitude = document.getElementById("address-longitude");
+        const googlePlaceId = document.getElementById("google-place-id");
+        const deliverySummary = document.getElementById("checkout-delivery-summary");
+        const totalSummary = document.getElementById("checkout-total-summary");
+        const checkoutSubmit = document.getElementById("checkout-submit");
+        const checkoutSubmitMessage = document.getElementById("checkout-submit-message");
+        const formatMoney = (amount) => `$${amount.toFixed(2)}`;
+        const addressFields = {
+            line1: document.getElementById("line1"),
+            line2: document.getElementById("line2"),
+            city: document.getElementById("city"),
+            state: document.getElementById("state"),
+            postalCode: document.getElementById("postal-code"),
+            country: document.getElementById("country"),
+        };
+        const savedAddress = {
+            search: addressSearch?.value || "",
+            placeId: googlePlaceId?.value || "",
+            latitude: addressLatitude?.value || "",
+            longitude: addressLongitude?.value || "",
+            line1: addressFields.line1?.value || "",
+            line2: addressFields.line2?.value || "",
+            city: addressFields.city?.value || "",
+            state: addressFields.state?.value || "",
+            postalCode: addressFields.postalCode?.value || "",
+            country: addressFields.country?.value || "",
+        };
+
+        function distanceKm(lat1, lng1, lat2, lng2) {
+            const radius = 6371;
+            const toRadians = (value) => Number(value) * Math.PI / 180;
+            const phi1 = toRadians(lat1);
+            const phi2 = toRadians(lat2);
+            const deltaPhi = toRadians(Number(lat2) - Number(lat1));
+            const deltaLambda = toRadians(Number(lng2) - Number(lng1));
+            const a = Math.sin(deltaPhi / 2) ** 2
+                + Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) ** 2;
+            return radius * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
+
+        function setSavedAddressFields() {
+            addressSearch.value = savedAddress.search;
+            googlePlaceId.value = savedAddress.placeId;
+            addressLatitude.value = savedAddress.latitude;
+            addressLongitude.value = savedAddress.longitude;
+            addressFields.line1.value = savedAddress.line1;
+            addressFields.line2.value = savedAddress.line2;
+            addressFields.city.value = savedAddress.city;
+            addressFields.state.value = savedAddress.state;
+            addressFields.postalCode.value = savedAddress.postalCode;
+            addressFields.country.value = savedAddress.country;
+        }
+
+        function clearNewAddressFields() {
+            addressSearch.value = "";
+            googlePlaceId.value = "";
+            addressLatitude.value = "";
+            addressLongitude.value = "";
+            addressFields.line1.value = "";
+            addressFields.line2.value = "";
+            addressFields.city.value = "";
+            addressFields.state.value = "";
+            addressFields.postalCode.value = "";
+            addressFields.country.value = "";
+        }
+
+        function updateCheckoutPanels() {
+            const method = document.querySelector('input[name="delivery_method"]:checked')?.value;
+            deliveryPanel.hidden = method === "pickup";
+            if (saveAddressOption) {
+                saveAddressOption.hidden = Boolean(useSavedAddress?.checked);
+            }
+            if (addressSearch) {
+                addressSearch.readOnly = Boolean(useSavedAddress?.checked);
+            }
+
+            const subtotal = Number(totalSummary.dataset.subtotal || "0");
+            const deliveryFee = Number(deliverySummary.dataset.deliveryFee || "0");
+            const hasFreeDelivery = deliverySummary.dataset.freeDelivery === "1";
+            const activeDeliveryFee = method === "delivery" && !hasFreeDelivery ? deliveryFee : 0;
+            deliverySummary.textContent = method === "pickup" || hasFreeDelivery ? "Free" : formatMoney(deliveryFee);
+            totalSummary.textContent = formatMoney(subtotal + activeDeliveryFee);
+
+            let message = "";
+            let disableSubmit = false;
+            if (method === "delivery") {
+                const lat = addressLatitude.value;
+                const lng = addressLongitude.value;
+                const originLat = deliveryPanel.dataset.originLat;
+                const originLng = deliveryPanel.dataset.originLng;
+                const radiusKm = Number(deliveryPanel.dataset.radiusKm || "20");
+
+                if (!googlePlaceId.value || !lat || !lng) {
+                    disableSubmit = true;
+                    message = useSavedAddress?.checked
+                        ? "Your saved address needs map coordinates before delivery can be placed. Enter a new address or choose pickup."
+                        : "Choose a verified address from the search results before placing your order.";
+                } else {
+                    const distance = distanceKm(lat, lng, originLat, originLng);
+                    if (distance > radiusKm) {
+                        disableSubmit = true;
+                        message = `Delivery is unavailable because this address is ${distance.toFixed(1)}km from Jilliby Cemetery. Please email us for options, choose pickup, or enter another address.`;
+                    } else {
+                        const searchMessage = document.getElementById("address-search-message");
+                        if (searchMessage) {
+                            searchMessage.textContent = `Address verified within ${radiusKm}km (${distance.toFixed(1)}km from Jilliby Cemetery).`;
+                            searchMessage.classList.remove("address-form__message--error");
+                        }
+                    }
+                }
+            }
+
+            checkoutSubmit.disabled = disableSubmit;
+            checkoutSubmitMessage.textContent = message;
+        }
+
+        deliveryRadios.forEach((radio) => radio.addEventListener("change", updateCheckoutPanels));
+        if (useSavedAddress) {
+            useSavedAddress.addEventListener("change", () => {
+                if (useSavedAddress.checked) {
+                    setSavedAddressFields();
+                } else {
+                    clearNewAddressFields();
+                }
+                updateCheckoutPanels();
+            });
+        }
+        updateCheckoutPanels();
+    </script>
+
+    {% if google_maps_api_key %}
+        <script>
+            window.gm_authFailure = function () {
+                const message = document.getElementById("address-search-message");
+                if (message) {
+                    message.textContent = "Google address search could not load. Check that the API key and Places API are enabled.";
+                    message.classList.add("address-form__message--error");
+                }
+            };
+
+            function addressScriptFailed() {
+                window.gm_authFailure();
+            }
+
+            function initAddressAutocomplete() {
+                const searchInput = document.getElementById("address-search");
+                const message = document.getElementById("address-search-message");
+                if (!searchInput || !window.google || !window.google.maps || !window.google.maps.places) {
+                    window.gm_authFailure();
+                    return;
+                }
+
+                const fields = {
+                    placeId: document.getElementById("google-place-id"),
+                    line1: document.getElementById("line1"),
+                    line2: document.getElementById("line2"),
+                    city: document.getElementById("city"),
+                    state: document.getElementById("state"),
+                    postalCode: document.getElementById("postal-code"),
+                    country: document.getElementById("country"),
+                };
+
+                const component = (components, type, shortName = false) => {
+                    const match = components.find((item) => item.types.includes(type));
+                    return match ? match[shortName ? "short_name" : "long_name"] : "";
+                };
+
+                searchInput.addEventListener("input", () => {
+                    if (useSavedAddress?.checked) return;
+                    fields.placeId.value = "";
+                    addressLatitude.value = "";
+                    addressLongitude.value = "";
+                    fields.line1.value = "";
+                    fields.line2.value = "";
+                    fields.city.value = "";
+                    fields.state.value = "";
+                    fields.postalCode.value = "";
+                    fields.country.value = "";
+                    if (message) {
+                        message.textContent = "Choose one of the address suggestions to verify it.";
+                        message.classList.remove("address-form__message--error");
+                    }
+                    updateCheckoutPanels();
+                });
+
+                const autocomplete = new google.maps.places.Autocomplete(searchInput, {
+                    componentRestrictions: { country: "au" },
+                    fields: ["address_components", "formatted_address", "geometry", "place_id"],
+                    types: ["address"],
+                });
+
+                autocomplete.addListener("place_changed", () => {
+                    const place = autocomplete.getPlace();
+                    const components = place.address_components || [];
+                    const streetNumber = component(components, "street_number");
+                    const route = component(components, "route");
+                    const city = component(components, "locality")
+                        || component(components, "postal_town")
+                        || component(components, "sublocality")
+                        || component(components, "administrative_area_level_2");
+
+                    fields.placeId.value = place.place_id || "";
+                    addressLatitude.value = place.geometry?.location?.lat() || "";
+                    addressLongitude.value = place.geometry?.location?.lng() || "";
+                    fields.line1.value = [streetNumber, route].filter(Boolean).join(" ");
+                    fields.line2.value = component(components, "subpremise");
+                    fields.city.value = city;
+                    fields.state.value = component(components, "administrative_area_level_1", true);
+                    fields.postalCode.value = component(components, "postal_code");
+                    fields.country.value = component(components, "country");
+
+                    if (message) {
+                        message.textContent = fields.placeId.value ? "Address verified by Google." : "Please choose a complete address suggestion.";
+                        message.classList.toggle("address-form__message--error", !fields.placeId.value);
+                    }
+                    updateCheckoutPanels();
+                });
+            }
+        </script>
+        <script async defer onerror="addressScriptFailed()" src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key|urlencode }}&libraries=places&callback=initAddressAutocomplete"></script>
+    {% endif %}
 </body>
 </html>

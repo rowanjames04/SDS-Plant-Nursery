@@ -39,6 +39,9 @@
                                         {% endif %}
                                         <div class="cart-row__details">
                                             <h3><a class="cart-row__name-link" href="{{ url_for('plant_detail', id=item.plant_id) }}">{{ item.name }}</a></h3>
+                                            {% if item.pot_size %}
+                                                <p class="muted">{{ item.pot_size }}mm pot</p>
+                                            {% endif %}
                                         </div>
                                     </div>
 
