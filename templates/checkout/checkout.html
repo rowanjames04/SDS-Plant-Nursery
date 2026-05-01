@@ -64,7 +64,9 @@
                     </div>
 
                     <div class="checkout-summary-panel__actions">
-                        <button type="button" class="button-link checkout-pay-btn" disabled>Pay now (coming soon)</button>
+                        <form action="{{ url_for('create_checkout_session_route') }}" method="POST">
+                            <button type="submit" class="button-link checkout-pay-btn">Pay now</button>
+                        </form>
                         <a class="button-link button-secondary checkout-back-btn" href="{{ url_for('cart') }}">← Back to cart</a>
                     </div>
                 </div>

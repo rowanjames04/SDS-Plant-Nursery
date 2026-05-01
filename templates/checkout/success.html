@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | Little Jill's Plant Nursery</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <div class="page-header">
+            <p class="page-header__eyebrow">❁ &ensp; thank you!</p>
+            <h1>Order Confirmed</h1>
+            <p class="muted">Your payment was successful. Order #{{ order.id }}</p>
+        </div>
+
+        <div class="card" style="max-width: 600px; margin: 0 auto;">
+            <div style="text-align: center; padding: 2rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                <h2 style="margin-bottom: 0.5rem;">Payment Successful</h2>
+                <p class="muted">A confirmation email will be sent to {{ current_user.email }}</p>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #eee; margin: 1.5rem 0;">
+
+            <h3>Order Summary</h3>
+            <div class="checkout-items-head" style="margin-top: 1rem;">
+                <span>Item</span>
+                <span>Qty</span>
+                <span>Price</span>
+            </div>
+            {% for item in order_summary.items %}
+            <div class="checkout-item-row">
+                <div class="checkout-item-row__info">
+                    {% if item.image_filename %}
+                    <div class="cart-row__thumb checkout-thumb">
+                        <img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}" alt="{{ item.name }}">
+                    </div>
+                    {% endif %}
+                    <div>
+                        <p class="checkout-item-row__name">{{ item.name }}</p>
+                        <p class="checkout-item-row__unit muted">${{ '%.2f'|format(item.unit_price) }} each</p>
+                    </div>
+                </div>
+                <span class="checkout-item-row__qty">{{ item.quantity }}</span>
+                <span class="checkout-item-row__total">${{ '%.2f'|format(item.line_total) }}</span>
+            </div>
+            {% endfor %}
+
+            <div class="checkout-summary-panel__rows" style="margin-top: 1rem;">
+                <div class="checkout-summary-panel__row">
+                    <span>Items ({{ order_summary.item_count }})</span>
+                    <span>${{ '%.2f'|format(order_summary.subtotal) }}</span>
+                </div>
+                <div class="checkout-summary-panel__row checkout-summary-panel__row--total">
+                    <span>Total</span>
+                    <span>${{ '%.2f'|format(order_summary.total) }}</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{{ url_for('orders') }}" class="button-link">View Your Orders</a>
+                <a href="{{ url_for('home') }}" class="button-link button-secondary" style="display: inline-block; margin-top: 0.5rem;">Continue Shopping</a>
+            </div>
+        </div>
+
+        <div class="checkout-thankyou" style="text-align: center; margin-top: 2rem;">
+            <p>❁ &nbsp; Thanks for shopping with Little Jill's &nbsp; ❁</p>
+        </div>
+    </main>
+</body>
+</html>

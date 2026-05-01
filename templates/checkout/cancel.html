@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Cancelled | Little Jill's Plant Nursery</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container">
+        <div class="page-header">
+            <p class="page-header__eyebrow">❁ &ensp; no worries</p>
+            <h1>Checkout Cancelled</h1>
+            <p class="muted">Your cart has been preserved. Ready when you are!</p>
+        </div>
+
+        <div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+            <div style="padding: 2rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🛒</div>
+                <p class="muted" style="margin-bottom: 1.5rem;">
+                    Your items are still waiting in your cart.
+                    Feel free to continue checkout whenever you're ready.
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="{{ url_for('cart') }}" class="button-link">Back to Cart</a>
+                    <a href="{{ url_for('home') }}" class="button-link button-secondary">Continue Shopping</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
