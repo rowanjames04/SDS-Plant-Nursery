@@ -740,7 +740,7 @@ def checkout():
     db.session.commit()
     summary = build_order_summary(order)
     return render_template(
-        "checkout.html",
+        "checkout/checkout.html",
         cart=cart,
         order=order,
         checkout_items=summary["items"],
