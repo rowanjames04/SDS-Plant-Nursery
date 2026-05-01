@@ -377,7 +377,7 @@ def plant_price_and_image(plant):
         .order_by(Pot.size)
         .first()
     )
-    return Decimal(plant_pot.price).quantize(Decimal("0.01")), plant.primary_image
+    return plant_pot, Decimal(plant_pot.price).quantize(Decimal("0.01")), plant.primary_image
 
 
 def clear_seeded_activity(users):
@@ -408,14 +408,16 @@ def make_cart(user, status, created_at, items, plants):
 
     for item_seed in items:
         plant = plants[item_seed["plant"]]
-        price, image_filename = plant_price_and_image(plant)
+        plant_pot, price, image_filename = plant_price_and_image(plant)
         db.session.add(
             CartItem(
                 cart_id=cart.id,
                 plant_id=plant.id,
+                pot_id=plant_pot.pot_id,
                 quantity=item_seed["quantity"],
                 unit_price_snapshot=price,
                 plant_name_snapshot=plant.common_name,
+                pot_size_snapshot=plant_pot.pot.size,
                 image_snapshot=image_filename,
                 created_at=created_at,
                 updated_at=created_at,
@@ -451,16 +453,18 @@ def make_order(user, order_seed, plants):
     subtotal = Decimal("0.00")
     for item_seed in order_seed["items"]:
         plant = plants[item_seed["plant"]]
-        price, image_filename = plant_price_and_image(plant)
+        plant_pot, price, image_filename = plant_price_and_image(plant)
         quantity = item_seed["quantity"]
         subtotal += price * quantity
         db.session.add(
             OrderItem(
                 order_id=order.id,
                 plant_id=plant.id,
+                pot_id=plant_pot.pot_id,
                 quantity=quantity,
                 unit_price_snapshot=price,
                 plant_name_snapshot=plant.common_name,
+                pot_size_snapshot=plant_pot.pot.size,
                 image_snapshot=image_filename,
                 created_at=order_seed["created_at"],
                 updated_at=order_seed["created_at"],

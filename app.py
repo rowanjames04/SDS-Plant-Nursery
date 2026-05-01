@@ -1,5 +1,6 @@
 import os
 import json
+import math
 import urllib.parse
 import urllib.request
 from collections import Counter
@@ -20,6 +21,11 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 MAX_CONTENT_LENGTH = 5 * 1000 * 1000  # 5 MB limit for uploaded images
 DEFAULT_DEV_SECRET_KEY = "dev-secret-key-change-me"
 GOOGLE_MAPS_API_KEY_FILE = "google_maps_api_key.txt"
+JILLIBY_CEMETERY_LATITUDE = -33.2610013
+JILLIBY_CEMETERY_LONGITUDE = 151.3974672
+LOCAL_DELIVERY_RADIUS_KM = Decimal("20.00")
+LOCAL_DELIVERY_FEE = Decimal("60.00")
+FREE_DELIVERY_PLANT_COUNT = 10
 
 
 def load_google_maps_api_key():
@@ -153,7 +159,9 @@ def build_cart_summary(cart):
             {
                 "id": item.id,
                 "plant_id": item.plant_id,
+                "pot_id": item.pot_id,
                 "name": item.plant_name_snapshot,
+                "pot_size": item.pot_size_snapshot,
                 "image_filename": item.image_snapshot,
                 "quantity": item.quantity,
                 "unit_price": unit_price,
@@ -190,14 +198,17 @@ def sync_order_with_cart(user, cart):
         order.items.append(
             OrderItem(
                 plant_id=cart_item.plant_id,
+                pot_id=cart_item.pot_id,
                 quantity=cart_item.quantity,
                 unit_price_snapshot=decimal_price(cart_item.unit_price_snapshot),
                 plant_name_snapshot=cart_item.plant_name_snapshot,
+                pot_size_snapshot=cart_item.pot_size_snapshot,
                 image_snapshot=cart_item.image_snapshot,
             )
         )
 
     order.subtotal_amount = subtotal
+    order.delivery_fee = Decimal("0.00")
     order.total_amount = subtotal
     order.payment_status = "pending"
     return order
@@ -211,7 +222,9 @@ def build_order_summary(order):
             {
                 "id": item.id,
                 "plant_id": item.plant_id,
+                "pot_id": item.pot_id,
                 "name": item.plant_name_snapshot,
+                "pot_size": item.pot_size_snapshot,
                 "image_filename": item.image_snapshot,
                 "quantity": item.quantity,
                 "unit_price": unit_price,
@@ -222,6 +235,7 @@ def build_order_summary(order):
     return {
         "items": items,
         "subtotal": decimal_price(order.subtotal_amount),
+        "delivery_fee": decimal_price(order.delivery_fee),
         "total": decimal_price(order.total_amount),
         "item_count": sum(item["quantity"] for item in items),
     }
@@ -292,6 +306,117 @@ def verified_address_from_place(place_id):
         "latitude": location.get("lat"),
         "longitude": location.get("lng"),
     }, None
+
+
+def distance_km(lat1, lon1, lat2=JILLIBY_CEMETERY_LATITUDE, lon2=JILLIBY_CEMETERY_LONGITUDE):
+    if None in (lat1, lon1, lat2, lon2):
+        return None
+
+    radius = 6371.0
+    phi1 = math.radians(float(lat1))
+    phi2 = math.radians(float(lat2))
+    delta_phi = math.radians(float(lat2) - float(lat1))
+    delta_lambda = math.radians(float(lon2) - float(lon1))
+    a = (
+        math.sin(delta_phi / 2) ** 2
+        + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
+    )
+    return Decimal(str(radius * (2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))))).quantize(Decimal("0.01"))
+
+
+def delivery_quote_for_address(address, plant_count):
+    distance = distance_km(address.get("latitude"), address.get("longitude"))
+    if distance is None:
+        return None, None, "We could not calculate delivery distance for that address."
+    if distance > LOCAL_DELIVERY_RADIUS_KM:
+        return distance, None, "This address is outside our 20km delivery radius. Please email us for delivery options."
+    if plant_count >= FREE_DELIVERY_PLANT_COUNT:
+        return distance, Decimal("0.00"), None
+    return distance, LOCAL_DELIVERY_FEE, None
+
+
+def address_dict_from_user_address(address):
+    return {
+        "line1": address.line1,
+        "line2": address.line2,
+        "city": address.city,
+        "state": address.state,
+        "postal_code": address.postal_code,
+        "country": address.country,
+        "formatted_address": address.formatted_address,
+        "google_place_id": address.google_place_id,
+        "latitude": address.latitude,
+        "longitude": address.longitude,
+    }
+
+
+def validate_cart_stock(cart):
+    shortages = []
+    for item in cart.items:
+        if item.pot_id is None:
+            shortages.append(f"{item.plant_name_snapshot} needs a pot size before checkout.")
+            continue
+        plant_pot = PlantPot.query.filter_by(plant_id=item.plant_id, pot_id=item.pot_id).first()
+        if plant_pot is None:
+            shortages.append(f"{item.plant_name_snapshot} is no longer available in that pot size.")
+        elif plant_pot.stock_qty < item.quantity:
+            shortages.append(
+                f"Only {plant_pot.stock_qty} {item.plant_name_snapshot} "
+                f"({item.pot_size_snapshot or plant_pot.pot.size}mm) left in stock."
+            )
+    return shortages
+
+
+def create_order_from_confirmed_checkout(user, cart, delivery_method, address=None, delivery_fee=Decimal("0.00"), delivery_distance=None):
+    order = Order(
+        user_id=user.id,
+        cart_id=cart.id,
+        status="preparing",
+        payment_status="paid",
+        delivery_method=delivery_method,
+        delivery_fee=delivery_fee,
+        delivery_distance_km=delivery_distance,
+    )
+    db.session.add(order)
+    subtotal = Decimal("0.00")
+
+    if address:
+        order.delivery_line1 = address["line1"]
+        order.delivery_line2 = address.get("line2")
+        order.delivery_city = address["city"]
+        order.delivery_state = address["state"]
+        order.delivery_postal_code = address["postal_code"]
+        order.delivery_country = address["country"]
+        order.delivery_formatted_address = address["formatted_address"]
+        order.delivery_google_place_id = address["google_place_id"]
+        order.delivery_latitude = address.get("latitude")
+        order.delivery_longitude = address.get("longitude")
+
+    for cart_item in cart.items:
+        plant_pot = PlantPot.query.filter_by(plant_id=cart_item.plant_id, pot_id=cart_item.pot_id).first()
+        plant_pot.stock_qty -= cart_item.quantity
+        unit_price = decimal_price(cart_item.unit_price_snapshot)
+        subtotal += unit_price * cart_item.quantity
+        order.items.append(
+            OrderItem(
+                plant_id=cart_item.plant_id,
+                pot_id=cart_item.pot_id,
+                quantity=cart_item.quantity,
+                unit_price_snapshot=unit_price,
+                plant_name_snapshot=cart_item.plant_name_snapshot,
+                pot_size_snapshot=cart_item.pot_size_snapshot,
+                image_snapshot=cart_item.image_snapshot,
+            )
+        )
+
+    order.subtotal_amount = subtotal
+    order.delivery_fee = delivery_fee
+    order.total_amount = subtotal + delivery_fee
+    order.stripe_checkout_session_id = request.form.get("stripe_checkout_session_id") or None
+    order.stripe_payment_intent_id = request.form.get("stripe_payment_intent_id") or None
+    cart.status = "ordered"
+    cart.updated_at = datetime.utcnow()
+    return order
 
 
 def get_active_cart(user):
@@ -387,11 +512,83 @@ def repair_legacy_plant_table():
                 )
 
 
+def repair_checkout_tables():
+    database_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+    if not database_uri.startswith("sqlite"):
+        return
+
+    inspector = inspect(db.engine)
+    tables = set(inspector.get_table_names())
+    if not {"cart_item", "order", "order_item"}.issubset(tables):
+        return
+
+    table_columns = {
+        table: {column["name"] for column in inspector.get_columns(table)}
+        for table in ("cart_item", "order", "order_item")
+    }
+    column_specs = {
+        "cart_item": {
+            "pot_id": "INTEGER",
+            "pot_size_snapshot": "INTEGER",
+        },
+        "order": {
+            "delivery_fee": "NUMERIC(10, 2) NOT NULL DEFAULT 0",
+            "delivery_method": "VARCHAR(30)",
+            "delivery_distance_km": "NUMERIC(8, 2)",
+            "delivery_line1": "VARCHAR(255)",
+            "delivery_line2": "VARCHAR(255)",
+            "delivery_city": "VARCHAR(120)",
+            "delivery_state": "VARCHAR(120)",
+            "delivery_postal_code": "VARCHAR(20)",
+            "delivery_country": "VARCHAR(120)",
+            "delivery_formatted_address": "VARCHAR(500)",
+            "delivery_google_place_id": "VARCHAR(255)",
+            "delivery_latitude": "FLOAT",
+            "delivery_longitude": "FLOAT",
+        },
+        "order_item": {
+            "pot_id": "INTEGER",
+            "pot_size_snapshot": "INTEGER",
+        },
+    }
+
+    with db.engine.begin() as connection:
+        for table, specs in column_specs.items():
+            for column_name, column_type in specs.items():
+                if column_name not in table_columns[table]:
+                    connection.execute(text(f'ALTER TABLE "{table}" ADD COLUMN {column_name} {column_type}'))
+
+        for table in ("cart_item", "order_item"):
+            connection.execute(text(f"""
+                UPDATE {table}
+                SET pot_id = (
+                    SELECT plant_pot.pot_id
+                    FROM plant_pot
+                    JOIN pot ON pot.id = plant_pot.pot_id
+                    WHERE plant_pot.plant_id = {table}.plant_id
+                    ORDER BY pot.size
+                    LIMIT 1
+                )
+                WHERE pot_id IS NULL
+            """))
+            connection.execute(text(f"""
+                UPDATE {table}
+                SET pot_size_snapshot = (
+                    SELECT pot.size
+                    FROM pot
+                    WHERE pot.id = {table}.pot_id
+                )
+                WHERE pot_size_snapshot IS NULL
+                  AND pot_id IS NOT NULL
+            """))
+
+
 with app.app_context():
     repair_legacy_user_table()
     repair_legacy_plant_table()
     # Create any missing tables for a fresh local SQLite database.
     db.create_all()
+    repair_checkout_tables()
 
 
 @app.context_processor
@@ -615,21 +812,32 @@ def add_to_cart():
     plant_pot = PlantPot.query.filter_by(plant_id=plant_id, pot_id=pot_id).first_or_404()
     plant = plant_pot.plant
     cart = get_or_create_active_cart(current_user)
-    existing_item = CartItem.query.filter_by(cart_id=cart.id, plant_id=plant.id).first()
+    existing_item = CartItem.query.filter_by(cart_id=cart.id, plant_id=plant.id, pot_id=pot_id).first()
+
+    cart_quantity = existing_item.quantity if existing_item else 0
+    if cart_quantity + quantity > plant_pot.stock_qty:
+        flash(f"Only {plant_pot.stock_qty} {plant.common_name} in {plant_pot.pot.size}mm pots are available.", "error")
+        next_url = request.form.get("next")
+        if next_url:
+            return redirect(next_url)
+        return redirect(url_for("plant_detail", id=plant.id))
 
     if existing_item:
         existing_item.quantity += quantity
         existing_item.unit_price_snapshot = decimal_price(plant_pot.price)
         existing_item.plant_name_snapshot = plant.common_name
+        existing_item.pot_size_snapshot = plant_pot.pot.size
         existing_item.image_snapshot = plant.primary_image
     else:
         db.session.add(
             CartItem(
                 cart_id=cart.id,
                 plant_id=plant.id,
+                pot_id=plant_pot.pot_id,
                 quantity=quantity,
                 unit_price_snapshot=decimal_price(plant_pot.price),
                 plant_name_snapshot=plant.common_name,
+                pot_size_snapshot=plant_pot.pot.size,
                 image_snapshot=plant.primary_image,
             )
         )
@@ -728,7 +936,7 @@ def update_cart():
     return redirect(url_for("cart"))
 
 
-@app.route("/checkout")
+@app.route("/checkout", methods=["GET", "POST"])
 @login_required
 def checkout():
     cart = get_or_create_active_cart(current_user)
@@ -736,17 +944,114 @@ def checkout():
         flash("Your cart is empty.", "info")
         return redirect(url_for("cart"))
 
-    order = sync_order_with_cart(current_user, cart)
-    db.session.commit()
-    summary = build_order_summary(order)
+    summary = build_cart_summary(cart)
+    stock_errors = validate_cart_stock(cart)
+    if stock_errors:
+        for error in stock_errors:
+            flash(error, "error")
+        return redirect(url_for("cart"))
+
+    saved_address_quote = None
+    if current_user.address:
+        saved_address = address_dict_from_user_address(current_user.address)
+        distance, fee, error = delivery_quote_for_address(saved_address, summary["item_count"])
+        saved_address_quote = {
+            "distance": distance,
+            "fee": fee,
+            "error": error,
+        }
+
+    if request.method == "POST":
+        delivery_method = request.form.get("delivery_method", "delivery")
+        address = None
+        delivery_fee = Decimal("0.00")
+        delivery_distance = None
+
+        if delivery_method == "pickup":
+            pass
+        elif delivery_method == "delivery":
+            use_saved_address = request.form.get("use_saved_address") == "1"
+            if use_saved_address:
+                if current_user.address is None:
+                    flash("Please add a delivery address before placing your order.", "error")
+                    return redirect(url_for("checkout"))
+                address = address_dict_from_user_address(current_user.address)
+            else:
+                place_id = request.form.get("google_place_id", "").strip()
+                if not place_id:
+                    flash("Please choose a verified delivery address from the search results.", "error")
+                    return redirect(url_for("checkout"))
+                address, error = verified_address_from_place(place_id)
+                if error:
+                    flash(error, "error")
+                    return redirect(url_for("checkout"))
+                address["line2"] = request.form.get("line2", "").strip()
+
+                if request.form.get("save_address") == "1":
+                    address_to_save = dict(address)
+                    address_to_save["is_default"] = True
+                    if current_user.address is None:
+                        current_user.address = UserAddress(**address_to_save)
+                    else:
+                        for field, value in address_to_save.items():
+                            setattr(current_user.address, field, value)
+
+            delivery_distance, delivery_fee, delivery_error = delivery_quote_for_address(address, summary["item_count"])
+            if delivery_error:
+                flash(delivery_error, "error")
+                return redirect(url_for("checkout"))
+        else:
+            flash("Please choose delivery or pickup.", "error")
+            return redirect(url_for("checkout"))
+
+        # Temporary payment boundary: Stripe success/webhook handling can call this same
+        # order finalisation path once checkout sessions are enabled.
+        order = create_order_from_confirmed_checkout(
+            current_user,
+            cart,
+            delivery_method,
+            address=address,
+            delivery_fee=delivery_fee,
+            delivery_distance=delivery_distance,
+        )
+        db.session.commit()
+        if delivery_method == "pickup":
+            flash("Order placed. We'll email you when your pickup is ready.", "success")
+        else:
+            flash("Order placed. We'll prepare your plants for dispatch.", "success")
+        return redirect(url_for("order_confirmation", order_id=order.id))
+
     return render_template(
         "checkout/checkout.html",
         cart=cart,
-        order=order,
         checkout_items=summary["items"],
         checkout_subtotal=summary["subtotal"],
         checkout_total=summary["total"],
         checkout_item_count=summary["item_count"],
+        delivery_fee=LOCAL_DELIVERY_FEE,
+        free_delivery_plant_count=FREE_DELIVERY_PLANT_COUNT,
+        local_delivery_radius_km=LOCAL_DELIVERY_RADIUS_KM,
+        jilliby_cemetery_latitude=JILLIBY_CEMETERY_LATITUDE,
+        jilliby_cemetery_longitude=JILLIBY_CEMETERY_LONGITUDE,
+        saved_address=current_user.address,
+        saved_address_quote=saved_address_quote,
+        google_maps_api_key=app.config.get("GOOGLE_MAPS_API_KEY"),
+    )
+
+
+@app.route("/orders/<int:order_id>/confirmation")
+@login_required
+def order_confirmation(order_id):
+    order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
+    summary = build_order_summary(order)
+    return render_template(
+        "order_confirmation.html",
+        order=order,
+        order_items=summary["items"],
+        order_subtotal=summary["subtotal"],
+        order_delivery_fee=summary["delivery_fee"],
+        order_total=summary["total"],
+        order_item_count=summary["item_count"],
     )
 
 @app.route("/register", methods=['GET', 'POST'])

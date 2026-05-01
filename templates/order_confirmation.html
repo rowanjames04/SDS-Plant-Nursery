@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | Little Jill's Plant Nursery</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <main class="container order-confirmation-page">
+        <section class="card order-confirmation-hero">
+            <p class="eyebrow">Order confirmed</p>
+            <h1>Thanks, {{ current_user.full_name }}.</h1>
+            <p class="muted">
+                Order #{{ order.id }} has been received and your plants are now reserved.
+                {% if order.delivery_method == 'pickup' %}
+                    We'll email you when your pickup is ready.
+                {% else %}
+                    We'll prepare your order for dispatch.
+                {% endif %}
+            </p>
+        </section>
+
+        <div class="checkout-layout">
+            <section class="card" style="padding:0;overflow:hidden;">
+                <div class="checkout-items-head">
+                    <span>Item</span>
+                    <span>Qty</span>
+                    <span>Price</span>
+                </div>
+                {% for item in order_items %}
+                    <div class="checkout-item-row">
+                        <div class="checkout-item-row__info">
+                            {% if item.image_filename %}
+                                <div class="cart-row__thumb checkout-thumb">
+                                    <img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}" alt="{{ item.name }}">
+                                </div>
+                            {% endif %}
+                            <div>
+                                <p class="checkout-item-row__name">{{ item.name }}</p>
+                                <p class="checkout-item-row__unit muted">${{ '%.2f'|format(item.unit_price) }} each{% if item.pot_size %} · {{ item.pot_size }}mm pot{% endif %}</p>
+                            </div>
+                        </div>
+                        <span class="checkout-item-row__qty">{{ item.quantity }}</span>
+                        <span class="checkout-item-row__total">${{ '%.2f'|format(item.line_total) }}</span>
+                    </div>
+                {% endfor %}
+            </section>
+
+            <aside class="card checkout-summary-panel">
+                <h2 class="checkout-summary-panel__title">Order #{{ order.id }}</h2>
+                <div class="checkout-summary-panel__rows">
+                    <div class="checkout-summary-panel__row">
+                        <span>Status</span>
+                        <span>{{ order.status|title }}</span>
+                    </div>
+                    <div class="checkout-summary-panel__row">
+                        <span>Payment</span>
+                        <span>{{ order.payment_status|title }}</span>
+                    </div>
+                    <div class="checkout-summary-panel__row">
+                        <span>Plants</span>
+                        <span>${{ '%.2f'|format(order_subtotal) }}</span>
+                    </div>
+                    <div class="checkout-summary-panel__row">
+                        <span>{{ order.delivery_method|title }}</span>
+                        <span>${{ '%.2f'|format(order_delivery_fee) }}</span>
+                    </div>
+                    <div class="checkout-summary-panel__row checkout-summary-panel__row--total">
+                        <span>Total</span>
+                        <span>${{ '%.2f'|format(order_total) }}</span>
+                    </div>
+                </div>
+
+                {% if order.delivery_method == 'delivery' and order.delivery_formatted_address %}
+                    <div class="checkout-confirmation-address">
+                        <strong>Deliver to</strong>
+                        <p>{{ order.delivery_formatted_address }}</p>
+                        {% if order.delivery_distance_km %}
+                            <p class="muted">{{ order.delivery_distance_km }}km from Jilliby Cemetery</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <a class="button-link" href="{{ url_for('orders') }}">View orders</a>
+                <a class="button-link button-secondary checkout-back-btn" href="{{ url_for('plants_index') }}">Keep shopping</a>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>
