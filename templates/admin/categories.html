@@ -2,17 +2,18 @@
 {% block title %}Categories{% endblock %}
 
 {% block content %}
-<section class="card hero" style="margin-bottom:20px;">
+<header class="admin-page-header">
     <div>
+        <p class="page-header__eyebrow">Catalogue</p>
         <h1>Categories</h1>
         <p class="muted">Manage categories, species, and varieties.</p>
     </div>
-</section>
+</header>
 
-<section class="card" style="margin-bottom:20px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h2 style="margin:0;">Categories</h2>
-        <a class="button-link" href="{{ url_for('admin.create_category') }}">Add category</a>
+<section class="card card--soft">
+    <div class="admin-card-header">
+        <h2>Categories</h2>
+        <a class="button-link button-link--sm" href="{{ url_for('admin.create_category') }}" style="width:auto;">Add category</a>
     </div>
     {% if categories %}
     <table class="data-table taxonomy-table">
@@ -25,21 +26,24 @@
         <tbody>
             {% for c in categories %}
             <tr>
-                <td>{{c.name }}</td>
+                <td>{{ c.name }}</td>
                 <td class="muted">{{ c.description or '—' }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <p class="muted">No categories yet.</p>
+    <div class="empty-state">
+        <p class="empty-state__msg">No categories yet.</p>
+        <a class="button-link" href="{{ url_for('admin.create_category') }}" style="width:auto;">Add category</a>
+    </div>
     {% endif %}
 </section>
 
-<section class="card" style="margin-bottom:20px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h2 style="margin:0;">Species</h2>
-        <a class="button-link" href="{{ url_for('admin.create_species') }}">Add species</a>
+<section class="card card--soft">
+    <div class="admin-card-header">
+        <h2>Species</h2>
+        <a class="button-link button-link--sm" href="{{ url_for('admin.create_species') }}" style="width:auto;">Add species</a>
     </div>
     {% if species %}
     <table class="data-table taxonomy-table">
@@ -59,14 +63,17 @@
         </tbody>
     </table>
     {% else %}
-    <p class="muted">No species yet.</p>
+    <div class="empty-state">
+        <p class="empty-state__msg">No species yet.</p>
+        <a class="button-link" href="{{ url_for('admin.create_species') }}" style="width:auto;">Add species</a>
+    </div>
     {% endif %}
 </section>
 
-<section class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h2 style="margin:0;">Varieties</h2>
-        <a class="button-link" href="{{ url_for('admin.create_variety') }}">Add variety</a>
+<section class="card card--soft">
+    <div class="admin-card-header">
+        <h2>Varieties</h2>
+        <a class="button-link button-link--sm" href="{{ url_for('admin.create_variety') }}" style="width:auto;">Add variety</a>
     </div>
     {% if varieties %}
     <table class="data-table taxonomy-table">
@@ -86,7 +93,10 @@
         </tbody>
     </table>
     {% else %}
-    <p class="muted">No varieties yet.</p>
+    <div class="empty-state">
+        <p class="empty-state__msg">No varieties yet.</p>
+        <a class="button-link" href="{{ url_for('admin.create_variety') }}" style="width:auto;">Add variety</a>
+    </div>
     {% endif %}
 </section>
 {% endblock %}
