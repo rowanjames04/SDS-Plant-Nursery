@@ -2,8 +2,8 @@
 {% block title %}{{ plant.common_name }}{% endblock %}
 
 {% block content %}
-<div class="profile-hero" style="margin-bottom:20px;">
-    <div style="display:flex;gap:14px;align-items:center;">
+<header class="admin-detail-header">
+    <div class="admin-detail-header__identity">
         <a class="button-link button-secondary" href="{{ url_for('admin.plants') }}" style="font-size:1.1rem;padding:8px 14px;">&#8592;</a>
         <div>
             <p class="page-header__eyebrow">Plants</p>
@@ -12,11 +12,11 @@
         </div>
     </div>
     <button class="button-link" type="submit" form="plant-detail-form" style="width:auto;">Save details</button>
-</div>
+</header>
 
 <div class="admin-detail-layout">
     <form id="plant-detail-form" method="post" action="{{ url_for('admin.plant_detail', id=plant.id) }}" class="admin-plant-form">
-        <section class="card profile-panel admin-detail-main">
+        <section class="card card--soft admin-detail-main">
             <div class="input-group">
                 <label>Common name</label>
                 <input type="text" name="common_name" value="{{ plant.common_name }}" required>
@@ -31,7 +31,7 @@
             </div>
         </section>
 
-        <section class="card profile-panel admin-form-section">
+        <section class="card card--soft admin-form-section">
             <h3>Conditions & Care</h3>
             <div class="admin-field-grid admin-field-grid--three">
                 <div class="input-group">
@@ -62,7 +62,7 @@
         </section>
     </form>
 
-    <section class="card profile-panel admin-detail-sidebar">
+    <section class="card card--soft admin-detail-sidebar">
         <div class="input-group">
             <label>Category</label>
             <select name="category_id" form="plant-detail-form">

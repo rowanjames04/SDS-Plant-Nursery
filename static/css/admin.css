@@ -181,6 +181,59 @@
     align-items: end;
 }
 
+.admin-page-header,
+.admin-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 8px 0 4px;
+}
+
+.admin-page-header h1,
+.admin-detail-header h1 {
+    margin: 0 0 6px;
+    color: #23471f;
+    font-size: 2rem;
+}
+
+.admin-page-header .muted,
+.admin-detail-header .muted {
+    margin: 0;
+}
+
+.admin-detail-header__identity {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.admin-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.admin-card-header h2 {
+    margin: 0 0 4px;
+    color: #23471f;
+    font-size: 1.18rem;
+}
+
+.admin-card-header .muted {
+    margin: 0;
+}
+
+.admin-table-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+}
+
 @media (max-width: 720px) {
     .admin-wrapper {
         grid-template-columns: 1fr;
@@ -214,5 +267,20 @@
     .admin-form-actions button,
     .admin-pot-assign-form button {
         width: 100%;
+    }
+
+    .admin-page-header,
+    .admin-detail-header,
+    .admin-card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-detail-header__identity {
+        align-items: flex-start;
+    }
+
+    .admin-table-actions {
+        justify-content: flex-start;
     }
 }

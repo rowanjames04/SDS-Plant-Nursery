@@ -11,6 +11,11 @@
     overflow: hidden;
 }
 
+.card--soft {
+    border-color: #d8e3d5;
+    box-shadow: 0 8px 22px rgba(35, 71, 31, 0.06);
+}
+
 .card--narrow {
     max-width: 600px;
     margin-left: auto;
