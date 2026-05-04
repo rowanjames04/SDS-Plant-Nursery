@@ -23,6 +23,7 @@
             <tr>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Assigned plants</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -39,6 +40,7 @@
                     <label class="sr-only" for="category-description-{{ c.id }}">Category description</label>
                     <input id="category-description-{{ c.id }}" class="taxonomy-row-input taxonomy-edit-field" form="category-update-{{ c.id }}" type="text" name="description" value="{{ c.description or '' }}" maxlength="255" placeholder="Description">
                 </td>
+                <td>{{ category_counts.get(c.id, 0) }}</td>
                 <td>
                     <div class="admin-table-actions">
                         <form id="category-update-{{ c.id }}" method="post" action="{{ url_for('admin.update_category', id=c.id) }}"></form>
@@ -85,6 +87,7 @@
             <tr>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Assigned plants</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -101,6 +104,7 @@
                     <label class="sr-only" for="species-description-{{ s.id }}">Species description</label>
                     <input id="species-description-{{ s.id }}" class="taxonomy-row-input taxonomy-edit-field" form="species-update-{{ s.id }}" type="text" name="description" value="{{ s.description or '' }}" maxlength="255" placeholder="Description">
                 </td>
+                <td>{{ species_counts.get(s.id, 0) }}</td>
                 <td>
                     <div class="admin-table-actions">
                         <form id="species-update-{{ s.id }}" method="post" action="{{ url_for('admin.update_species', id=s.id) }}"></form>
@@ -147,6 +151,7 @@
             <tr>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Assigned plants</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -163,6 +168,7 @@
                     <label class="sr-only" for="variety-description-{{ v.id }}">Variety description</label>
                     <input id="variety-description-{{ v.id }}" class="taxonomy-row-input taxonomy-edit-field" form="variety-update-{{ v.id }}" type="text" name="description" value="{{ v.description or '' }}" maxlength="255" placeholder="Description">
                 </td>
+                <td>{{ variety_counts.get(v.id, 0) }}</td>
                 <td>
                     <div class="admin-table-actions">
                         <form id="variety-update-{{ v.id }}" method="post" action="{{ url_for('admin.update_variety', id=v.id) }}"></form>

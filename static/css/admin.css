@@ -252,6 +252,12 @@
     width: 22%;
 }
 
+.taxonomy-table th:nth-last-child(2),
+.taxonomy-table td:nth-last-child(2) {
+    width: 70px;
+    text-align: center;
+}
+
 .taxonomy-add-form button {
     justify-self: stretch;
     min-width: 140px;

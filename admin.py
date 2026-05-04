@@ -18,6 +18,70 @@ def _save_plant_image(file):
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
+def _taxonomy_form_data(label):
+    name = request.form.get("name", "").strip()
+    if not name:
+        flash(f"{label} name is required.", "error")
+        return None
+    return {
+        "name": name,
+        "description": request.form.get("description", "").strip() or None,
+    }
+
+
+def _plant_counts_for(column):
+    from app import db
+    from models import Plant
+
+    return dict(
+        db.session.query(column, db.func.count(Plant.id))
+        .filter(column.isnot(None))
+        .group_by(column)
+        .all()
+    )
+
+
+def _create_taxonomy_record(model, label):
+    from app import db
+
+    data = _taxonomy_form_data(label)
+    if data:
+        db.session.add(model(**data))
+        db.session.commit()
+        flash(f"{label} added.", "success")
+    return redirect(url_for("admin.categories"))
+
+
+def _update_taxonomy_record(model, record_id, label):
+    from app import db
+
+    record = model.query.get_or_404(record_id)
+    data = _taxonomy_form_data(label)
+    if not data:
+        return redirect(url_for("admin.categories"))
+
+    record.name = data["name"]
+    record.description = data["description"]
+    db.session.commit()
+    flash(f"{label} updated.", "success")
+    return redirect(url_for("admin.categories"))
+
+
+def _delete_taxonomy_record(model, record_id, plant_column, label):
+    from app import db
+    from models import Plant
+
+    record = model.query.get_or_404(record_id)
+    if Plant.query.filter(plant_column == record_id).first():
+        flash(f"{label} cannot be deleted while plants are using it.", "error")
+        return redirect(url_for("admin.categories"))
+
+    db.session.delete(record)
+    db.session.commit()
+    flash(f"{label} deleted.", "success")
+    return redirect(url_for("admin.categories"))
+
+
 def staff_required(f):
     @wraps(f)
     @login_required
@@ -239,182 +303,98 @@ def orders():
 @admin_bp.route("/categories")
 @staff_required
 def categories():
-    from models import Category, Species, Variety
+    from models import Category, Plant, Species, Variety
+
     categories = Category.query.order_by(Category.name).all()
     species = Species.query.order_by(Species.name).all()
     varieties = Variety.query.order_by(Variety.name).all()
-    return render_template("admin/categories.html", categories=categories, species=species, varieties=varieties)
+    return render_template(
+        "admin/categories.html",
+        categories=categories,
+        species=species,
+        varieties=varieties,
+        category_counts=_plant_counts_for(Plant.category_id),
+        species_counts=_plant_counts_for(Plant.species_id),
+        variety_counts=_plant_counts_for(Plant.variety_id),
+    )
 
 
 @admin_bp.route("/categories/new", methods=["GET", "POST"])
 @staff_required
 def create_category():
-    from app import db
     from models import Category
-    if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        if not name:
-            flash("Category name is required.", "error")
-            return redirect(url_for("admin.categories"))
 
-        category = Category(
-            name=name,
-            description=request.form.get("description"),
-        )
-        db.session.add(category)
-        db.session.commit()
-        flash("Category added.", "success")
-    return redirect(url_for("admin.categories"))
+    if request.method != "POST":
+        return redirect(url_for("admin.categories"))
+    return _create_taxonomy_record(Category, "Category")
 
 
 @admin_bp.route("/categories/<int:id>/update", methods=["POST"])
 @staff_required
 def update_category(id):
-    from app import db
     from models import Category
 
-    category = Category.query.get_or_404(id)
-    name = request.form.get("name", "").strip()
-    if not name:
-        flash("Category name is required.", "error")
-        return redirect(url_for("admin.categories"))
-
-    category.name = name
-    category.description = request.form.get("description", "").strip() or None
-    db.session.commit()
-    flash("Category updated.", "success")
-    return redirect(url_for("admin.categories"))
+    return _update_taxonomy_record(Category, id, "Category")
 
 
 @admin_bp.route("/categories/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_category(id):
-    from app import db
     from models import Category, Plant
 
-    category = Category.query.get_or_404(id)
-    if Plant.query.filter_by(category_id=id).first():
-        flash("Category cannot be deleted while plants are using it.", "error")
-        return redirect(url_for("admin.categories"))
-
-    db.session.delete(category)
-    db.session.commit()
-    flash("Category deleted.", "success")
-    return redirect(url_for("admin.categories"))
+    return _delete_taxonomy_record(Category, id, Plant.category_id, "Category")
 
 
 @admin_bp.route("/species/new", methods=["GET", "POST"])
 @staff_required
 def create_species():
-    from app import db
     from models import Species
-    if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        if not name:
-            flash("Species name is required.", "error")
-            return redirect(url_for("admin.categories"))
 
-        species = Species(
-            name=name,
-            description=request.form.get("description"),
-        )
-        db.session.add(species)
-        db.session.commit()
-        flash("Species added.", "success")
-    return redirect(url_for("admin.categories"))
+    if request.method != "POST":
+        return redirect(url_for("admin.categories"))
+    return _create_taxonomy_record(Species, "Species")
 
 
 @admin_bp.route("/species/<int:id>/update", methods=["POST"])
 @staff_required
 def update_species(id):
-    from app import db
     from models import Species
 
-    species = Species.query.get_or_404(id)
-    name = request.form.get("name", "").strip()
-    if not name:
-        flash("Species name is required.", "error")
-        return redirect(url_for("admin.categories"))
-
-    species.name = name
-    species.description = request.form.get("description", "").strip() or None
-    db.session.commit()
-    flash("Species updated.", "success")
-    return redirect(url_for("admin.categories"))
+    return _update_taxonomy_record(Species, id, "Species")
 
 
 @admin_bp.route("/species/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_species(id):
-    from app import db
     from models import Plant, Species
 
-    species = Species.query.get_or_404(id)
-    if Plant.query.filter_by(species_id=id).first():
-        flash("Species cannot be deleted while plants are using it.", "error")
-        return redirect(url_for("admin.categories"))
-
-    db.session.delete(species)
-    db.session.commit()
-    flash("Species deleted.", "success")
-    return redirect(url_for("admin.categories"))
+    return _delete_taxonomy_record(Species, id, Plant.species_id, "Species")
 
 
 @admin_bp.route("/varieties/new", methods=["GET", "POST"])
 @staff_required
 def create_variety():
-    from app import db
     from models import Variety
-    if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        if not name:
-            flash("Variety name is required.", "error")
-            return redirect(url_for("admin.categories"))
 
-        variety = Variety(
-            name=name,
-            description=request.form.get("description"),
-        )
-        db.session.add(variety)
-        db.session.commit()
-        flash("Variety added.", "success")
-    return redirect(url_for("admin.categories"))
+    if request.method != "POST":
+        return redirect(url_for("admin.categories"))
+    return _create_taxonomy_record(Variety, "Variety")
 
 
 @admin_bp.route("/varieties/<int:id>/update", methods=["POST"])
 @staff_required
 def update_variety(id):
-    from app import db
     from models import Variety
 
-    variety = Variety.query.get_or_404(id)
-    name = request.form.get("name", "").strip()
-    if not name:
-        flash("Variety name is required.", "error")
-        return redirect(url_for("admin.categories"))
-
-    variety.name = name
-    variety.description = request.form.get("description", "").strip() or None
-    db.session.commit()
-    flash("Variety updated.", "success")
-    return redirect(url_for("admin.categories"))
+    return _update_taxonomy_record(Variety, id, "Variety")
 
 
 @admin_bp.route("/varieties/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_variety(id):
-    from app import db
     from models import Plant, Variety
 
-    variety = Variety.query.get_or_404(id)
-    if Plant.query.filter_by(variety_id=id).first():
-        flash("Variety cannot be deleted while plants are using it.", "error")
-        return redirect(url_for("admin.categories"))
-
-    db.session.delete(variety)
-    db.session.commit()
-    flash("Variety deleted.", "success")
-    return redirect(url_for("admin.categories"))
+    return _delete_taxonomy_record(Variety, id, Plant.variety_id, "Variety")
 
 
 @admin_bp.route("/plants/<int:id>/images/upload", methods=["POST"])
