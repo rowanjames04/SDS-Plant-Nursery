@@ -41,6 +41,17 @@ def _plant_counts_for(column):
     )
 
 
+def _filter_taxonomy_records(records, query):
+    if not query:
+        return records
+
+    query = query.lower()
+    return [
+        record for record in records
+        if query in " ".join([record.name or "", record.description or ""]).lower()
+    ]
+
+
 def _create_taxonomy_record(model, label):
     from app import db
 
@@ -109,9 +120,40 @@ def home():
 @admin_bp.route("/plants")
 @staff_required
 def plants():
-    from models import Plant
+    from models import Category, Plant
+
+    categories = Category.query.all()
+    category_map = {category.id: category.name for category in categories}
+    search_query = request.args.get("q", "").strip()
     plants = Plant.query.order_by(Plant.common_name).all()
-    return render_template("admin/plants.html", plants=plants)
+    plant_rows = []
+    for plant in plants:
+        category_name = category_map.get(plant.category_id)
+        if search_query:
+            searchable_text = " ".join(
+                [
+                    plant.common_name or "",
+                    category_name or "",
+                ]
+            ).lower()
+            if search_query.lower() not in searchable_text:
+                continue
+
+        plant_rows.append(
+            {
+                "id": plant.id,
+                "common_name": plant.common_name,
+                "category_name": category_name,
+                "assigned_pot_count": len(plant.plant_pots),
+                "total_stock": sum(plant_pot.stock_qty for plant_pot in plant.plant_pots),
+            }
+        )
+    return render_template(
+        "admin/plants.html",
+        plants=plant_rows,
+        total_plants=len(plants),
+        search_query=search_query,
+    )
 
 
 @admin_bp.route("/plants/new", methods=["GET", "POST"])
@@ -305,14 +347,16 @@ def orders():
 def categories():
     from models import Category, Plant, Species, Variety
 
+    search_query = request.args.get("q", "").strip()
     categories = Category.query.order_by(Category.name).all()
     species = Species.query.order_by(Species.name).all()
     varieties = Variety.query.order_by(Variety.name).all()
     return render_template(
         "admin/categories.html",
-        categories=categories,
-        species=species,
-        varieties=varieties,
+        categories=_filter_taxonomy_records(categories, search_query),
+        species=_filter_taxonomy_records(species, search_query),
+        varieties=_filter_taxonomy_records(varieties, search_query),
+        search_query=search_query,
         category_counts=_plant_counts_for(Plant.category_id),
         species_counts=_plant_counts_for(Plant.species_id),
         variety_counts=_plant_counts_for(Plant.variety_id),

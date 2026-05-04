@@ -6,32 +6,50 @@
     <div>
         <p class="page-header__eyebrow">Catalogue</p>
         <h1>Plants</h1>
-        <p class="muted">{{ plants|length }} plant{% if plants|length != 1 %}s{% endif %} in the catalogue.</p>
+        {% if search_query %}
+            <p class="muted">{{ plants|length }} of {{ total_plants }} plant{% if total_plants != 1 %}s{% endif %} match "{{ search_query }}".</p>
+        {% else %}
+            <p class="muted">{{ total_plants }} plant{% if total_plants != 1 %}s{% endif %} in the catalogue.</p>
+        {% endif %}
     </div>
     <a class="button-link" href="{{ url_for('admin.create_plant') }}" style="width:auto;">Add plant</a>
 </header>
 
 <section class="card card--soft">
+    <form class="admin-search-form" method="get" action="{{ url_for('admin.plants') }}">
+        <label class="sr-only" for="plant-search">Search plants</label>
+        <input id="plant-search" type="text" name="q" value="{{ search_query }}" placeholder="Search by name or category">
+        <button class="button-link button-link--sm admin-search-submit" type="submit" aria-label="Search">
+            <span class="admin-search-icon" aria-hidden="true"></span>
+        </button>
+        {% if search_query %}
+            <a class="button-link button-link--sm button-secondary" href="{{ url_for('admin.plants') }}">Clear</a>
+        {% endif %}
+    </form>
     {% if plants %}
-    <table class="data-table">
+    <table class="data-table admin-plants-table">
         <thead>
             <tr>
                 <th>Common name</th>
-                <th>Scientific name</th>
+                <th>Category</th>
+                <th>Assigned pots</th>
+                <th>Total stock</th>
                 <th style="text-align:right;">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for plant in plants %}
             <tr>
-                <td><strong>{{ plant.common_name }}</strong></td>
+                <td>{{ plant.common_name }}</td>
                 <td>
-                    {% if plant.scientific_name %}
-                        <em>{{ plant.scientific_name }}</em>
+                    {% if plant.category_name %}
+                        {{ plant.category_name }}
                     {% else %}
                         <span class="muted">Not set</span>
                     {% endif %}
                 </td>
+                <td>{{ plant.assigned_pot_count }}</td>
+                <td>{{ plant.total_stock }}</td>
                 <td>
                     <div class="admin-table-actions">
                         <a class="button-link button-link--sm"
@@ -57,8 +75,13 @@
     </table>
     {% else %}
     <div class="empty-state">
-        <p class="empty-state__msg">No plants yet.</p>
-        <a class="button-link" href="{{ url_for('admin.create_plant') }}" style="width:auto;">Add plant</a>
+        {% if search_query %}
+            <p class="empty-state__msg">No plants match "{{ search_query }}".</p>
+            <a class="button-link" href="{{ url_for('admin.plants') }}" style="width:auto;">Clear search</a>
+        {% else %}
+            <p class="empty-state__msg">No plants yet.</p>
+            <a class="button-link" href="{{ url_for('admin.create_plant') }}" style="width:auto;">Add plant</a>
+        {% endif %}
     </div>
     {% endif %}
 </section>
