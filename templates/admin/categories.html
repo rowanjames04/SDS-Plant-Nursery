@@ -12,8 +12,10 @@
 
 <section class="card card--soft">
     <div class="admin-card-header">
-        <h2>Categories</h2>
-        <a class="button-link button-link--sm" href="{{ url_for('admin.create_category') }}" style="width:auto;">Add category</a>
+        <div>
+            <h2>Categories</h2>
+            <p class="muted">Group plants for browsing and filtering.</p>
+        </div>
     </div>
     {% if categories %}
     <table class="data-table taxonomy-table">
@@ -27,7 +29,7 @@
             {% for c in categories %}
             <tr>
                 <td>{{ c.name }}</td>
-                <td class="muted">{{ c.description or '—' }}</td>
+                <td class="muted">{{ c.description or '-' }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -35,15 +37,27 @@
     {% else %}
     <div class="empty-state">
         <p class="empty-state__msg">No categories yet.</p>
-        <a class="button-link" href="{{ url_for('admin.create_category') }}" style="width:auto;">Add category</a>
     </div>
     {% endif %}
+    <form class="taxonomy-add-form" method="post" action="{{ url_for('admin.create_category') }}">
+        <div class="input-group">
+            <label class="sr-only" for="category-name">Category name</label>
+            <input id="category-name" type="text" name="name" placeholder="Name, e.g. Indoor Plants" required>
+        </div>
+        <div class="input-group">
+            <label class="sr-only" for="category-description">Category description</label>
+            <input id="category-description" type="text" name="description" placeholder="Description, e.g. Low-maintenance greenery for bright rooms">
+        </div>
+        <button class="button-link button-link--sm" type="submit">Add category</button>
+    </form>
 </section>
 
 <section class="card card--soft">
     <div class="admin-card-header">
-        <h2>Species</h2>
-        <a class="button-link button-link--sm" href="{{ url_for('admin.create_species') }}" style="width:auto;">Add species</a>
+        <div>
+            <h2>Species</h2>
+            <p class="muted">Botanical species used by plant records.</p>
+        </div>
     </div>
     {% if species %}
     <table class="data-table taxonomy-table">
@@ -57,7 +71,7 @@
             {% for s in species %}
             <tr>
                 <td>{{ s.name }}</td>
-                <td class="muted">{{ s.description or '—' }}</td>
+                <td class="muted">{{ s.description or '-' }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -65,15 +79,27 @@
     {% else %}
     <div class="empty-state">
         <p class="empty-state__msg">No species yet.</p>
-        <a class="button-link" href="{{ url_for('admin.create_species') }}" style="width:auto;">Add species</a>
     </div>
     {% endif %}
+    <form class="taxonomy-add-form" method="post" action="{{ url_for('admin.create_species') }}">
+        <div class="input-group">
+            <label class="sr-only" for="species-name">Species name</label>
+            <input id="species-name" type="text" name="name" placeholder="Name, e.g. Lavandula angustifolia" required>
+        </div>
+        <div class="input-group">
+            <label class="sr-only" for="species-description">Species description</label>
+            <input id="species-description" type="text" name="description" placeholder="Description, e.g. Classic lavender with purple flower spikes">
+        </div>
+        <button class="button-link button-link--sm" type="submit">Add species</button>
+    </form>
 </section>
 
 <section class="card card--soft">
     <div class="admin-card-header">
-        <h2>Varieties</h2>
-        <a class="button-link button-link--sm" href="{{ url_for('admin.create_variety') }}" style="width:auto;">Add variety</a>
+        <div>
+            <h2>Varieties</h2>
+            <p class="muted">Reusable variety labels for catalogue detail.</p>
+        </div>
     </div>
     {% if varieties %}
     <table class="data-table taxonomy-table">
@@ -87,7 +113,7 @@
             {% for v in varieties %}
             <tr>
                 <td>{{ v.name }}</td>
-                <td class="muted">{{ v.description or '—' }}</td>
+                <td class="muted">{{ v.description or '-' }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -95,8 +121,18 @@
     {% else %}
     <div class="empty-state">
         <p class="empty-state__msg">No varieties yet.</p>
-        <a class="button-link" href="{{ url_for('admin.create_variety') }}" style="width:auto;">Add variety</a>
     </div>
     {% endif %}
+    <form class="taxonomy-add-form" method="post" action="{{ url_for('admin.create_variety') }}">
+        <div class="input-group">
+            <label class="sr-only" for="variety-name">Variety name</label>
+            <input id="variety-name" type="text" name="name" placeholder="Name, e.g. Compact">
+        </div>
+        <div class="input-group">
+            <label class="sr-only" for="variety-description">Variety description</label>
+            <input id="variety-description" type="text" name="description" placeholder="Description, e.g. Smaller growth habit for pots">
+        </div>
+        <button class="button-link button-link--sm" type="submit">Add variety</button>
+    </form>
 </section>
 {% endblock %}

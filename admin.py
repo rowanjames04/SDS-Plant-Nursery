@@ -252,14 +252,19 @@ def create_category():
     from app import db
     from models import Category
     if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        if not name:
+            flash("Category name is required.", "error")
+            return redirect(url_for("admin.categories"))
+
         category = Category(
-            name=request.form["name"],
+            name=name,
             description=request.form.get("description"),
         )
         db.session.add(category)
         db.session.commit()
-        return redirect(url_for("admin.home"))
-    return render_template("admin/category_form.html", category=None)
+        flash("Category added.", "success")
+    return redirect(url_for("admin.categories"))
 
 
 @admin_bp.route("/species/new", methods=["GET", "POST"])
@@ -268,14 +273,19 @@ def create_species():
     from app import db
     from models import Species
     if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        if not name:
+            flash("Species name is required.", "error")
+            return redirect(url_for("admin.categories"))
+
         species = Species(
-            name=request.form["name"],
+            name=name,
             description=request.form.get("description"),
         )
         db.session.add(species)
         db.session.commit()
-        return redirect(url_for("admin.home"))
-    return render_template("admin/species_form.html", species=None)
+        flash("Species added.", "success")
+    return redirect(url_for("admin.categories"))
 
 
 @admin_bp.route("/varieties/new", methods=["GET", "POST"])
@@ -284,14 +294,19 @@ def create_variety():
     from app import db
     from models import Variety
     if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        if not name:
+            flash("Variety name is required.", "error")
+            return redirect(url_for("admin.categories"))
+
         variety = Variety(
-            name=request.form["name"],
+            name=name,
             description=request.form.get("description"),
         )
         db.session.add(variety)
         db.session.commit()
-        return redirect(url_for("admin.home"))
-    return render_template("admin/variety_form.html", variety=None)
+        flash("Variety added.", "success")
+    return redirect(url_for("admin.categories"))
 
 
 @admin_bp.route("/plants/<int:id>/images/upload", methods=["POST"])
