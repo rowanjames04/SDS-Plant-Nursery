@@ -234,12 +234,22 @@
     gap: 8px;
 }
 
+.admin-table-actions form {
+    display: inline-flex;
+    margin: 0;
+}
+
 .taxonomy-add-form {
     display: grid;
-    grid-template-columns: 28% minmax(260px, 1fr) auto;
+    grid-template-columns: 22% minmax(260px, 1fr) auto;
     gap: 10px 12px;
     align-items: end;
     margin-top: 16px;
+}
+
+.taxonomy-table th:first-child,
+.taxonomy-table td:first-child {
+    width: 22%;
 }
 
 .taxonomy-add-form button {
@@ -248,6 +258,37 @@
     min-height: 40px;
     padding: 10px 16px;
     font-size: 0.9rem;
+}
+
+.taxonomy-table th:last-child,
+.taxonomy-table td:last-child {
+    width: 190px;
+    text-align: right;
+}
+
+.taxonomy-row-input {
+    padding: 8px 10px;
+    max-width: calc(100% - 8px);
+}
+
+.taxonomy-edit-field {
+    display: none;
+}
+
+.taxonomy-row--editing .taxonomy-display {
+    display: none;
+}
+
+.taxonomy-row--editing .taxonomy-edit-field {
+    display: inline-flex;
+}
+
+.taxonomy-row--editing input.taxonomy-edit-field {
+    display: block;
+}
+
+.taxonomy-row--editing .admin-table-actions form:last-child {
+    display: none;
 }
 
 @media (max-width: 720px) {

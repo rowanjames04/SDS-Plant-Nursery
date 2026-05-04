@@ -23,13 +23,33 @@
             <tr>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for c in categories %}
-            <tr>
-                <td>{{ c.name }}</td>
-                <td class="muted">{{ c.description or '-' }}</td>
+            <tr class="taxonomy-row">
+                <td>
+                    <span class="taxonomy-display">{{ c.name }}</span>
+                    <label class="sr-only" for="category-name-{{ c.id }}">Category name</label>
+                    <input id="category-name-{{ c.id }}" class="taxonomy-row-input taxonomy-edit-field" form="category-update-{{ c.id }}" type="text" name="name" value="{{ c.name }}" maxlength="100" required>
+                </td>
+                <td>
+                    <span class="taxonomy-display muted">{{ c.description or '-' }}</span>
+                    <label class="sr-only" for="category-description-{{ c.id }}">Category description</label>
+                    <input id="category-description-{{ c.id }}" class="taxonomy-row-input taxonomy-edit-field" form="category-update-{{ c.id }}" type="text" name="description" value="{{ c.description or '' }}" maxlength="255" placeholder="Description">
+                </td>
+                <td>
+                    <div class="admin-table-actions">
+                        <form id="category-update-{{ c.id }}" method="post" action="{{ url_for('admin.update_category', id=c.id) }}"></form>
+                        <button class="button-link button-link--sm button-secondary taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
+                        <button class="button-link button-link--sm button-secondary taxonomy-edit-field" form="category-update-{{ c.id }}" type="submit">Save</button>
+                        <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
+                        <form method="post" action="{{ url_for('admin.delete_category', id=c.id) }}" onsubmit="return confirm({{ ('Delete ' ~ c.name ~ '?')|tojson }});">
+                            <button class="button-link button-link--sm" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -42,11 +62,11 @@
     <form class="taxonomy-add-form" method="post" action="{{ url_for('admin.create_category') }}">
         <div class="input-group">
             <label class="sr-only" for="category-name">Category name</label>
-            <input id="category-name" type="text" name="name" placeholder="Name, e.g. Indoor Plants" required>
+            <input id="category-name" type="text" name="name" maxlength="100" placeholder="Name, e.g. Indoor Plants" required>
         </div>
         <div class="input-group">
             <label class="sr-only" for="category-description">Category description</label>
-            <input id="category-description" type="text" name="description" placeholder="Description, e.g. Low-maintenance greenery for bright rooms">
+            <input id="category-description" type="text" name="description" maxlength="255" placeholder="Description, e.g. Low-maintenance greenery for bright rooms">
         </div>
         <button class="button-link button-link--sm" type="submit">Add category</button>
     </form>
@@ -65,13 +85,33 @@
             <tr>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for s in species %}
-            <tr>
-                <td>{{ s.name }}</td>
-                <td class="muted">{{ s.description or '-' }}</td>
+            <tr class="taxonomy-row">
+                <td>
+                    <span class="taxonomy-display">{{ s.name }}</span>
+                    <label class="sr-only" for="species-name-{{ s.id }}">Species name</label>
+                    <input id="species-name-{{ s.id }}" class="taxonomy-row-input taxonomy-edit-field" form="species-update-{{ s.id }}" type="text" name="name" value="{{ s.name }}" maxlength="100" required>
+                </td>
+                <td>
+                    <span class="taxonomy-display muted">{{ s.description or '-' }}</span>
+                    <label class="sr-only" for="species-description-{{ s.id }}">Species description</label>
+                    <input id="species-description-{{ s.id }}" class="taxonomy-row-input taxonomy-edit-field" form="species-update-{{ s.id }}" type="text" name="description" value="{{ s.description or '' }}" maxlength="255" placeholder="Description">
+                </td>
+                <td>
+                    <div class="admin-table-actions">
+                        <form id="species-update-{{ s.id }}" method="post" action="{{ url_for('admin.update_species', id=s.id) }}"></form>
+                        <button class="button-link button-link--sm button-secondary taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
+                        <button class="button-link button-link--sm button-secondary taxonomy-edit-field" form="species-update-{{ s.id }}" type="submit">Save</button>
+                        <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
+                        <form method="post" action="{{ url_for('admin.delete_species', id=s.id) }}" onsubmit="return confirm({{ ('Delete ' ~ s.name ~ '?')|tojson }});">
+                            <button class="button-link button-link--sm" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -84,11 +124,11 @@
     <form class="taxonomy-add-form" method="post" action="{{ url_for('admin.create_species') }}">
         <div class="input-group">
             <label class="sr-only" for="species-name">Species name</label>
-            <input id="species-name" type="text" name="name" placeholder="Name, e.g. Lavandula angustifolia" required>
+            <input id="species-name" type="text" name="name" maxlength="100" placeholder="Name, e.g. Lavandula angustifolia" required>
         </div>
         <div class="input-group">
             <label class="sr-only" for="species-description">Species description</label>
-            <input id="species-description" type="text" name="description" placeholder="Description, e.g. Classic lavender with purple flower spikes">
+            <input id="species-description" type="text" name="description" maxlength="255" placeholder="Description, e.g. Classic lavender with purple flower spikes">
         </div>
         <button class="button-link button-link--sm" type="submit">Add species</button>
     </form>
@@ -107,13 +147,33 @@
             <tr>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for v in varieties %}
-            <tr>
-                <td>{{ v.name }}</td>
-                <td class="muted">{{ v.description or '-' }}</td>
+            <tr class="taxonomy-row">
+                <td>
+                    <span class="taxonomy-display">{{ v.name }}</span>
+                    <label class="sr-only" for="variety-name-{{ v.id }}">Variety name</label>
+                    <input id="variety-name-{{ v.id }}" class="taxonomy-row-input taxonomy-edit-field" form="variety-update-{{ v.id }}" type="text" name="name" value="{{ v.name }}" maxlength="100" required>
+                </td>
+                <td>
+                    <span class="taxonomy-display muted">{{ v.description or '-' }}</span>
+                    <label class="sr-only" for="variety-description-{{ v.id }}">Variety description</label>
+                    <input id="variety-description-{{ v.id }}" class="taxonomy-row-input taxonomy-edit-field" form="variety-update-{{ v.id }}" type="text" name="description" value="{{ v.description or '' }}" maxlength="255" placeholder="Description">
+                </td>
+                <td>
+                    <div class="admin-table-actions">
+                        <form id="variety-update-{{ v.id }}" method="post" action="{{ url_for('admin.update_variety', id=v.id) }}"></form>
+                        <button class="button-link button-link--sm button-secondary taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
+                        <button class="button-link button-link--sm button-secondary taxonomy-edit-field" form="variety-update-{{ v.id }}" type="submit">Save</button>
+                        <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
+                        <form method="post" action="{{ url_for('admin.delete_variety', id=v.id) }}" onsubmit="return confirm({{ ('Delete ' ~ v.name ~ '?')|tojson }});">
+                            <button class="button-link button-link--sm" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -126,13 +186,32 @@
     <form class="taxonomy-add-form" method="post" action="{{ url_for('admin.create_variety') }}">
         <div class="input-group">
             <label class="sr-only" for="variety-name">Variety name</label>
-            <input id="variety-name" type="text" name="name" placeholder="Name, e.g. Compact">
+            <input id="variety-name" type="text" name="name" maxlength="100" placeholder="Name, e.g. Compact">
         </div>
         <div class="input-group">
             <label class="sr-only" for="variety-description">Variety description</label>
-            <input id="variety-description" type="text" name="description" placeholder="Description, e.g. Smaller growth habit for pots">
+            <input id="variety-description" type="text" name="description" maxlength="255" placeholder="Description, e.g. Smaller growth habit for pots">
         </div>
         <button class="button-link button-link--sm" type="submit">Add variety</button>
     </form>
 </section>
+<script>
+    document.querySelectorAll(".taxonomy-edit-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+            button.closest(".taxonomy-row").classList.add("taxonomy-row--editing");
+        });
+    });
+
+    document.querySelectorAll(".taxonomy-cancel-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+            const row = button.closest(".taxonomy-row");
+            row.querySelectorAll(".taxonomy-edit-field").forEach((field) => {
+                if (field instanceof HTMLInputElement) {
+                    field.value = field.defaultValue;
+                }
+            });
+            row.classList.remove("taxonomy-row--editing");
+        });
+    });
+</script>
 {% endblock %}

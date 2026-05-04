@@ -267,6 +267,42 @@ def create_category():
     return redirect(url_for("admin.categories"))
 
 
+@admin_bp.route("/categories/<int:id>/update", methods=["POST"])
+@staff_required
+def update_category(id):
+    from app import db
+    from models import Category
+
+    category = Category.query.get_or_404(id)
+    name = request.form.get("name", "").strip()
+    if not name:
+        flash("Category name is required.", "error")
+        return redirect(url_for("admin.categories"))
+
+    category.name = name
+    category.description = request.form.get("description", "").strip() or None
+    db.session.commit()
+    flash("Category updated.", "success")
+    return redirect(url_for("admin.categories"))
+
+
+@admin_bp.route("/categories/<int:id>/delete", methods=["POST"])
+@staff_required
+def delete_category(id):
+    from app import db
+    from models import Category, Plant
+
+    category = Category.query.get_or_404(id)
+    if Plant.query.filter_by(category_id=id).first():
+        flash("Category cannot be deleted while plants are using it.", "error")
+        return redirect(url_for("admin.categories"))
+
+    db.session.delete(category)
+    db.session.commit()
+    flash("Category deleted.", "success")
+    return redirect(url_for("admin.categories"))
+
+
 @admin_bp.route("/species/new", methods=["GET", "POST"])
 @staff_required
 def create_species():
@@ -288,6 +324,42 @@ def create_species():
     return redirect(url_for("admin.categories"))
 
 
+@admin_bp.route("/species/<int:id>/update", methods=["POST"])
+@staff_required
+def update_species(id):
+    from app import db
+    from models import Species
+
+    species = Species.query.get_or_404(id)
+    name = request.form.get("name", "").strip()
+    if not name:
+        flash("Species name is required.", "error")
+        return redirect(url_for("admin.categories"))
+
+    species.name = name
+    species.description = request.form.get("description", "").strip() or None
+    db.session.commit()
+    flash("Species updated.", "success")
+    return redirect(url_for("admin.categories"))
+
+
+@admin_bp.route("/species/<int:id>/delete", methods=["POST"])
+@staff_required
+def delete_species(id):
+    from app import db
+    from models import Plant, Species
+
+    species = Species.query.get_or_404(id)
+    if Plant.query.filter_by(species_id=id).first():
+        flash("Species cannot be deleted while plants are using it.", "error")
+        return redirect(url_for("admin.categories"))
+
+    db.session.delete(species)
+    db.session.commit()
+    flash("Species deleted.", "success")
+    return redirect(url_for("admin.categories"))
+
+
 @admin_bp.route("/varieties/new", methods=["GET", "POST"])
 @staff_required
 def create_variety():
@@ -306,6 +378,42 @@ def create_variety():
         db.session.add(variety)
         db.session.commit()
         flash("Variety added.", "success")
+    return redirect(url_for("admin.categories"))
+
+
+@admin_bp.route("/varieties/<int:id>/update", methods=["POST"])
+@staff_required
+def update_variety(id):
+    from app import db
+    from models import Variety
+
+    variety = Variety.query.get_or_404(id)
+    name = request.form.get("name", "").strip()
+    if not name:
+        flash("Variety name is required.", "error")
+        return redirect(url_for("admin.categories"))
+
+    variety.name = name
+    variety.description = request.form.get("description", "").strip() or None
+    db.session.commit()
+    flash("Variety updated.", "success")
+    return redirect(url_for("admin.categories"))
+
+
+@admin_bp.route("/varieties/<int:id>/delete", methods=["POST"])
+@staff_required
+def delete_variety(id):
+    from app import db
+    from models import Plant, Variety
+
+    variety = Variety.query.get_or_404(id)
+    if Plant.query.filter_by(variety_id=id).first():
+        flash("Variety cannot be deleted while plants are using it.", "error")
+        return redirect(url_for("admin.categories"))
+
+    db.session.delete(variety)
+    db.session.commit()
+    flash("Variety deleted.", "success")
     return redirect(url_for("admin.categories"))
 
 
