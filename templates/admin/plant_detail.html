@@ -118,28 +118,35 @@
     </section>
 </div>
 
-<section class="card">
-    <h2>Images</h2>
-    {% if plant.images %}
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
-        {% for image in plant.images %}
+<section class="card card--soft admin-media-card">
+    <div class="admin-card-header">
         <div>
-            <img src="{{ url_for('static', filename='images/' ~ image) }}" alt="{{ plant.common_name }}" style="width:120px;height:120px;object-fit:cover;">
-            {% if loop.first %}
-            <p class="muted">Primary</p>
-            {% else %}
-            <form method="post" action="{{ url_for('admin.reorder_plant_images', id=plant.id) }}" style="margin-top:4px;">
-                <input type="hidden" name="images[]" value="{{ image }}">
-                {% for other in plant.images if other != image %}
-                <input type="hidden" name="images[]" value="{{ other }}">
-                {% endfor %}
-                <button type="submit">Set as primary</button>
-            </form>
-            {% endif %}
-            <form method="post" action="{{ url_for('admin.delete_plant_image', id=plant.id) }}" style="margin-top:4px;">
-                <input type="hidden" name="filename" value="{{ image }}">
-                <button type="submit">Delete</button>
-            </form>
+            <h2>Images</h2>
+            <p class="muted">Manage catalogue photos and choose the primary image.</p>
+        </div>
+    </div>
+    {% if plant.images %}
+    <div class="admin-image-grid">
+        {% for image in plant.images %}
+        <div class="admin-image-tile">
+            <img src="{{ url_for('static', filename='images/' ~ image) }}" alt="{{ plant.common_name }}">
+            <div class="admin-image-tile__meta">
+                {% if loop.first %}
+                    <span class="status active">Primary</span>
+                {% else %}
+                    <form method="post" action="{{ url_for('admin.reorder_plant_images', id=plant.id) }}">
+                        <input type="hidden" name="images[]" value="{{ image }}">
+                        {% for other in plant.images if other != image %}
+                        <input type="hidden" name="images[]" value="{{ other }}">
+                        {% endfor %}
+                        <button class="button-link button-link--sm button-secondary" type="submit">Set primary</button>
+                    </form>
+                {% endif %}
+                <form method="post" action="{{ url_for('admin.delete_plant_image', id=plant.id) }}">
+                    <input type="hidden" name="filename" value="{{ image }}">
+                    <button class="button-link button-link--sm" type="submit">Delete</button>
+                </form>
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -147,35 +154,30 @@
     <p class="muted">No images yet.</p>
     {% endif %}
 
-    <form method="post" action="{{ url_for('admin.upload_plant_images', id=plant.id) }}" enctype="multipart/form-data">
+    <form class="admin-upload-form" method="post" action="{{ url_for('admin.upload_plant_images', id=plant.id) }}" enctype="multipart/form-data">
         <div class="input-group">
             <label>Upload images</label>
             <input type="file" name="images" multiple accept=".png,.jpg,.jpeg,.webp">
         </div>
-        <div>
-            <button type="submit">Upload</button>
-        </div>
+        <button class="button-link" type="submit">Upload</button>
     </form>
 </section>
 
-<section class="card" id="pot-sizes">
-    <h2>Pot Sizes & Stock</h2>
+<section class="card card--soft admin-inventory-card" id="pot-sizes">
+    <div class="admin-card-header">
+        <div>
+            <h2>Pot Sizes & Stock</h2>
+            <p class="muted">Update pricing and available stock for each assigned pot size.</p>
+        </div>
+    </div>
     {% if plant.plant_pots %}
-    <table class="data-table">
-        <colgroup>
-            <col style="width:15%;">
-            <col style="width:20%;">
-            <col style="width:30%;">
-            <col style="width:1%;white-space:nowrap;">
-            <col style="width:1%;white-space:nowrap;">
-        </colgroup>
+    <table class="data-table admin-inventory-table">
         <thead>
             <tr>
                 <th>Pot size</th>
                 <th>Price</th>
                 <th>Stock</th>
-                <th></th>
-                <th></th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -183,22 +185,24 @@
             {% set form_id = 'update-pot-' ~ pp.pot_id %}
             <tr>
                 <td>{{ pp.pot.size }}mm</td>
-                <td><input form="{{ form_id }}" type="number" name="price" step="0.01" min="0" value="{{ pp.price }}" style="width:90px;"></td>
-                <td style="white-space:nowrap;">
-                    <input form="{{ form_id }}" type="number" name="stock_qty" min="0" value="{{ pp.stock_qty }}" style="width:72px;">
-                    {% if pp.stock_qty == 0 %}
-                        <span class="status cancelled" style="margin-left:8px;">Out of stock</span>
-                    {% elif pp.stock_qty < 5 %}
-                        <span class="status pending" style="margin-left:8px;">Low</span>
-                    {% endif %}
+                <td><input class="admin-money-input" form="{{ form_id }}" type="number" name="price" step="0.01" min="0" value="{{ pp.price }}"></td>
+                <td>
+                    <div class="admin-stock-cell">
+                        <input class="admin-stock-input" form="{{ form_id }}" type="number" name="stock_qty" min="0" value="{{ pp.stock_qty }}">
+                        {% if pp.stock_qty == 0 %}
+                        <span class="status cancelled">Out of stock</span>
+                        {% elif pp.stock_qty < 5 %}
+                        <span class="status pending">Low</span>
+                        {% endif %}
+                    </div>
                 </td>
-                <td style="white-space:nowrap;">
-                    <button form="{{ form_id }}" class="button-link button-link--sm" type="submit" style="width:auto;">Save</button>
-                </td>
-                <td style="white-space:nowrap;">
-                    <form method="post" action="{{ url_for('admin.unassign_pot', id=plant.id, pot_id=pp.pot_id) }}" onsubmit="return confirm('Remove this pot size?');">
-                        <button class="button-link button-link--sm button-secondary" type="submit" style="width:auto;">Remove</button>
-                    </form>
+                <td>
+                    <div class="admin-table-actions">
+                        <button form="{{ form_id }}" class="button-link button-link--sm" type="submit">Save</button>
+                        <form method="post" action="{{ url_for('admin.unassign_pot', id=plant.id, pot_id=pp.pot_id) }}" onsubmit="return confirm('Remove this pot size?');">
+                            <button class="button-link button-link--sm button-secondary" type="submit">Remove</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
@@ -212,7 +216,9 @@
     {% endif %}
 
     {% if available_pots %}
-    <h3 style="margin-top:24px;">Assign a pot size</h3>
+    <div class="admin-subsection-heading">
+        <h3>Assign a pot size</h3>
+    </div>
     <form method="post" action="{{ url_for('admin.assign_pot', id=plant.id) }}" class="form admin-pot-assign-form">
         <div class="input-group">
             <label>Pot size</label>
