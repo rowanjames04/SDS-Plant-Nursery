@@ -126,7 +126,7 @@
     width: 100%;
 }
 
-.checkout-pay-btn {
+.checkout-pay-btn:disabled {
     opacity: 0.55;
     cursor: not-allowed;
 }
