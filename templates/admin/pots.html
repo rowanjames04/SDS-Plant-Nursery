@@ -6,42 +6,51 @@
     <div>
         <p class="page-header__eyebrow">Catalogue</p>
         <h1>Pots</h1>
-        <p class="muted">{{ pots|length }} pot size{% if pots|length != 1 %}s{% endif %}.</p>
+        {% if search_query %}
+            <p class="muted">{{ pots|length }} pot size{% if pots|length != 1 %}s{% endif %} match "{{ search_query }}".</p>
+        {% else %}
+            <p class="muted">{{ pots|length }} pot size{% if pots|length != 1 %}s{% endif %}.</p>
+        {% endif %}
     </div>
-    <a class="button-link" href="{{ url_for('admin.create_pot') }}" style="width:auto;">Add pot</a>
+    <form class="admin-search-form admin-search-form--inline" method="get" action="{{ url_for('admin.pots') }}">
+        <label class="sr-only" for="pot-search">Search pots</label>
+        <input id="pot-search" type="text" name="q" value="{{ search_query }}" placeholder="Search pot sizes">
+        <button class="button-link button-link--sm admin-search-submit" type="submit" aria-label="Search pots">
+            <span class="admin-search-icon" aria-hidden="true"></span>
+        </button>
+        {% if search_query %}
+            <a class="button-link button-link--sm button-secondary" href="{{ url_for('admin.pots') }}">Clear</a>
+        {% endif %}
+    </form>
 </header>
 
 <section class="card card--soft">
     {% if pots %}
-    <table class="data-table">
+    <table class="data-table admin-pots-table">
         <thead>
             <tr>
-                <th>Size (mm)</th>
-                <th>Plants assigned</th>
-                <th style="text-align:right;">Actions</th>
+                <th>Size</th>
+                <th>Assigned plants</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for pot in pots %}
-            <tr>
-                <td>{{ pot.size }}mm</td>
+            <tr class="taxonomy-row">
+                <td>
+                    <span class="taxonomy-display">{{ pot.size }}mm</span>
+                    <label class="sr-only" for="pot-size-{{ pot.id }}">Pot size</label>
+                    <input id="pot-size-{{ pot.id }}" class="taxonomy-row-input taxonomy-edit-field" form="pot-update-{{ pot.id }}" type="number" name="size" value="{{ pot.size }}" min="1" required>
+                </td>
                 <td>{{ pot.plant_pots|length }}</td>
                 <td>
                     <div class="admin-table-actions">
-                        <a class="button-link button-link--sm button-secondary"
-                           href="{{ url_for('admin.edit_pot', id=pot.id) }}"
-                           style="width:auto;">
-                            Edit
-                        </a>
-                        <form method="post"
-                              action="{{ url_for('admin.delete_pot', id=pot.id) }}"
-                              style="display:inline;"
-                              onsubmit="return confirm('Delete this pot size?');">
-                            <button class="button-link button-link--sm"
-                                    type="submit"
-                                    style="width:auto;">
-                                Delete
-                            </button>
+                        <form id="pot-update-{{ pot.id }}" method="post" action="{{ url_for('admin.edit_pot', id=pot.id) }}"></form>
+                        <button class="button-link button-link--sm button-secondary taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
+                        <button class="button-link button-link--sm button-secondary taxonomy-edit-field" form="pot-update-{{ pot.id }}" type="submit">Save</button>
+                        <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
+                        <form method="post" action="{{ url_for('admin.delete_pot', id=pot.id) }}" onsubmit="return confirm('Delete {{ pot.size }}mm pot size?');">
+                            <button class="button-link button-link--sm" type="submit">Delete</button>
                         </form>
                     </div>
                 </td>
@@ -51,9 +60,39 @@
     </table>
     {% else %}
     <div class="empty-state">
-        <p class="empty-state__msg">No pot sizes yet.</p>
-        <a class="button-link" href="{{ url_for('admin.create_pot') }}" style="width:auto;">Add pot</a>
+        {% if search_query %}
+            <p class="empty-state__msg">No pot sizes match "{{ search_query }}".</p>
+        {% else %}
+            <p class="empty-state__msg">No pot sizes yet.</p>
+        {% endif %}
     </div>
     {% endif %}
+    <form class="admin-pot-add-form" method="post" action="{{ url_for('admin.create_pot') }}">
+        <div class="input-group">
+            <label class="sr-only" for="pot-size">Pot size</label>
+            <input id="pot-size" type="number" name="size" min="1" placeholder="Size, e.g. 140" required>
+        </div>
+        <button class="button-link button-link--sm" type="submit">Add pot</button>
+    </form>
 </section>
+
+<script>
+    document.querySelectorAll(".taxonomy-edit-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+            button.closest(".taxonomy-row").classList.add("taxonomy-row--editing");
+        });
+    });
+
+    document.querySelectorAll(".taxonomy-cancel-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+            const row = button.closest(".taxonomy-row");
+            row.querySelectorAll(".taxonomy-edit-field").forEach((field) => {
+                if (field instanceof HTMLInputElement) {
+                    field.value = field.defaultValue;
+                }
+            });
+            row.classList.remove("taxonomy-row--editing");
+        });
+    });
+</script>
 {% endblock %}

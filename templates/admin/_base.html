@@ -26,7 +26,7 @@
                 <a class="admin-nav__item {% if request.endpoint == 'admin.categories' %}admin-nav__item--active{% endif %}" href="{{ url_for('admin.categories') }}">
                     Categories
                 </a>
-                <a class="admin-nav__item {% if request.endpoint in ['admin.pots', 'admin.create_pot', 'admin.edit_pot'] %}admin-nav__item--active{% endif %}" href="{{ url_for('admin.pots') }}">
+                <a class="admin-nav__item {% if request.endpoint == 'admin.pots' %}admin-nav__item--active{% endif %}" href="{{ url_for('admin.pots') }}">
                     Pots
                 </a>
             </nav>

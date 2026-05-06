@@ -287,8 +287,15 @@ def unassign_pot(id, pot_id):
 @staff_required
 def pots():
     from models import Pot
+
+    search_query = request.args.get("q", "").strip()
     pots = Pot.query.order_by(Pot.size).all()
-    return render_template("admin/pots.html", pots=pots)
+    if search_query:
+        pots = [
+            pot for pot in pots
+            if search_query.lower() in f"{pot.size}mm".lower()
+        ]
+    return render_template("admin/pots.html", pots=pots, search_query=search_query)
 
 
 @admin_bp.route("/pots/new", methods=["GET", "POST"])
@@ -296,15 +303,23 @@ def pots():
 def create_pot():
     from app import db
     from models import Pot
-    if request.method == "POST":
-        pot = Pot(
-            size=request.form.get("size"),
-        )
-        db.session.add(pot)
-        db.session.commit()
+
+    if request.method != "POST":
         return redirect(url_for("admin.pots"))
 
-    return render_template("admin/pot_form.html", pot=None)
+    size = request.form.get("size", type=int)
+    if size is None or size <= 0:
+        flash("Pot size must be a positive number.", "error")
+        return redirect(url_for("admin.pots"))
+
+    if Pot.query.filter_by(size=size).first():
+        flash("That pot size already exists.", "error")
+        return redirect(url_for("admin.pots"))
+
+    db.session.add(Pot(size=size))
+    db.session.commit()
+    flash("Pot size added.", "success")
+    return redirect(url_for("admin.pots"))
 
 
 @admin_bp.route("/pots/<int:id>/edit", methods=["GET", "POST"])
@@ -314,12 +329,23 @@ def edit_pot(id):
     from models import Pot
 
     pot = Pot.query.get_or_404(id)
-    if request.method == "POST":
-        pot.size = request.form.get("size")
-        db.session.commit()
+    if request.method != "POST":
         return redirect(url_for("admin.pots"))
 
-    return render_template("admin/pot_form.html", pot=pot)
+    size = request.form.get("size", type=int)
+    if size is None or size <= 0:
+        flash("Pot size must be a positive number.", "error")
+        return redirect(url_for("admin.pots"))
+
+    existing = Pot.query.filter_by(size=size).first()
+    if existing and existing.id != pot.id:
+        flash("That pot size already exists.", "error")
+        return redirect(url_for("admin.pots"))
+
+    pot.size = size
+    db.session.commit()
+    flash("Pot size updated.", "success")
+    return redirect(url_for("admin.pots"))
 
 
 @admin_bp.route("/pots/<int:id>/delete", methods=["POST"])
@@ -329,8 +355,13 @@ def delete_pot(id):
     from models import Pot
 
     pot = Pot.query.get_or_404(id)
+    if pot.plant_pots:
+        flash("Pot size cannot be deleted while plants are using it.", "error")
+        return redirect(url_for("admin.pots"))
+
     db.session.delete(pot)
     db.session.commit()
+    flash("Pot size deleted.", "success")
     return redirect(url_for("admin.pots"))
 
 
