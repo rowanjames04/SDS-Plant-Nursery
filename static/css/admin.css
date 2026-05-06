@@ -203,6 +203,18 @@
     margin: 0;
 }
 
+.admin-page-header__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.admin-page-header__actions > .button-link {
+    width: auto;
+    white-space: nowrap;
+}
+
 .admin-detail-header__identity {
     display: flex;
     gap: 14px;
@@ -582,6 +594,11 @@
     .admin-page-header,
     .admin-detail-header,
     .admin-card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-page-header__actions {
         flex-direction: column;
         align-items: stretch;
     }

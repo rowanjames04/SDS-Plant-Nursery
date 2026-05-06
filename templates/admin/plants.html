@@ -12,20 +12,22 @@
             <p class="muted">{{ total_plants }} plant{% if total_plants != 1 %}s{% endif %} in the catalogue.</p>
         {% endif %}
     </div>
-    <a class="button-link" href="{{ url_for('admin.create_plant') }}" style="width:auto;">Add plant</a>
+    <div class="admin-page-header__actions">
+        <form class="admin-search-form admin-search-form--inline" method="get" action="{{ url_for('admin.plants') }}">
+            <label class="sr-only" for="plant-search">Search plants</label>
+            <input id="plant-search" type="text" name="q" value="{{ search_query }}" placeholder="Search by name or category">
+            <button class="button-link button-link--sm admin-search-submit" type="submit" aria-label="Search">
+                <span class="admin-search-icon" aria-hidden="true"></span>
+            </button>
+            {% if search_query %}
+                <a class="button-link button-link--sm button-secondary" href="{{ url_for('admin.plants') }}">Clear</a>
+            {% endif %}
+        </form>
+        <a class="button-link" href="{{ url_for('admin.create_plant') }}">Add plant</a>
+    </div>
 </header>
 
 <section class="card card--soft">
-    <form class="admin-search-form" method="get" action="{{ url_for('admin.plants') }}">
-        <label class="sr-only" for="plant-search">Search plants</label>
-        <input id="plant-search" type="text" name="q" value="{{ search_query }}" placeholder="Search by name or category">
-        <button class="button-link button-link--sm admin-search-submit" type="submit" aria-label="Search">
-            <span class="admin-search-icon" aria-hidden="true"></span>
-        </button>
-        {% if search_query %}
-            <a class="button-link button-link--sm button-secondary" href="{{ url_for('admin.plants') }}">Clear</a>
-        {% endif %}
-    </form>
     {% if plants %}
     <table class="data-table admin-plants-table">
         <thead>
