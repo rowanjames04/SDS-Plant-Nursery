@@ -14,6 +14,11 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 
+try:
+    import stripe
+except ModuleNotFoundError:
+    stripe = None
+
 
 load_dotenv()
 UPLOAD_FOLDER = 'static/images'
@@ -47,6 +52,15 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or DEFAULT_DEV_SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 app.config['GOOGLE_MAPS_API_KEY'] = load_google_maps_api_key()
+app.config['STRIPE_SECRET_KEY'] = os.getenv('STRIPE_SECRET_KEY', '').strip()
+app.config['STRIPE_WEBHOOK_SECRET'] = os.getenv('STRIPE_WEBHOOK_SECRET', '').strip()
+default_site_url = os.getenv('SITE_URL', '').strip()
+if not default_site_url:
+    render_hostname = os.getenv('RENDER_EXTERNAL_HOSTNAME', '').strip()
+    default_site_url = f"https://{render_hostname}" if render_hostname else 'http://localhost:5000'
+app.config['SITE_URL'] = default_site_url.rstrip('/')
+if stripe is not None:
+    stripe.api_key = app.config['STRIPE_SECRET_KEY'] or None
 
 convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
@@ -367,17 +381,23 @@ def validate_cart_stock(cart):
     return shortages
 
 
-def create_order_from_confirmed_checkout(user, cart, delivery_method, address=None, delivery_fee=Decimal("0.00"), delivery_distance=None):
-    order = Order(
-        user_id=user.id,
-        cart_id=cart.id,
-        status="preparing",
-        payment_status="paid",
-        delivery_method=delivery_method,
-        delivery_fee=delivery_fee,
-        delivery_distance_km=delivery_distance,
+def sync_payment_pending_order(user, cart, delivery_method, address=None, delivery_fee=Decimal("0.00"), delivery_distance=None):
+    order = (
+        Order.query.filter_by(user_id=user.id, cart_id=cart.id, status="payment_pending")
+        .order_by(Order.updated_at.desc(), Order.id.desc())
+        .first()
     )
-    db.session.add(order)
+    if order is None:
+        order = Order(user_id=user.id, cart_id=cart.id, status="payment_pending")
+        db.session.add(order)
+        db.session.flush()
+
+    order.items.clear()
+    order.payment_status = "unpaid"
+    order.delivery_method = delivery_method
+    order.delivery_fee = delivery_fee
+    order.delivery_distance_km = delivery_distance
+    order.stripe_payment_intent_id = None
     subtotal = Decimal("0.00")
 
     if address:
@@ -391,10 +411,19 @@ def create_order_from_confirmed_checkout(user, cart, delivery_method, address=No
         order.delivery_google_place_id = address["google_place_id"]
         order.delivery_latitude = address.get("latitude")
         order.delivery_longitude = address.get("longitude")
+    else:
+        order.delivery_line1 = None
+        order.delivery_line2 = None
+        order.delivery_city = None
+        order.delivery_state = None
+        order.delivery_postal_code = None
+        order.delivery_country = None
+        order.delivery_formatted_address = None
+        order.delivery_google_place_id = None
+        order.delivery_latitude = None
+        order.delivery_longitude = None
 
     for cart_item in cart.items:
-        plant_pot = PlantPot.query.filter_by(plant_id=cart_item.plant_id, pot_id=cart_item.pot_id).first()
-        plant_pot.stock_qty -= cart_item.quantity
         unit_price = decimal_price(cart_item.unit_price_snapshot)
         subtotal += unit_price * cart_item.quantity
         order.items.append(
@@ -412,11 +441,133 @@ def create_order_from_confirmed_checkout(user, cart, delivery_method, address=No
     order.subtotal_amount = subtotal
     order.delivery_fee = delivery_fee
     order.total_amount = subtotal + delivery_fee
-    order.stripe_checkout_session_id = request.form.get("stripe_checkout_session_id") or None
-    order.stripe_payment_intent_id = request.form.get("stripe_payment_intent_id") or None
-    cart.status = "ordered"
+    order.updated_at = datetime.utcnow()
     cart.updated_at = datetime.utcnow()
     return order
+
+
+def session_value(session, key, default=None):
+    if hasattr(session, "get"):
+        return session.get(key, default)
+    return getattr(session, key, default)
+
+
+def fulfill_stripe_checkout_session(session_id, session=None):
+    if not session_id:
+        raise ValueError("Missing Stripe Checkout Session ID.")
+    if stripe is None:
+        raise RuntimeError("The stripe Python package is not installed.")
+
+    if session is None:
+        session = stripe.checkout.Session.retrieve(session_id)
+
+    payment_status = session_value(session, "payment_status")
+    if payment_status != "paid":
+        return None
+
+    metadata = session_value(session, "metadata", {}) or {}
+    order_id = metadata.get("order_id") if hasattr(metadata, "get") else getattr(metadata, "order_id", None)
+    if not order_id:
+        raise ValueError("Stripe session is missing order metadata.")
+
+    order = Order.query.get(int(order_id))
+    if order is None:
+        raise ValueError("Order for Stripe session was not found.")
+
+    if order.payment_status == "paid":
+        return order
+
+    stock_errors = []
+    stock_rows = []
+    for item in order.items:
+        plant_pot = PlantPot.query.filter_by(plant_id=item.plant_id, pot_id=item.pot_id).first()
+        if plant_pot is None:
+            stock_errors.append(f"{item.plant_name_snapshot} is no longer available in that pot size.")
+        elif plant_pot.stock_qty < item.quantity:
+            stock_errors.append(
+                f"Only {plant_pot.stock_qty} {item.plant_name_snapshot} "
+                f"({item.pot_size_snapshot or plant_pot.pot.size}mm) left in stock."
+            )
+        else:
+            stock_rows.append((plant_pot, item.quantity))
+
+    if stock_errors:
+        order.payment_status = "failed"
+        db.session.commit()
+        raise ValueError(" ".join(stock_errors))
+
+    for plant_pot, quantity in stock_rows:
+        plant_pot.stock_qty -= quantity
+
+    order.stripe_checkout_session_id = session_value(session, "id", session_id)
+    order.stripe_payment_intent_id = session_value(session, "payment_intent")
+    order.payment_status = "paid"
+    order.status = "preparing"
+    order.updated_at = datetime.utcnow()
+    if order.cart:
+        order.cart.status = "ordered"
+        order.cart.updated_at = datetime.utcnow()
+    db.session.commit()
+    return order
+
+
+def mark_stripe_checkout_session_failed(session):
+    metadata = session_value(session, "metadata", {}) or {}
+    order_id = metadata.get("order_id") if hasattr(metadata, "get") else getattr(metadata, "order_id", None)
+    if not order_id:
+        return None
+
+    order = Order.query.get(int(order_id))
+    if order is None or order.payment_status == "paid":
+        return order
+
+    order.stripe_checkout_session_id = session_value(session, "id", order.stripe_checkout_session_id)
+    order.stripe_payment_intent_id = session_value(session, "payment_intent")
+    order.payment_status = "failed"
+    order.updated_at = datetime.utcnow()
+    if order.cart:
+        order.cart.status = "active"
+        order.cart.updated_at = datetime.utcnow()
+    db.session.commit()
+    return order
+
+
+def expire_stripe_checkout_session(session):
+    metadata = session_value(session, "metadata", {}) or {}
+    order_id = metadata.get("order_id") if hasattr(metadata, "get") else getattr(metadata, "order_id", None)
+    if not order_id:
+        return None
+
+    order = Order.query.get(int(order_id))
+    if order is None or order.payment_status == "paid":
+        return order
+
+    order.stripe_checkout_session_id = session_value(session, "id", order.stripe_checkout_session_id)
+    order.payment_status = "expired"
+    order.updated_at = datetime.utcnow()
+    if order.cart:
+        order.cart.status = "active"
+        order.cart.updated_at = datetime.utcnow()
+    db.session.commit()
+    return order
+
+
+def ensure_active_stripe_config():
+    if stripe is None:
+        raise RuntimeError("The stripe Python package is not installed. Run pip install -r requirements.txt.")
+    if not app.config.get("STRIPE_SECRET_KEY"):
+        raise RuntimeError("Stripe is not configured. Add STRIPE_SECRET_KEY to the environment.")
+
+
+def create_stripe_checkout_session_for_order(order):
+    ensure_active_stripe_config()
+    from payments.checkout import create_checkout_session
+
+    session = create_checkout_session(order)
+    order.stripe_checkout_session_id = session_value(session, "id")
+    if order.cart:
+        order.cart.updated_at = datetime.utcnow()
+    return session
 
 
 def get_active_cart(user):
@@ -698,6 +849,7 @@ def profile():
 
     user_orders = (
         Order.query.filter_by(user_id=current_user.id)
+        .filter(Order.payment_status == "paid")
         .order_by(Order.created_at.desc())
         .all()
     )
@@ -714,6 +866,7 @@ def profile():
 def orders():
     user_orders = (
         Order.query.filter_by(user_id=current_user.id)
+        .filter(Order.payment_status == "paid")
         .order_by(Order.created_at.desc())
         .all()
     )
@@ -1004,9 +1157,7 @@ def checkout():
             flash("Please choose delivery or pickup.", "error")
             return redirect(url_for("checkout"))
 
-        # Temporary payment boundary: Stripe success/webhook handling can call this same
-        # order finalisation path once checkout sessions are enabled.
-        order = create_order_from_confirmed_checkout(
+        order = sync_payment_pending_order(
             current_user,
             cart,
             delivery_method,
@@ -1014,12 +1165,15 @@ def checkout():
             delivery_fee=delivery_fee,
             delivery_distance=delivery_distance,
         )
+        try:
+            session = create_stripe_checkout_session_for_order(order)
+        except Exception as error:
+            db.session.rollback()
+            flash(f"We could not start Stripe Checkout: {error}", "error")
+            return redirect(url_for("checkout"))
+
         db.session.commit()
-        if delivery_method == "pickup":
-            flash("Order placed. We'll email you when your pickup is ready.", "success")
-        else:
-            flash("Order placed. We'll prepare your plants for dispatch.", "success")
-        return redirect(url_for("order_confirmation", order_id=order.id))
+        return redirect(session_value(session, "url"))
 
     return render_template(
         "checkout/checkout.html",
@@ -1039,10 +1193,92 @@ def checkout():
     )
 
 
+@app.route("/checkout/success")
+@login_required
+def checkout_success():
+    session_id = request.args.get("session_id", "").strip()
+    if not session_id:
+        flash("Stripe did not return a checkout session. Please try again.", "error")
+        return redirect(url_for("checkout"))
+    if stripe is None:
+        flash("Stripe support is not installed on this environment.", "error")
+        return redirect(url_for("checkout"))
+
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        metadata = session_value(session, "metadata", {}) or {}
+        order_id = metadata.get("order_id") if hasattr(metadata, "get") else getattr(metadata, "order_id", None)
+        order = Order.query.filter_by(id=int(order_id), user_id=current_user.id).first() if order_id else None
+        if order is None:
+            flash("That Stripe checkout session does not belong to your account.", "error")
+            return redirect(url_for("checkout"))
+        order = fulfill_stripe_checkout_session(session_id, session=session)
+    except Exception as error:
+        db.session.rollback()
+        flash(f"We could not confirm your payment yet: {error}", "error")
+        return redirect(url_for("checkout"))
+
+    if order is None:
+        flash("Payment has not completed yet. Please return to checkout and try again.", "error")
+        return redirect(url_for("checkout"))
+
+    summary = build_order_summary(order)
+    return render_template(
+        "checkout/success.html",
+        order=order,
+        order_summary=summary,
+    )
+
+
+@app.route("/checkout/cancel")
+@login_required
+def checkout_cancel():
+    flash("Stripe Checkout was cancelled. Your cart has been preserved.", "error")
+    return render_template("checkout/cancel.html")
+
+
+@app.route("/stripe/webhook", methods=["POST"])
+def stripe_webhook():
+    if stripe is None:
+        return "The stripe Python package is not installed.", 400
+
+    webhook_secret = app.config.get("STRIPE_WEBHOOK_SECRET")
+    if not webhook_secret:
+        return "Stripe webhook secret is not configured.", 400
+
+    payload = request.get_data()
+    sig_header = request.headers.get("Stripe-Signature", "")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+    except ValueError:
+        return "Invalid payload.", 400
+    except stripe.error.SignatureVerificationError:
+        return "Invalid signature.", 400
+
+    event_type = event.get("type")
+    session = event.get("data", {}).get("object", {})
+    try:
+        if event_type in ("checkout.session.completed", "checkout.session.async_payment_succeeded"):
+            fulfill_stripe_checkout_session(session_value(session, "id"), session=session)
+        elif event_type == "checkout.session.async_payment_failed":
+            mark_stripe_checkout_session_failed(session)
+        elif event_type == "checkout.session.expired":
+            expire_stripe_checkout_session(session)
+    except Exception:
+        db.session.rollback()
+        return "Webhook handling failed.", 400
+
+    return "", 200
+
+
 @app.route("/orders/<int:order_id>/confirmation")
 @login_required
 def order_confirmation(order_id):
     order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
+    if order.payment_status != "paid":
+        flash("That order has not been paid for yet. Please complete checkout first.", "error")
+        return redirect(url_for("checkout"))
     summary = build_order_summary(order)
     return render_template(
         "order_confirmation.html",

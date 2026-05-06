@@ -14,7 +14,7 @@
         <div class="page-header">
             <p class="page-header__eyebrow">❁ &ensp; thank you!</p>
             <h1>Order Confirmed</h1>
-            <p class="muted">Your payment was successful. Order #{{ order.id }}</p>
+            <p class="muted">Stripe confirmed your payment. Order #{{ order.id }} is now being prepared.</p>
         </div>
 
         <div class="card card--narrow">
@@ -32,7 +32,7 @@
                 <span>Qty</span>
                 <span>Price</span>
             </div>
-            {% for item in order_summary.items %}
+            {% for item in order_summary["items"] %}
             <div class="checkout-item-row">
                 <div class="checkout-item-row__info">
                     {% if item.image_filename %}
@@ -42,7 +42,7 @@
                     {% endif %}
                     <div>
                         <p class="checkout-item-row__name">{{ item.name }}</p>
-                        <p class="checkout-item-row__unit muted">${{ '%.2f'|format(item.unit_price) }} each</p>
+                        <p class="checkout-item-row__unit muted">${{ '%.2f'|format(item.unit_price) }} each{% if item.pot_size %} · {{ item.pot_size }}mm pot{% endif %}</p>
                     </div>
                 </div>
                 <span class="checkout-item-row__qty">{{ item.quantity }}</span>
@@ -52,12 +52,16 @@
 
             <div class="checkout-summary-panel__rows">
                 <div class="checkout-summary-panel__row">
-                    <span>Items ({{ order_summary.item_count }})</span>
-                    <span>${{ '%.2f'|format(order_summary.subtotal) }}</span>
+                    <span>Items ({{ order_summary["item_count"] }})</span>
+                    <span>${{ '%.2f'|format(order_summary["subtotal"]) }}</span>
+                </div>
+                <div class="checkout-summary-panel__row">
+                    <span>{{ order.delivery_method|title }}</span>
+                    <span>${{ '%.2f'|format(order_summary["delivery_fee"]) }}</span>
                 </div>
                 <div class="checkout-summary-panel__row checkout-summary-panel__row--total">
                     <span>Total</span>
-                    <span>${{ '%.2f'|format(order_summary.total) }}</span>
+                    <span>${{ '%.2f'|format(order_summary["total"]) }}</span>
                 </div>
             </div>
 

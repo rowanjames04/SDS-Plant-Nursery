@@ -168,25 +168,13 @@
                         </div>
                     </div>
 
-<<<<<<< Updated upstream:templates/checkout/checkout.html
                     <div class="checkout-summary-panel__actions">
-                        <button type="button" class="button-link checkout-pay-btn" disabled>Pay now</button>
-                        <a class="button-link button-secondary checkout-back-btn" href="{{ url_for('cart') }}">← Back to cart</a>
+                        <button id="checkout-submit" type="submit" class="button-link checkout-pay-btn">Pay now</button>
+                        <p id="checkout-submit-message" class="checkout-submit-message" aria-live="polite"></p>
+                        <p class="checkout-payment-note">Secure card payment is handled by Stripe. Card details are not stored by Little Jill's.</p>
+                        <a class="button-link button-secondary checkout-back-btn" href="{{ url_for('cart') }}">Back to cart</a>
                     </div>
-                </div>
-
-                <div class="checkout-thankyou">
-                    <p>❁ &nbsp; Thanks for shopping with Little Jill's &nbsp; ❁</p>
-                </div>
-=======
-                    <input type="hidden" name="stripe_checkout_session_id" value="">
-                    <input type="hidden" name="stripe_payment_intent_id" value="">
-                    <button id="checkout-submit" type="submit" class="button-link checkout-pay-btn">Place order</button>
-                    <p id="checkout-submit-message" class="checkout-submit-message" aria-live="polite"></p>
-                    <p class="checkout-payment-note">Payment is mocked for now. The hidden Stripe fields are ready for checkout session metadata later.</p>
-                    <a class="button-link button-secondary checkout-back-btn" href="{{ url_for('cart') }}">Back to cart</a>
                 </aside>
->>>>>>> Stashed changes:templates/checkout.html
             </div>
         </form>
     </main>

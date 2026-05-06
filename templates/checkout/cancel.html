@@ -13,8 +13,8 @@
     <main class="container">
         <div class="page-header">
             <p class="page-header__eyebrow">❁ &ensp; no worries</p>
-            <h1>Checkout Cancelled</h1>
-            <p class="muted">Your cart has been preserved. Ready when you are!</p>
+            <h1>Payment not completed</h1>
+            <p class="muted">Stripe Checkout was cancelled or did not finish. Your cart has been preserved.</p>
         </div>
 
         <div class="card card--medium">
@@ -22,7 +22,7 @@
                 <div class="centered-content__icon">🛒</div>
                 <p class="muted centered-content__body">
                     Your items are still waiting in your cart.
-                    Feel free to continue checkout whenever you're ready.
+                    You can return to checkout whenever you're ready.
                 </p>
                 <div class="centered-actions">
                     <a href="{{ url_for('cart') }}" class="button-link">Back to Cart</a>
