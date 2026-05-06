@@ -4,6 +4,9 @@ from functools import wraps
 from flask import Blueprint, abort, flash, render_template, request, redirect, url_for
 from flask_login import current_user, login_required
 
+from app import db
+from models import Category, Order, Plant, PlantPot, Pot, Species, Variety
+
 PLANT_IMAGE_DIR = os.path.join("static", "images", "plants")
 _ALLOWED_EXTS = {"png", "jpg", "jpeg", "webp"}
 
@@ -30,9 +33,6 @@ def _taxonomy_form_data(label):
 
 
 def _plant_counts_for(column):
-    from app import db
-    from models import Plant
-
     return dict(
         db.session.query(column, db.func.count(Plant.id))
         .filter(column.isnot(None))
@@ -53,8 +53,6 @@ def _filter_taxonomy_records(records, query):
 
 
 def _create_taxonomy_record(model, label):
-    from app import db
-
     data = _taxonomy_form_data(label)
     if data:
         db.session.add(model(**data))
@@ -64,8 +62,6 @@ def _create_taxonomy_record(model, label):
 
 
 def _update_taxonomy_record(model, record_id, label):
-    from app import db
-
     record = model.query.get_or_404(record_id)
     data = _taxonomy_form_data(label)
     if not data:
@@ -79,9 +75,6 @@ def _update_taxonomy_record(model, record_id, label):
 
 
 def _delete_taxonomy_record(model, record_id, plant_column, label):
-    from app import db
-    from models import Plant
-
     record = model.query.get_or_404(record_id)
     if Plant.query.filter(plant_column == record_id).first():
         flash(f"{label} cannot be deleted while plants are using it.", "error")
@@ -105,7 +98,6 @@ def staff_required(f):
 @admin_bp.route("/home")
 @staff_required
 def home():
-    from models import Order, Plant
     total_orders = Order.query.count()
     pending_orders = Order.query.filter_by(status="pending").count()
     total_plants = Plant.query.count()
@@ -120,8 +112,6 @@ def home():
 @admin_bp.route("/plants")
 @staff_required
 def plants():
-    from models import Category, Plant
-
     categories = Category.query.all()
     category_map = {category.id: category.name for category in categories}
     search_query = request.args.get("q", "").strip()
@@ -159,9 +149,6 @@ def plants():
 @admin_bp.route("/plants/new", methods=["GET", "POST"])
 @staff_required
 def create_plant():
-    from app import db
-    from models import Plant, Category, Species, Variety
-
     if request.method == "POST":
         plant = Plant(
             common_name=request.form["common_name"],
@@ -208,9 +195,6 @@ PLANT_FIELDS = [
 @admin_bp.route("/plants/<int:id>", methods=["GET", "POST"])
 @staff_required
 def plant_detail(id):
-    from app import db
-    from models import Plant, Category, Species, Variety, Pot
-
     plant = Plant.query.get_or_404(id)
 
     if request.method == "POST":
@@ -246,9 +230,6 @@ def plant_detail(id):
 @admin_bp.route("/plants/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_plant(id):
-    from app import db
-    from models import Plant
-
     plant = Plant.query.get_or_404(id)
     db.session.delete(plant)
     db.session.commit()
@@ -257,9 +238,6 @@ def delete_plant(id):
 @admin_bp.route("/plants/<int:id>/assign-pot", methods=["POST"])
 @staff_required
 def assign_pot(id):
-    from app import db
-    from models import Plant, PlantPot
-
     Plant.query.get_or_404(id)
     pot_id = request.form.get("pot_id", type=int)
     price = request.form.get("price") or None
@@ -274,9 +252,6 @@ def assign_pot(id):
 @admin_bp.route("/plants/<int:id>/unassign-pot/<int:pot_id>", methods=["POST"])
 @staff_required
 def unassign_pot(id, pot_id):
-    from app import db
-    from models import PlantPot
-
     plant_pot = PlantPot.query.get_or_404((id, pot_id))
     db.session.delete(plant_pot)
     db.session.commit()
@@ -286,8 +261,6 @@ def unassign_pot(id, pot_id):
 @admin_bp.route("/pots")
 @staff_required
 def pots():
-    from models import Pot
-
     search_query = request.args.get("q", "").strip()
     pots = Pot.query.order_by(Pot.size).all()
     if search_query:
@@ -301,9 +274,6 @@ def pots():
 @admin_bp.route("/pots/new", methods=["GET", "POST"])
 @staff_required
 def create_pot():
-    from app import db
-    from models import Pot
-
     if request.method != "POST":
         return redirect(url_for("admin.pots"))
 
@@ -325,9 +295,6 @@ def create_pot():
 @admin_bp.route("/pots/<int:id>/edit", methods=["GET", "POST"])
 @staff_required
 def edit_pot(id):
-    from app import db
-    from models import Pot
-
     pot = Pot.query.get_or_404(id)
     if request.method != "POST":
         return redirect(url_for("admin.pots"))
@@ -351,9 +318,6 @@ def edit_pot(id):
 @admin_bp.route("/pots/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_pot(id):
-    from app import db
-    from models import Pot
-
     pot = Pot.query.get_or_404(id)
     if pot.plant_pots:
         flash("Pot size cannot be deleted while plants are using it.", "error")
@@ -368,7 +332,6 @@ def delete_pot(id):
 @admin_bp.route("/orders")
 @staff_required
 def orders():
-    from models import Order
     orders = Order.query.order_by(Order.id).all()
     return render_template("admin/orders.html", orders=orders)
 
@@ -376,8 +339,6 @@ def orders():
 @admin_bp.route("/categories")
 @staff_required
 def categories():
-    from models import Category, Plant, Species, Variety
-
     search_query = request.args.get("q", "").strip()
     categories = Category.query.order_by(Category.name).all()
     species = Species.query.order_by(Species.name).all()
@@ -397,8 +358,6 @@ def categories():
 @admin_bp.route("/categories/new", methods=["GET", "POST"])
 @staff_required
 def create_category():
-    from models import Category
-
     if request.method != "POST":
         return redirect(url_for("admin.categories"))
     return _create_taxonomy_record(Category, "Category")
@@ -407,24 +366,18 @@ def create_category():
 @admin_bp.route("/categories/<int:id>/update", methods=["POST"])
 @staff_required
 def update_category(id):
-    from models import Category
-
     return _update_taxonomy_record(Category, id, "Category")
 
 
 @admin_bp.route("/categories/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_category(id):
-    from models import Category, Plant
-
     return _delete_taxonomy_record(Category, id, Plant.category_id, "Category")
 
 
 @admin_bp.route("/species/new", methods=["GET", "POST"])
 @staff_required
 def create_species():
-    from models import Species
-
     if request.method != "POST":
         return redirect(url_for("admin.categories"))
     return _create_taxonomy_record(Species, "Species")
@@ -433,24 +386,18 @@ def create_species():
 @admin_bp.route("/species/<int:id>/update", methods=["POST"])
 @staff_required
 def update_species(id):
-    from models import Species
-
     return _update_taxonomy_record(Species, id, "Species")
 
 
 @admin_bp.route("/species/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_species(id):
-    from models import Plant, Species
-
     return _delete_taxonomy_record(Species, id, Plant.species_id, "Species")
 
 
 @admin_bp.route("/varieties/new", methods=["GET", "POST"])
 @staff_required
 def create_variety():
-    from models import Variety
-
     if request.method != "POST":
         return redirect(url_for("admin.categories"))
     return _create_taxonomy_record(Variety, "Variety")
@@ -459,25 +406,18 @@ def create_variety():
 @admin_bp.route("/varieties/<int:id>/update", methods=["POST"])
 @staff_required
 def update_variety(id):
-    from models import Variety
-
     return _update_taxonomy_record(Variety, id, "Variety")
 
 
 @admin_bp.route("/varieties/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_variety(id):
-    from models import Plant, Variety
-
     return _delete_taxonomy_record(Variety, id, Plant.variety_id, "Variety")
 
 
 @admin_bp.route("/plants/<int:id>/images/upload", methods=["POST"])
 @staff_required
 def upload_plant_images(id):
-    from app import db
-    from models import Plant
-
     plant = Plant.query.get_or_404(id)
     files = request.files.getlist("images")
     new_images = []
@@ -493,9 +433,6 @@ def upload_plant_images(id):
 @admin_bp.route("/plants/<int:id>/images/delete", methods=["POST"])
 @staff_required
 def delete_plant_image(id):
-    from app import db
-    from models import Plant
-
     plant = Plant.query.get_or_404(id)
     filename = request.form.get("filename")
     file_path = os.path.join("static", "images", filename) if filename else None
@@ -512,9 +449,6 @@ def delete_plant_image(id):
 @admin_bp.route("/plants/<int:id>/pots/<int:pot_id>/update", methods=["POST"])
 @staff_required
 def update_pot(id, pot_id):
-    from app import db
-    from models import PlantPot
-
     plant_pot = PlantPot.query.get_or_404((id, pot_id))
     stock_qty = request.form.get("stock_qty", type=int)
     price = request.form.get("price")
@@ -534,9 +468,6 @@ def update_pot(id, pot_id):
 @admin_bp.route("/plants/<int:id>/images/reorder", methods=["POST"])
 @staff_required
 def reorder_plant_images(id):
-    from app import db
-    from models import Plant
-
     plant = Plant.query.get_or_404(id)
     ordered = request.form.getlist("images[]")
     existing = set(plant.images or [])
