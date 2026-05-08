@@ -21,6 +21,12 @@
             <div class="plant-grid">
                 {% for category in categories %}
                     <article class="plant-card">
+                        {% set img = cat_images.get(category.id) %}
+                        {% if img %}
+                        <div class="plant-card__image">
+                            <img src="{{ url_for('static', filename='images/' ~ img) }}" alt="{{ category.name }}">
+                        </div>
+                        {% endif %}
                         <div class="plant-card__body">
                             <h3 class="plant-card__name">{{ category.name }}</h3>
                             {% if category.description %}

@@ -566,6 +566,24 @@
     cursor: pointer;
 }
 
+.taxonomy-thumb-cell {
+    width: 48px;
+    padding-right: 0;
+}
+
+.taxonomy-thumb {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+    border: 1px solid #d8e3d5;
+}
+
+.taxonomy-thumb--empty {
+    background: #eef3ed;
+}
+
 .admin-orders-table {
     table-layout: fixed;
 }

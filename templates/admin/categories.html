@@ -36,6 +36,7 @@
     <table class="data-table taxonomy-table">
         <thead>
             <tr>
+                <th></th>
                 <th>Name</th>
                 <th>Description</th>
                 <th>Assigned plants</th>
@@ -45,6 +46,14 @@
         <tbody>
             {% for c in categories %}
             <tr class="taxonomy-row">
+                <td class="taxonomy-thumb-cell">
+                    {% set img = cat_images.get(c.id) %}
+                    {% if img %}
+                        <img class="taxonomy-thumb" src="{{ url_for('static', filename='images/' ~ img) }}" alt="">
+                    {% else %}
+                        <div class="taxonomy-thumb taxonomy-thumb--empty"></div>
+                    {% endif %}
+                </td>
                 <td>
                     <span class="taxonomy-display">{{ c.name }}</span>
                     <label class="sr-only" for="category-name-{{ c.id }}">Category name</label>

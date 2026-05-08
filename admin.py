@@ -4,7 +4,7 @@ from functools import wraps
 from flask import Blueprint, abort, flash, render_template, request, redirect, url_for
 from flask_login import current_user, login_required
 
-from app import db
+from app import db, category_representative_images
 from models import Category, Order, Plant, PlantPot, Pot, Species, Variety
 
 PLANT_IMAGE_DIR = os.path.join("static", "images", "plants")
@@ -376,6 +376,7 @@ def categories():
         category_counts=_plant_counts_for(Plant.category_id),
         species_counts=_plant_counts_for(Plant.species_id),
         variety_counts=_plant_counts_for(Plant.variety_id),
+        cat_images=category_representative_images(),
     )
 
 

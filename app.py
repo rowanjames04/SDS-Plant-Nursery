@@ -97,6 +97,17 @@ def save_image(file):
         return filename
     return None
 
+def category_representative_images():
+    subq = (
+        db.session.query(Plant.category_id, func.min(Plant.id).label("min_id"))
+        .filter(Plant.category_id.isnot(None), Plant.images.isnot(None))
+        .group_by(Plant.category_id)
+        .subquery()
+    )
+    first_plants = db.session.query(Plant).join(subq, Plant.id == subq.c.min_id).all()
+    return {p.category_id: p.primary_image for p in first_plants if p.primary_image}
+
+
 def load_catalog():
     categories = Category.query.order_by(Category.name).all()
     species = Species.query.order_by(Species.name).all()
@@ -749,12 +760,14 @@ def inject_header_cart_summary():
 @app.route("/")
 def home():
     catalog = load_catalog()
+    cat_images = category_representative_images()
     return render_template(
         'Home.html',
         categories=catalog["categories"],
         species=catalog["species"],
         varieties=catalog["varieties"],
         plants=catalog["plants"],
+        cat_images=cat_images,
     )
 
 
