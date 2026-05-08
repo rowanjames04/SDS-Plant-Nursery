@@ -13,6 +13,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
+from flask_mail import Mail, Message
 
 try:
     import stripe
@@ -62,6 +63,35 @@ app.config['SITE_URL'] = default_site_url.rstrip('/')
 if stripe is not None:
     stripe.api_key = app.config['STRIPE_SECRET_KEY'] or None
 
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = ('Little Jill Plant Nursery', os.getenv('MAIL_USERNAME'))
+
+mail = Mail(app)
+
+print("MAIL USERNAME:", app.config.get('MAIL_USERNAME'))
+
+def send_welcome_email(user):
+    msg = Message(
+        subject="Little Jill's Plant Nursery!",
+        recipients=[user.email]
+    )
+    msg.html = render_template('emails/welcome.html', user=user)
+    msg.body = f"Hi {user.full_name}, Little Jill's Plant Nursery! Your account has been created successfully."
+    mail.send(msg)
+
+def send_order_status_email(order):
+    msg = Message(
+        subject=f"Your Order #{order.id} has been updated",
+        recipients=[order.user.email]
+    )
+    msg.html = render_template('emails/order_status.html', order=order)
+    msg.body = f"Hi {order.user.full_name}, your order #{order.id} status has been updated to {order.status}."
+    mail.send(msg)
+    
 convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
     "pk": "pk_%(table_name)s",
@@ -513,6 +543,11 @@ def fulfill_stripe_checkout_session(session_id, session=None):
         order.cart.status = "ordered"
         order.cart.updated_at = utc_now()
     db.session.commit()
+
+    try:
+        send_order_status_email(order)
+    except Exception as e:
+        print(f"Order confirmation email failed: {e}")
     return order
 
 
@@ -1231,14 +1266,19 @@ def checkout_success():
             flash("That Stripe checkout session does not belong to your account.", "error")
             return redirect(url_for("checkout"))
         order = fulfill_stripe_checkout_session(session_id, session=session)
+
+        if order is None:
+            flash("Payment has not completed yet. Please return to checkout and try again.", "error")
+            return redirect(url_for("checkout"))
+
     except Exception as error:
         db.session.rollback()
         flash(f"We could not confirm your payment yet: {error}", "error")
         return redirect(url_for("checkout"))
 
     if order is None:
-        flash("Payment has not completed yet. Please return to checkout and try again.", "error")
-        return redirect(url_for("checkout"))
+            flash("Payment has not completed yet. Please return to checkout and try again.", "error")
+            return redirect(url_for("checkout"))
 
     summary = build_order_summary(order)
     return render_template(
@@ -1335,6 +1375,11 @@ def register():
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
+
+        try:
+            send_welcome_email(user)
+        except Exception as e:
+            print(f"Welcome email failed: {e}")
 
         flash('Account created! Please log in.', 'success')
         return redirect(url_for('login'))

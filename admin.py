@@ -4,7 +4,7 @@ from functools import wraps
 from flask import Blueprint, abort, flash, render_template, request, redirect, url_for
 from flask_login import current_user, login_required
 
-from app import db
+from app import db, mail, send_order_status_email
 from models import Category, Order, Plant, PlantPot, Pot, Species, Variety
 
 PLANT_IMAGE_DIR = os.path.join("static", "images", "plants")
@@ -336,18 +336,45 @@ def orders():
     return render_template("admin/orders.html", orders=orders)
 
 
-@admin_bp.route("/orders/<int:id>/status", methods=["POST"])
+# @admin_bp.route("/orders/<int:id>/status", methods=["POST"])
+# @staff_required
+# def update_order_status(id):
+#     order = db.get_or_404(Order, id)
+#     status = request.form.get("status", "").strip()
+#     if status in {"preparing", "dispatched", "delivered", "cancelled"}:
+#         order.status = status
+#         db.session.commit()
+#         flash(f"Order #{order.id} updated to {status}.", "success")
+#     else:
+#         flash("Invalid status.", "error")
+#     return redirect(url_for("admin.orders"))
+
+@admin_bp.route("/orders/<int:id>/update-status", methods=["GET", "POST"])
 @staff_required
 def update_order_status(id):
     order = db.get_or_404(Order, id)
-    status = request.form.get("status", "").strip()
-    if status in {"preparing", "dispatched", "delivered", "cancelled"}:
-        order.status = status
-        db.session.commit()
-        flash(f"Order #{order.id} updated to {status}.", "success")
-    else:
-        flash("Invalid status.", "error")
-    return redirect(url_for("admin.orders"))
+    ORDER_STATUSES = ["preparing", "dispatched", "delivered", "cancelled"]
+
+    if request.method == "POST":
+        new_status = request.form.get("status", "").strip()
+        if new_status in ORDER_STATUSES:
+            order.status = new_status
+            db.session.commit()
+            try:
+                send_order_status_email(order)
+                flash(f"Order #{order.id} updated to '{new_status}' and customer notified.", "success")
+            except Exception as e:
+                print(f"Order status email failed: {e}")
+                flash(f"Order #{order.id} updated but email could not be sent.", "warning")
+        else:
+            flash("Invalid status.", "error")
+        return redirect(url_for("admin.orders"))
+
+    return render_template(
+        "admin/order_update_status.html",
+        order=order,
+        statuses=ORDER_STATUSES,
+    )
 
 
 @admin_bp.route("/orders/<int:id>/delete", methods=["POST"])
