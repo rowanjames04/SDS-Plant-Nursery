@@ -62,7 +62,7 @@ def _create_taxonomy_record(model, label):
 
 
 def _update_taxonomy_record(model, record_id, label):
-    record = model.query.get_or_404(record_id)
+    record = db.get_or_404(model, record_id)
     data = _taxonomy_form_data(label)
     if not data:
         return redirect(url_for("admin.categories"))
@@ -75,7 +75,7 @@ def _update_taxonomy_record(model, record_id, label):
 
 
 def _delete_taxonomy_record(model, record_id, plant_column, label):
-    record = model.query.get_or_404(record_id)
+    record = db.get_or_404(model, record_id)
     if Plant.query.filter(plant_column == record_id).first():
         flash(f"{label} cannot be deleted while plants are using it.", "error")
         return redirect(url_for("admin.categories"))
@@ -195,7 +195,7 @@ PLANT_FIELDS = [
 @admin_bp.route("/plants/<int:id>", methods=["GET", "POST"])
 @staff_required
 def plant_detail(id):
-    plant = Plant.query.get_or_404(id)
+    plant = db.get_or_404(Plant, id)
 
     if request.method == "POST":
         for field in PLANT_FIELDS:
@@ -230,7 +230,7 @@ def plant_detail(id):
 @admin_bp.route("/plants/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_plant(id):
-    plant = Plant.query.get_or_404(id)
+    plant = db.get_or_404(Plant, id)
     db.session.delete(plant)
     db.session.commit()
     return redirect(url_for("admin.plants"))
@@ -238,7 +238,7 @@ def delete_plant(id):
 @admin_bp.route("/plants/<int:id>/assign-pot", methods=["POST"])
 @staff_required
 def assign_pot(id):
-    Plant.query.get_or_404(id)
+    db.get_or_404(Plant, id)
     pot_id = request.form.get("pot_id", type=int)
     price = request.form.get("price") or None
     stock_qty = request.form.get("stock_qty", type=int) or 0
@@ -252,7 +252,7 @@ def assign_pot(id):
 @admin_bp.route("/plants/<int:id>/unassign-pot/<int:pot_id>", methods=["POST"])
 @staff_required
 def unassign_pot(id, pot_id):
-    plant_pot = PlantPot.query.get_or_404((id, pot_id))
+    plant_pot = db.get_or_404(PlantPot, (id, pot_id))
     db.session.delete(plant_pot)
     db.session.commit()
     return redirect(url_for("admin.plant_detail", id=id))
@@ -295,7 +295,7 @@ def create_pot():
 @admin_bp.route("/pots/<int:id>/edit", methods=["GET", "POST"])
 @staff_required
 def edit_pot(id):
-    pot = Pot.query.get_or_404(id)
+    pot = db.get_or_404(Pot, id)
     if request.method != "POST":
         return redirect(url_for("admin.pots"))
 
@@ -318,7 +318,7 @@ def edit_pot(id):
 @admin_bp.route("/pots/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_pot(id):
-    pot = Pot.query.get_or_404(id)
+    pot = db.get_or_404(Pot, id)
     if pot.plant_pots:
         flash("Pot size cannot be deleted while plants are using it.", "error")
         return redirect(url_for("admin.pots"))
@@ -339,7 +339,7 @@ def orders():
 @admin_bp.route("/orders/<int:id>/status", methods=["POST"])
 @staff_required
 def update_order_status(id):
-    order = Order.query.get_or_404(id)
+    order = db.get_or_404(Order, id)
     status = request.form.get("status", "").strip()
     if status in {"preparing", "dispatched", "delivered", "cancelled"}:
         order.status = status
@@ -353,7 +353,7 @@ def update_order_status(id):
 @admin_bp.route("/orders/<int:id>/delete", methods=["POST"])
 @staff_required
 def delete_order(id):
-    order = Order.query.get_or_404(id)
+    order = db.get_or_404(Order, id)
     db.session.delete(order)
     db.session.commit()
     flash(f"Order #{id} deleted.", "success")
@@ -442,7 +442,7 @@ def delete_variety(id):
 @admin_bp.route("/plants/<int:id>/images/upload", methods=["POST"])
 @staff_required
 def upload_plant_images(id):
-    plant = Plant.query.get_or_404(id)
+    plant = db.get_or_404(Plant, id)
     files = request.files.getlist("images")
     new_images = []
     for file in files:
@@ -457,7 +457,7 @@ def upload_plant_images(id):
 @admin_bp.route("/plants/<int:id>/images/delete", methods=["POST"])
 @staff_required
 def delete_plant_image(id):
-    plant = Plant.query.get_or_404(id)
+    plant = db.get_or_404(Plant, id)
     filename = request.form.get("filename")
     file_path = os.path.join("static", "images", filename) if filename else None
 
@@ -473,7 +473,7 @@ def delete_plant_image(id):
 @admin_bp.route("/plants/<int:id>/pots/<int:pot_id>/update", methods=["POST"])
 @staff_required
 def update_pot(id, pot_id):
-    plant_pot = PlantPot.query.get_or_404((id, pot_id))
+    plant_pot = db.get_or_404(PlantPot, (id, pot_id))
     stock_qty = request.form.get("stock_qty", type=int)
     price = request.form.get("price")
 
@@ -492,10 +492,9 @@ def update_pot(id, pot_id):
 @admin_bp.route("/plants/<int:id>/images/reorder", methods=["POST"])
 @staff_required
 def reorder_plant_images(id):
-    plant = Plant.query.get_or_404(id)
+    plant = db.get_or_404(Plant, id)
     ordered = request.form.getlist("images[]")
     existing = set(plant.images or [])
     plant.images = [f for f in ordered if f in existing]
     db.session.commit()
     return redirect(url_for("admin.plant_detail", id=id))
-

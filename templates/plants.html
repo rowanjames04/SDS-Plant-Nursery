@@ -28,7 +28,7 @@
             <input type="text" name="q" value="{{ search_query }}" placeholder="Search plants…" aria-label="Search plants">
             <button type="submit">Search</button>
             {% if search_query %}
-                <a class="button-secondary" href="{{ url_for('plants_index', **({'category': list(active_categories)} if active_categories else {})) }}">Clear</a>
+                <a class="button-secondary" href="{{ url_for('plants_index', category=active_category_ids) if active_category_ids else url_for('plants_index') }}">Clear</a>
             {% endif %}
         </form>
 

@@ -4,8 +4,8 @@ import math
 import urllib.parse
 import urllib.request
 from collections import Counter
-from datetime import datetime
-from decimal import Decimal
+from datetime import UTC, datetime
+from decimal import Decimal, ROUND_HALF_UP
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData, inspect, text, func
@@ -78,9 +78,14 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
+
+def utc_now():
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 from models import Cart, CartItem, Category, Order, OrderItem, Plant, PlantPot, Pot, Species, User, UserAddress, Variety, Wishlist
 from admin import admin_bp
@@ -157,8 +162,8 @@ def decimal_price(value):
     if value is None:
         return Decimal("0.00")
     if isinstance(value, Decimal):
-        return value.quantize(Decimal("0.01"))
-    return Decimal(str(value)).quantize(Decimal("0.01"))
+        return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 def build_cart_summary(cart):
@@ -441,8 +446,8 @@ def sync_payment_pending_order(user, cart, delivery_method, address=None, delive
     order.subtotal_amount = subtotal
     order.delivery_fee = delivery_fee
     order.total_amount = subtotal + delivery_fee
-    order.updated_at = datetime.utcnow()
-    cart.updated_at = datetime.utcnow()
+    order.updated_at = utc_now()
+    cart.updated_at = utc_now()
     return order
 
 
@@ -470,7 +475,7 @@ def fulfill_stripe_checkout_session(session_id, session=None):
     if not order_id:
         raise ValueError("Stripe session is missing order metadata.")
 
-    order = Order.query.get(int(order_id))
+    order = db.session.get(Order, int(order_id))
     if order is None:
         raise ValueError("Order for Stripe session was not found.")
 
@@ -503,10 +508,10 @@ def fulfill_stripe_checkout_session(session_id, session=None):
     order.stripe_payment_intent_id = session_value(session, "payment_intent")
     order.payment_status = "paid"
     order.status = "preparing"
-    order.updated_at = datetime.utcnow()
+    order.updated_at = utc_now()
     if order.cart:
         order.cart.status = "ordered"
-        order.cart.updated_at = datetime.utcnow()
+        order.cart.updated_at = utc_now()
     db.session.commit()
     return order
 
@@ -517,17 +522,17 @@ def mark_stripe_checkout_session_failed(session):
     if not order_id:
         return None
 
-    order = Order.query.get(int(order_id))
+    order = db.session.get(Order, int(order_id))
     if order is None or order.payment_status == "paid":
         return order
 
     order.stripe_checkout_session_id = session_value(session, "id", order.stripe_checkout_session_id)
     order.stripe_payment_intent_id = session_value(session, "payment_intent")
     order.payment_status = "failed"
-    order.updated_at = datetime.utcnow()
+    order.updated_at = utc_now()
     if order.cart:
         order.cart.status = "active"
-        order.cart.updated_at = datetime.utcnow()
+        order.cart.updated_at = utc_now()
     db.session.commit()
     return order
 
@@ -538,16 +543,16 @@ def expire_stripe_checkout_session(session):
     if not order_id:
         return None
 
-    order = Order.query.get(int(order_id))
+    order = db.session.get(Order, int(order_id))
     if order is None or order.payment_status == "paid":
         return order
 
     order.stripe_checkout_session_id = session_value(session, "id", order.stripe_checkout_session_id)
     order.payment_status = "expired"
-    order.updated_at = datetime.utcnow()
+    order.updated_at = utc_now()
     if order.cart:
         order.cart.status = "active"
-        order.cart.updated_at = datetime.utcnow()
+        order.cart.updated_at = utc_now()
     db.session.commit()
     return order
 
@@ -566,7 +571,7 @@ def create_stripe_checkout_session_for_order(order):
     session = create_checkout_session(order)
     order.stripe_checkout_session_id = session_value(session, "id")
     if order.cart:
-        order.cart.updated_at = datetime.utcnow()
+        order.cart.updated_at = utc_now()
     return session
 
 
@@ -827,6 +832,7 @@ def plants_index():
         varieties=varieties,
         cat_counts=cat_counts,
         active_categories=active_categories,
+        active_category_ids=sorted(active_categories),
         toggle_category_url=toggle_category_url,
         search_query=search_query,
         total_plants=len(all_plants),
@@ -1007,7 +1013,7 @@ def add_to_cart():
             )
         )
 
-    cart.updated_at = datetime.utcnow()
+    cart.updated_at = utc_now()
     db.session.commit()
     flash(f"{plant.common_name} added to your cart.", "success")
 
@@ -1047,7 +1053,7 @@ def update_cart_item(item_id):
         else:
             item.quantity = quantity
 
-    cart.updated_at = datetime.utcnow()
+    cart.updated_at = utc_now()
     db.session.commit()
     return redirect(url_for("cart"))
 
@@ -1089,7 +1095,7 @@ def update_cart():
             changed_any = True
 
     if changed_any:
-        cart.updated_at = datetime.utcnow()
+        cart.updated_at = utc_now()
         db.session.commit()
         if removed_any:
             flash("Cart updated. Items with zero quantity were removed.", "success")
@@ -1288,7 +1294,7 @@ def stripe_webhook():
 @login_required
 def order_confirmation(order_id):
     if current_user.is_staff:
-        order = Order.query.get_or_404(order_id)
+        order = db.get_or_404(Order, order_id)
     else:
         order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
     if order.payment_status != "paid":
@@ -1338,10 +1344,10 @@ def register():
 
 @app.route("/plants/<int:id>")
 def plant_detail(id):
-    plant = Plant.query.get_or_404(id)
-    category = Category.query.get(plant.category_id) if plant.category_id else None
-    species = Species.query.get(plant.species_id) if plant.species_id else None
-    variety = Variety.query.get(plant.variety_id) if plant.variety_id else None
+    plant = db.get_or_404(Plant, id)
+    category = db.session.get(Category, plant.category_id) if plant.category_id else None
+    species = db.session.get(Species, plant.species_id) if plant.species_id else None
+    variety = db.session.get(Variety, plant.variety_id) if plant.variety_id else None
     plant_pots = PlantPot.query.filter_by(plant_id=id).order_by(PlantPot.pot_id).all()
     return render_template(
         'plant_detail.html',
