@@ -14,12 +14,27 @@
         <div class="page-header">
             <p class="page-header__eyebrow">❁ &ensp; grown with care</p>
             <h1>Our Plants</h1>
-            <p class="muted">{{ plants|length }} variet{% if plants|length != 1 %}ies{% else %}y{% endif %} ready to grow. Find what suits your space.</p>
+            {% if search_query %}
+                <p class="muted">{{ plants|length }} result{% if plants|length != 1 %}s{% endif %} for &ldquo;{{ search_query }}&rdquo;.</p>
+            {% else %}
+                <p class="muted">{{ total_plants }} variet{% if total_plants != 1 %}ies{% else %}y{% endif %} ready to grow. Find what suits your space.</p>
+            {% endif %}
         </div>
+
+        <form class="plants-search-form" method="get" action="{{ url_for('plants_index') }}">
+            {% for cat_id in active_categories %}
+                <input type="hidden" name="category" value="{{ cat_id }}">
+            {% endfor %}
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search plants…" aria-label="Search plants">
+            <button type="submit">Search</button>
+            {% if search_query %}
+                <a class="button-secondary" href="{{ url_for('plants_index', **({'category': list(active_categories)} if active_categories else {})) }}">Clear</a>
+            {% endif %}
+        </form>
 
         {% if categories %}
         <div class="filter-bar">
-            <a class="filter-chip {% if not active_categories %}filter-chip--active{% endif %}" href="{{ url_for('plants_index') }}">All <span class="filter-chip__count">{{ plants|length if not active_categories else (cat_counts.values()|sum) }}</span></a>
+            <a class="filter-chip {% if not active_categories %}filter-chip--active{% endif %}" href="{{ url_for('plants_index', q=search_query) if search_query else url_for('plants_index') }}">All</a>
             {% for cat in categories %}
             {% if cat_counts.get(cat.id, 0) > 0 %}
             <a class="filter-chip {% if cat.id in active_categories %}filter-chip--active{% endif %}" href="{{ toggle_category_url(active_categories, cat.id) }}">{{ cat.name }} <span class="filter-chip__count">{{ cat_counts.get(cat.id, 0) }}</span></a>
@@ -60,7 +75,9 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="muted">No plants found.</p>
+            <p class="muted">
+                {% if search_query %}No plants match &ldquo;{{ search_query }}&rdquo;.{% else %}No plants found.{% endif %}
+            </p>
         {% endif %}
     </main>
 </body>
