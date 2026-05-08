@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Orders | Little Jill's Plant Nursery</title>
         <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
 
 <body>
@@ -24,19 +24,27 @@
         {% if orders %}
             <div class="orderslist">
                 {% for order in orders %}
+                    {% if order.status == 'delivered' %}
+                        {% set status_class = 'delivered' %}
+                    {% elif order.status == 'cancelled' %}
+                        {% set status_class = 'cancelled' %}
+                    {% else %}
+                        {% set status_class = 'pending' %}
+                    {% endif %}
+
                     <article class="orderhistory">
                         <div class="orderheading">
                             <div>
                                 <h3>Order #{{ order.id }}</h3>
                                 <p class="muted">{{ order.created_at.strftime('%d %b %Y') }}</p>
                             </div>
-                            <span class="status {{ 'delivered' if order.status == 'completed' else 'cancelled' if order.status == 'cancelled' else 'pending' }}">{{ order.status|title }}</span>
+                            <span class="status {{ status_class }}">{{ order.status|replace('_', ' ')|title }}</span>
                         </div>
 
                         <div class="order-meta-grid">
                             <div>
-                                <span class="meta-label">Payment</span>
-                                <strong>{{ order.payment_status|default('Pending', true)|title }}</strong>
+                                <span class="meta-label">Delivery</span>
+                                <strong>{{ order.delivery_method|title if order.delivery_method else '—' }}</strong>
                             </div>
                             <div>
                                 <span class="meta-label">Items</span>
@@ -48,17 +56,35 @@
                             </div>
                         </div>
 
+                        {% if order.delivery_method == 'delivery' and order.delivery_formatted_address %}
+                            <p class="muted" style="margin:0 0 12px;font-size:0.88rem;">
+                                Deliver to {{ order.delivery_formatted_address }}
+                            </p>
+                        {% endif %}
+
                         <div class="orderitems">
                             <strong>Items</strong>
                             <ul>
                                 {% for item in order.items %}
                                     <li>
-                                        <span>{{ item.quantity }} x {{ item.plant_name_snapshot }}{% if item.pot_size_snapshot %} ({{ item.pot_size_snapshot }}mm){% endif %}</span>
+                                        <span>{{ item.quantity }} &times; {{ item.plant_name_snapshot }}{% if item.pot_size_snapshot %} ({{ item.pot_size_snapshot }}mm){% endif %}</span>
                                         <span>${{ '%.2f'|format(item.unit_price_snapshot * item.quantity) }}</span>
                                     </li>
                                 {% endfor %}
+                                {% if order.delivery_fee and order.delivery_fee > 0 %}
+                                    <li class="muted">
+                                        <span>Delivery fee</span>
+                                        <span>${{ '%.2f'|format(order.delivery_fee) }}</span>
+                                    </li>
+                                {% endif %}
                             </ul>
                         </div>
+
+                        <a class="button-link button-link--sm button-secondary"
+                           href="{{ url_for('order_confirmation', order_id=order.id) }}"
+                           style="margin-top:14px;width:auto;">
+                            View details
+                        </a>
                     </article>
                 {% endfor %}
             </div>
