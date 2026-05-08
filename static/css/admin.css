@@ -1,3 +1,7 @@
+.site-header--admin .site-header__inner {
+    max-width: none;
+}
+
 .admin-wrapper {
     display: grid;
     grid-template-columns: 220px 1fr;
@@ -546,6 +550,70 @@
     display: none;
 }
 
+.admin-order-status-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.admin-order-status-form select {
+    padding: 5px 8px;
+    border: 1px solid #c7d6c3;
+    border-radius: 6px;
+    font-size: 0.84rem;
+    background: #fff;
+    cursor: pointer;
+}
+
+.admin-orders-table {
+    table-layout: fixed;
+}
+
+.admin-orders-table th:first-child,
+.admin-orders-table td:first-child {
+    width: 56px;
+}
+
+.admin-orders-table th:nth-child(3),
+.admin-orders-table td:nth-child(3),
+.admin-orders-table th:nth-child(4),
+.admin-orders-table td:nth-child(4),
+.admin-orders-table th:nth-child(5),
+.admin-orders-table td:nth-child(5) {
+    width: 110px;
+}
+
+.admin-orders-table th:nth-child(6),
+.admin-orders-table td:nth-child(6) {
+    width: 110px;
+}
+
+.admin-orders-table th:last-child,
+.admin-orders-table td:last-child {
+    width: 300px;
+}
+
+.table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 900px) {
+    .admin-orders-table th:last-child,
+    .admin-orders-table td:last-child {
+        width: auto;
+    }
+
+    .admin-table-actions {
+        flex-wrap: wrap;
+    }
+
+    .admin-order-status-form {
+        flex-wrap: wrap;
+    }
+}
+
 @media (max-width: 720px) {
     .admin-wrapper {
         grid-template-columns: 1fr;
@@ -554,6 +622,22 @@
     .admin-sidebar {
         position: static;
         height: auto;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-bottom: 1px solid #2e2e2e;
+    }
+
+    .admin-nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        padding: 6px 8px;
+        gap: 4px;
+        overflow-x: auto;
+    }
+
+    .admin-nav__item {
+        flex-shrink: 0;
+        white-space: nowrap;
     }
 
     .admin-field-grid--two,
@@ -609,5 +693,9 @@
 
     .admin-table-actions {
         justify-content: flex-start;
+    }
+
+    .admin-search-form--inline {
+        grid-template-columns: 1fr auto auto;
     }
 }

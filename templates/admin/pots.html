@@ -26,6 +26,7 @@
 
 <section class="card card--soft">
     {% if pots %}
+    <div class="table-scroll">
     <table class="data-table admin-pots-table">
         <thead>
             <tr>
@@ -47,10 +48,10 @@
                     <div class="admin-table-actions">
                         <form id="pot-update-{{ pot.id }}" method="post" action="{{ url_for('admin.edit_pot', id=pot.id) }}"></form>
                         <button class="button-link button-link--sm button-secondary taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
-                        <button class="button-link button-link--sm button-secondary taxonomy-edit-field" form="pot-update-{{ pot.id }}" type="submit">Save</button>
+                        <button class="button-link button-link--sm taxonomy-edit-field" form="pot-update-{{ pot.id }}" type="submit">Save</button>
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
                         <form method="post" action="{{ url_for('admin.delete_pot', id=pot.id) }}" onsubmit="return confirm('Delete {{ pot.size }}mm pot size?');">
-                            <button class="button-link button-link--sm" type="submit">Delete</button>
+                            <button class="button-link button-link--sm button-link--danger" type="submit">Delete</button>
                         </form>
                     </div>
                 </td>
@@ -58,6 +59,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
     <div class="empty-state">
         {% if search_query %}

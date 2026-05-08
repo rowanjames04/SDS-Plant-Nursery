@@ -762,6 +762,7 @@ def home():
 @app.route("/plants")
 def plants_index():
     active_categories = set(request.args.getlist('category', type=int))
+    search_query = request.args.get('q', '').strip()
 
     categories = Category.query.order_by(Category.name).all()
     species_list = Species.query.order_by(Species.name).all()
@@ -783,6 +784,14 @@ def plants_index():
     q = Plant.query
     if active_categories:
         q = q.filter(Plant.category_id.in_(active_categories))
+    if search_query:
+        like = f'%{search_query}%'
+        q = q.filter(
+            db.or_(
+                Plant.common_name.ilike(like),
+                Plant.scientific_name.ilike(like),
+            )
+        )
 
     plant_rows = []
     for plant in q.order_by(Plant.common_name).all():
@@ -804,10 +813,11 @@ def plants_index():
             cats.discard(cat_id)
         else:
             cats.add(cat_id)
-        if cats:
-            params = '&'.join(f'category={c}' for c in sorted(cats))
-            return url_for('plants_index') + '?' + params
-        return url_for('plants_index')
+        parts = []
+        if search_query:
+            parts.append(f'q={urllib.parse.quote_plus(search_query)}')
+        parts.extend(f'category={c}' for c in sorted(cats))
+        return url_for('plants_index') + ('?' + '&'.join(parts) if parts else '')
 
     return render_template(
         "plants.html",
@@ -818,6 +828,8 @@ def plants_index():
         cat_counts=cat_counts,
         active_categories=active_categories,
         toggle_category_url=toggle_category_url,
+        search_query=search_query,
+        total_plants=len(all_plants),
     )
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -1275,7 +1287,10 @@ def stripe_webhook():
 @app.route("/orders/<int:order_id>/confirmation")
 @login_required
 def order_confirmation(order_id):
-    order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
+    if current_user.is_staff:
+        order = Order.query.get_or_404(order_id)
+    else:
+        order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
     if order.payment_status != "paid":
         flash("That order has not been paid for yet. Please complete checkout first.", "error")
         return redirect(url_for("checkout"))

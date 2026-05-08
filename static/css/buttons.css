@@ -51,3 +51,11 @@ button:disabled {
 .button-secondary:hover {
     background: #eef5eb;
 }
+
+.button-link--danger {
+    background: #b91c1c;
+}
+
+.button-link--danger:hover {
+    background: #991b1b;
+}

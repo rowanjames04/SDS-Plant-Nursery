@@ -29,6 +29,7 @@
 
 <section class="card card--soft">
     {% if plants %}
+    <div class="table-scroll">
     <table class="data-table admin-plants-table">
         <thead>
             <tr>
@@ -63,7 +64,7 @@
                               action="{{ url_for('admin.delete_plant', id=plant.id) }}"
                               style="display:inline;"
                               onsubmit="return confirm('Delete {{ plant.common_name }}? This cannot be undone.');">
-                            <button class="button-link button-link--sm button-secondary"
+                            <button class="button-link button-link--sm button-link--danger"
                                     type="submit"
                                     style="width:auto;">
                                 Delete
@@ -75,6 +76,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
     <div class="empty-state">
         {% if search_query %}

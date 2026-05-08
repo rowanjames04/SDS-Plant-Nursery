@@ -169,6 +169,7 @@
         </div>
     </div>
     {% if plant.plant_pots %}
+    <div class="table-scroll">
     <table class="data-table admin-inventory-table">
         <thead>
             <tr>
@@ -198,7 +199,7 @@
                     <div class="admin-table-actions">
                         <button form="{{ form_id }}" class="button-link button-link--sm" type="submit">Save</button>
                         <form method="post" action="{{ url_for('admin.unassign_pot', id=plant.id, pot_id=pp.pot_id) }}" onsubmit="return confirm('Remove this pot size?');">
-                            <button class="button-link button-link--sm button-secondary" type="submit">Remove</button>
+                            <button class="button-link button-link--sm button-link--danger" type="submit">Remove</button>
                         </form>
                     </div>
                 </td>
@@ -206,6 +207,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% for pp in plant.plant_pots %}
     <form id="update-pot-{{ pp.pot_id }}" method="post" action="{{ url_for('admin.update_pot', id=plant.id, pot_id=pp.pot_id) }}"></form>
     {% endfor %}

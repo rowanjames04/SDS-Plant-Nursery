@@ -196,3 +196,57 @@
     display: flex;
     gap: 8px;
 }
+
+.plants-search-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.plants-search-form input[type="text"] {
+    flex: 1;
+    min-width: 180px;
+    max-width: 360px;
+    padding: 9px 14px;
+    border: 1px solid #c7d6c3;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.plants-search-form input[type="text"]:focus {
+    border-color: #2d5a27;
+    box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.12);
+}
+
+.plants-search-form button {
+    padding: 9px 20px;
+    background: #2d5a27;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.plants-search-form button:hover {
+    background: #23471f;
+}
+
+.plants-search-form .button-secondary {
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: 1px solid #c7d6c3;
+    background: #fff;
+    color: #23471f;
+    font-weight: 600;
+}
+
+.plants-search-form .button-secondary:hover {
+    background: #eef5eb;
+}

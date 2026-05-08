@@ -1,86 +1,84 @@
 {% extends 'admin/_base.html' %}
-{% block title %}New Plant{% endblock %}
+{% block title %}Orders{% endblock %}
 
 {% block content %}
-
-
-<div class="adminsordercontainer">
-
+<header class="admin-page-header">
     <div>
-        <h2 class="adminsordertitle">All Orders</h2>
-
-        <div class="ordersfilters">
-            <input type="text" placeholder="Search orders...">
-            <select>
-                <option>All Status</option>
-                <option>Pending</option>
-                <option>Delivered</option>
-                <option>Cancelled</option>
-            </select>
-        </div>
+        <h1>Orders</h1>
+        <p class="muted">{{ orders|length }} order{% if orders|length != 1 %}s{% endif %} total.</p>
     </div>
+</header>
 
-    <table class="adminsordertable">
+<section class="card card--soft">
+    {% if orders %}
+    <div class="table-scroll">
+    <table class="data-table admin-orders-table">
         <thead>
             <tr>
-                <th>Order ID</th>
+                <th>#</th>
                 <th>Customer</th>
                 <th>Date</th>
+                <th>Delivery</th>
                 <th>Total</th>
-                <th>Payment</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
-
         <tbody>
+            {% for order in orders %}
+                {% if order.status == 'delivered' %}
+                    {% set status_class = 'active' %}
+                {% elif order.status == 'cancelled' %}
+                    {% set status_class = 'cancelled' %}
+                {% else %}
+                    {% set status_class = 'pending' %}
+                {% endif %}
 
             <tr>
-                <td>#N/A</td>
-                <td>Name</td>
-                <td>Date</td>
-                <td>Price</td>
-                <td>Payment</td>
-                <td><span class="adminsstatus adminsdelivered">Delivered</span></td>
+                <td>#{{ order.id }}</td>
                 <td>
-                    <button class="adminsviewbtn">View</button>
-                    <button class="adminseditbtn">Update</button>
-                    <button class="adminsdeletebtn">Delete</button>
+                    <div>{{ order.user.full_name }}</div>
+                    <div class="muted" style="font-size:0.82rem;">{{ order.user.email }}</div>
+                </td>
+                <td style="white-space:nowrap;">{{ order.created_at.strftime('%d %b %Y') }}</td>
+                <td>{{ order.delivery_method|title if order.delivery_method else '—' }}</td>
+                <td style="white-space:nowrap;">${{ '%.2f'|format(order.total_amount) }}</td>
+                <td><span class="status {{ status_class }}">{{ order.status|replace('_', ' ')|title }}</span></td>
+                <td>
+                    <div class="admin-table-actions">
+                        <a class="button-link button-link--sm"
+                           href="{{ url_for('order_confirmation', order_id=order.id) }}"
+                           style="width:auto;">
+                            View
+                        </a>
+
+                        <form method="post"
+                              action="{{ url_for('admin.update_order_status', id=order.id) }}"
+                              class="admin-order-status-form">
+                            <select name="status" aria-label="Order status">
+                                {% for s in ['preparing', 'dispatched', 'delivered', 'cancelled'] %}
+                                <option value="{{ s }}" {{ 'selected' if order.status == s }}>{{ s|title }}</option>
+                                {% endfor %}
+                            </select>
+                            <button class="button-link button-link--sm button-secondary" type="submit">Update</button>
+                        </form>
+
+                        <form method="post"
+                              action="{{ url_for('admin.delete_order', id=order.id) }}"
+                              onsubmit="return confirm('Delete order #{{ order.id }}? This cannot be undone.');">
+                            <button class="button-link button-link--sm button-link--danger" type="submit">Delete</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
-
-            <tr>
-                <td>#N/A</td>
-                <td>Name</td>
-                <td>Date</td>
-                <td>Price</td>
-                <td>Payment</td>
-                <td><span class="adminsstatus adminspending">Pending</span></td>
-                <td>
-                    <button class="adminsviewbtn">View</button>
-                    <button class="adminseditbtn">Update</button>
-                    <button class="adminsdeletebtn">Delete</button>
-                </td>
-            </tr>
-
-            <tr>
-                <td>#N/A</td>
-                <td>Name</td>
-                <td>Date</td>
-                <td>Price</td>
-                <td>Payment</td>
-                <td><span class="adminsstatus adminscancelled">Cancelled</span></td>
-                <td>
-                    <button class="adminsviewbtn">View</button>
-                    <button class="adminseditbtn">Update</button>
-                    <button class="adminsdeletebtn">Delete</button>
-                </td>
-            </tr>
-
+            {% endfor %}
         </tbody>
     </table>
-
-</div>
-
-</body>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-state__msg">No orders yet.</p>
+    </div>
+    {% endif %}
+</section>
 {% endblock %}
