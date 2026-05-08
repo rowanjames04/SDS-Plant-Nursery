@@ -546,6 +546,31 @@
     display: none;
 }
 
+.admin-orders-table {
+    table-layout: fixed;
+}
+
+.admin-orders-table th:first-child,
+.admin-orders-table td:first-child {
+    width: 56px;
+}
+
+.admin-orders-table th:nth-child(3),
+.admin-orders-table td:nth-child(3),
+.admin-orders-table th:nth-child(4),
+.admin-orders-table td:nth-child(4),
+.admin-orders-table th:nth-child(5),
+.admin-orders-table td:nth-child(5) {
+    width: 110px;
+}
+
+.admin-orders-table th:nth-child(6),
+.admin-orders-table td:nth-child(6),
+.admin-orders-table th:nth-child(7),
+.admin-orders-table td:nth-child(7) {
+    width: 130px;
+}
+
 @media (max-width: 720px) {
     .admin-wrapper {
         grid-template-columns: 1fr;
