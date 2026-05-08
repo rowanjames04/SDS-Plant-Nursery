@@ -332,8 +332,32 @@ def delete_pot(id):
 @admin_bp.route("/orders")
 @staff_required
 def orders():
-    orders = Order.query.order_by(Order.id).all()
+    orders = Order.query.order_by(Order.id.desc()).all()
     return render_template("admin/orders.html", orders=orders)
+
+
+@admin_bp.route("/orders/<int:id>/status", methods=["POST"])
+@staff_required
+def update_order_status(id):
+    order = Order.query.get_or_404(id)
+    status = request.form.get("status", "").strip()
+    if status in {"preparing", "dispatched", "delivered", "cancelled"}:
+        order.status = status
+        db.session.commit()
+        flash(f"Order #{order.id} updated to {status}.", "success")
+    else:
+        flash("Invalid status.", "error")
+    return redirect(url_for("admin.orders"))
+
+
+@admin_bp.route("/orders/<int:id>/delete", methods=["POST"])
+@staff_required
+def delete_order(id):
+    order = Order.query.get_or_404(id)
+    db.session.delete(order)
+    db.session.commit()
+    flash(f"Order #{id} deleted.", "success")
+    return redirect(url_for("admin.orders"))
 
 
 @admin_bp.route("/categories")

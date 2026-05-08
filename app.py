@@ -1287,7 +1287,10 @@ def stripe_webhook():
 @app.route("/orders/<int:order_id>/confirmation")
 @login_required
 def order_confirmation(order_id):
-    order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
+    if current_user.is_staff:
+        order = Order.query.get_or_404(order_id)
+    else:
+        order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
     if order.payment_status != "paid":
         flash("That order has not been paid for yet. Please complete checkout first.", "error")
         return redirect(url_for("checkout"))
