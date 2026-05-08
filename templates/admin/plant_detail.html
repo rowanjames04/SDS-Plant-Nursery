@@ -169,6 +169,7 @@
         </div>
     </div>
     {% if plant.plant_pots %}
+    <div class="table-scroll">
     <table class="data-table admin-inventory-table">
         <thead>
             <tr>
@@ -206,6 +207,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% for pp in plant.plant_pots %}
     <form id="update-pot-{{ pp.pot_id }}" method="post" action="{{ url_for('admin.update_pot', id=plant.id, pot_id=pp.pot_id) }}"></form>
     {% endfor %}

@@ -594,6 +594,26 @@
     width: 300px;
 }
 
+.table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 900px) {
+    .admin-orders-table th:last-child,
+    .admin-orders-table td:last-child {
+        width: auto;
+    }
+
+    .admin-table-actions {
+        flex-wrap: wrap;
+    }
+
+    .admin-order-status-form {
+        flex-wrap: wrap;
+    }
+}
+
 @media (max-width: 720px) {
     .admin-wrapper {
         grid-template-columns: 1fr;
@@ -602,6 +622,22 @@
     .admin-sidebar {
         position: static;
         height: auto;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-bottom: 1px solid #2e2e2e;
+    }
+
+    .admin-nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        padding: 6px 8px;
+        gap: 4px;
+        overflow-x: auto;
+    }
+
+    .admin-nav__item {
+        flex-shrink: 0;
+        white-space: nowrap;
     }
 
     .admin-field-grid--two,
@@ -657,5 +693,9 @@
 
     .admin-table-actions {
         justify-content: flex-start;
+    }
+
+    .admin-search-form--inline {
+        grid-template-columns: 1fr auto auto;
     }
 }

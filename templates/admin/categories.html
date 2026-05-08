@@ -32,6 +32,7 @@
         </div>
     </div>
     {% if categories %}
+    <div class="table-scroll">
     <table class="data-table taxonomy-table">
         <thead>
             <tr>
@@ -70,6 +71,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
     <div class="empty-state">
         {% if search_query %}
@@ -100,6 +102,7 @@
         </div>
     </div>
     {% if species %}
+    <div class="table-scroll">
     <table class="data-table taxonomy-table">
         <thead>
             <tr>
@@ -138,6 +141,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
     <div class="empty-state">
         {% if search_query %}
@@ -168,6 +172,7 @@
         </div>
     </div>
     {% if varieties %}
+    <div class="table-scroll">
     <table class="data-table taxonomy-table">
         <thead>
             <tr>
@@ -206,6 +211,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
     <div class="empty-state">
         {% if search_query %}

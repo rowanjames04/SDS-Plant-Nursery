@@ -29,6 +29,7 @@
 
 <section class="card card--soft">
     {% if plants %}
+    <div class="table-scroll">
     <table class="data-table admin-plants-table">
         <thead>
             <tr>
@@ -75,6 +76,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
     <div class="empty-state">
         {% if search_query %}
