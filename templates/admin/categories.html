@@ -68,7 +68,7 @@
                 <td>
                     <div class="admin-table-actions">
                         <form id="category-update-{{ c.id }}" method="post" action="{{ url_for('admin.update_category', id=c.id) }}"></form>
-                        <button class="button-link button-link--sm button-secondary taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
+                        <button class="button-link button-link--sm taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
                         <button class="button-link button-link--sm taxonomy-edit-field" form="category-update-{{ c.id }}" type="submit">Save</button>
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
                         <form method="post" action="{{ url_for('admin.delete_category', id=c.id) }}" onsubmit="return confirm({{ ('Delete ' ~ c.name ~ '?')|tojson }});">
@@ -138,7 +138,7 @@
                 <td>
                     <div class="admin-table-actions">
                         <form id="species-update-{{ s.id }}" method="post" action="{{ url_for('admin.update_species', id=s.id) }}"></form>
-                        <button class="button-link button-link--sm button-secondary taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
+                        <button class="button-link button-link--sm taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field" form="species-update-{{ s.id }}" type="submit">Save</button>
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
                         <form method="post" action="{{ url_for('admin.delete_species', id=s.id) }}" onsubmit="return confirm({{ ('Delete ' ~ s.name ~ '?')|tojson }});">
@@ -208,7 +208,7 @@
                 <td>
                     <div class="admin-table-actions">
                         <form id="variety-update-{{ v.id }}" method="post" action="{{ url_for('admin.update_variety', id=v.id) }}"></form>
-                        <button class="button-link button-link--sm button-secondary taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
+                        <button class="button-link button-link--sm taxonomy-display taxonomy-edit-toggle" type="button">Edit</button>
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field" form="variety-update-{{ v.id }}" type="submit">Save</button>
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
                         <form method="post" action="{{ url_for('admin.delete_variety', id=v.id) }}" onsubmit="return confirm({{ ('Delete ' ~ v.name ~ '?')|tojson }});">
