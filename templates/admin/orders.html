@@ -53,20 +53,19 @@
                         </a>
 
                         <form method="post"
+                              action="{{ url_for('admin.delete_order', id=order.id) }}"
+                              onsubmit="return confirm('Delete order #{{ order.id }}? This cannot be undone.');">
+                            <button class="button-link button-link--sm button-link--danger" type="submit">Delete</button>
+                        </form>
+
+                        <form method="post"
                               action="{{ url_for('admin.update_order_status', id=order.id) }}"
                               class="admin-order-status-form">
-                            <select name="status" aria-label="Order status">
+                            <select name="status" aria-label="Order status" onchange="this.form.submit()">
                                 {% for s in ['preparing', 'dispatched', 'delivered', 'cancelled'] %}
                                 <option value="{{ s }}" {{ 'selected' if order.status == s }}>{{ s|title }}</option>
                                 {% endfor %}
                             </select>
-                            <button class="button-link button-link--sm button-secondary" type="submit">Update</button>
-                        </form>
-
-                        <form method="post"
-                              action="{{ url_for('admin.delete_order', id=order.id) }}"
-                              onsubmit="return confirm('Delete order #{{ order.id }}? This cannot be undone.');">
-                            <button class="button-link button-link--sm button-link--danger" type="submit">Delete</button>
                         </form>
                     </div>
                 </td>
