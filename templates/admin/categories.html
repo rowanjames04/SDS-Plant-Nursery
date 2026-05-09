@@ -142,7 +142,7 @@
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field" form="species-update-{{ s.id }}" type="submit">Save</button>
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
                         <form method="post" action="{{ url_for('admin.delete_species', id=s.id) }}" onsubmit="return confirm({{ ('Delete ' ~ s.name ~ '?')|tojson }});">
-                            <button class="button-link button-link--sm" type="submit">Delete</button>
+                            <button class="button-link button-link--sm button-link--danger" type="submit">Delete</button>
                         </form>
                     </div>
                 </td>
@@ -212,7 +212,7 @@
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field" form="variety-update-{{ v.id }}" type="submit">Save</button>
                         <button class="button-link button-link--sm button-secondary taxonomy-edit-field taxonomy-cancel-toggle" type="button">Cancel</button>
                         <form method="post" action="{{ url_for('admin.delete_variety', id=v.id) }}" onsubmit="return confirm({{ ('Delete ' ~ v.name ~ '?')|tojson }});">
-                            <button class="button-link button-link--sm" type="submit">Delete</button>
+                            <button class="button-link button-link--sm button-link--danger" type="submit">Delete</button>
                         </form>
                     </div>
                 </td>
