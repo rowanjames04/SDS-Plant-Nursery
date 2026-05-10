@@ -566,6 +566,46 @@
     cursor: pointer;
 }
 
+.admin-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.stat-card--highlight {
+    border-color: #2d5a27;
+    background: #f0f6ef;
+}
+
+.stat-card--highlight .stat-card__value {
+    color: #2d5a27;
+}
+
+@media (max-width: 900px) {
+    .admin-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.taxonomy-thumb-cell {
+    width: 48px;
+    padding-right: 0;
+}
+
+.taxonomy-thumb {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+    border: 1px solid #d8e3d5;
+}
+
+.taxonomy-thumb--empty {
+    background: #eef3ed;
+}
+
 .admin-orders-table {
     table-layout: fixed;
 }

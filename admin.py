@@ -98,14 +98,45 @@ def staff_required(f):
 @admin_bp.route("/home")
 @staff_required
 def home():
-    total_orders = Order.query.count()
-    pending_orders = Order.query.filter_by(status="pending").count()
+    from sqlalchemy import func as sqlfunc
+    from models import User
+
+    total_orders = Order.query.filter_by(payment_status="paid").count()
+    active_orders = Order.query.filter(
+        Order.payment_status == "paid",
+        Order.status.in_(["preparing", "dispatched"])
+    ).count()
     total_plants = Plant.query.count()
+    total_customers = User.query.filter_by(is_staff=False).count()
+
+    revenue_row = db.session.query(sqlfunc.sum(Order.total_amount)).filter_by(payment_status="paid").scalar()
+    total_revenue = revenue_row or 0
+
+    low_stock = (
+        PlantPot.query
+        .filter(PlantPot.stock_qty < 5)
+        .order_by(PlantPot.stock_qty)
+        .limit(8)
+        .all()
+    )
+
+    recent_orders = (
+        Order.query
+        .filter_by(payment_status="paid")
+        .order_by(Order.created_at.desc())
+        .limit(6)
+        .all()
+    )
+
     return render_template(
         "admin/home.html",
         total_orders=total_orders,
-        pending_orders=pending_orders,
+        active_orders=active_orders,
         total_plants=total_plants,
+        total_customers=total_customers,
+        total_revenue=total_revenue,
+        low_stock=low_stock,
+        recent_orders=recent_orders,
     )
 
 
@@ -387,6 +418,11 @@ def delete_order(id):
     return redirect(url_for("admin.orders"))
 
 
+def _cat_images():
+    from app import category_representative_images
+    return category_representative_images()
+
+
 @admin_bp.route("/categories")
 @staff_required
 def categories():
@@ -403,6 +439,7 @@ def categories():
         category_counts=_plant_counts_for(Plant.category_id),
         species_counts=_plant_counts_for(Plant.species_id),
         variety_counts=_plant_counts_for(Plant.variety_id),
+        cat_images=_cat_images(),
     )
 
 

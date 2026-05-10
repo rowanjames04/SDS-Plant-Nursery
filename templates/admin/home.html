@@ -11,16 +11,112 @@
 
 <div class="stat-grid">
     <div class="stat-card">
-        <div class="stat-card__value">{{ pending_orders }}</div>
-        <div class="stat-card__label">Pending orders</div>
+        <div class="stat-card__value">${{ '%.0f'|format(total_revenue) }}</div>
+        <div class="stat-card__label">Total revenue</div>
     </div>
     <div class="stat-card">
         <div class="stat-card__value">{{ total_orders }}</div>
-        <div class="stat-card__label">Total orders</div>
+        <div class="stat-card__label">Paid orders</div>
+    </div>
+    <div class="stat-card stat-card--highlight">
+        <div class="stat-card__value">{{ active_orders }}</div>
+        <div class="stat-card__label">Orders in progress</div>
     </div>
     <div class="stat-card">
         <div class="stat-card__value">{{ total_plants }}</div>
         <div class="stat-card__label">Plants in catalogue</div>
     </div>
+    <div class="stat-card">
+        <div class="stat-card__value">{{ total_customers }}</div>
+        <div class="stat-card__label">Customers</div>
+    </div>
+</div>
+
+<div class="admin-dashboard-grid">
+    <section class="card card--soft">
+        <div class="admin-card-header">
+            <div>
+                <h2>Recent orders</h2>
+                <p class="muted">Last 6 paid orders.</p>
+            </div>
+            <a class="button-link button-link--sm button-secondary" href="{{ url_for('admin.orders') }}" style="width:auto;">View all</a>
+        </div>
+        {% if recent_orders %}
+        <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                {% if order.status == 'delivered' %}
+                    {% set sc = 'active' %}
+                {% elif order.status == 'cancelled' %}
+                    {% set sc = 'cancelled' %}
+                {% else %}
+                    {% set sc = 'pending' %}
+                {% endif %}
+                <tr>
+                    <td><a href="{{ url_for('order_confirmation', order_id=order.id) }}">#{{ order.id }}</a></td>
+                    <td>{{ order.user.full_name }}</td>
+                    <td style="white-space:nowrap;">{{ order.created_at.strftime('%d %b %Y') }}</td>
+                    <td>${{ '%.2f'|format(order.total_amount) }}</td>
+                    <td><span class="status {{ sc }}">{{ order.status|replace('_',' ')|title }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="muted">No paid orders yet.</p>
+        {% endif %}
+    </section>
+
+    <section class="card card--soft">
+        <div class="admin-card-header">
+            <div>
+                <h2>Low stock</h2>
+                <p class="muted">Pot sizes with fewer than 5 units.</p>
+            </div>
+        </div>
+        {% if low_stock %}
+        <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Plant</th>
+                    <th>Pot</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pp in low_stock %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('admin.plant_detail', id=pp.plant_id) }}">{{ pp.plant.common_name }}</a>
+                    </td>
+                    <td>{{ pp.pot.size }}mm</td>
+                    <td>
+                        {% if pp.stock_qty == 0 %}
+                            <span class="status cancelled">Out of stock</span>
+                        {% else %}
+                            <span class="status pending">{{ pp.stock_qty }} left</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="muted">All stock levels are healthy.</p>
+        {% endif %}
+    </section>
 </div>
 {% endblock %}
