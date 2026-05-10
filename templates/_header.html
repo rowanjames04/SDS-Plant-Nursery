@@ -11,9 +11,6 @@
         </a>
         <div class="header-actions">
             <nav class="site-nav site-nav--primary">
-                <a class="nav-button" href="{{ url_for('home') }}">
-                    <span>Home</span>
-                </a>
                 <a class="nav-button" href="{{ url_for('plants_index') }}">
                     <span>Plants</span>
                 </a>
@@ -42,7 +39,6 @@
                     </summary>
                     <div class="account-menu__dropdown">
                         <a class="account-menu__item" href="{{ url_for('profile') }}">Profile</a>
-                        <a class="account-menu__item" href="{{ url_for('wishlist') }}">Wishlist</a>
                         <a class="account-menu__item" href="{{ url_for('logout') }}">Logout</a>
                     </div>
                 </details>

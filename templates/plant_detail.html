@@ -12,15 +12,30 @@
 
     <main class="container">
         <section class="card hero">
-            <div>
-                {% if plant.primary_image %}
-                <div class="plant-detail__image">
-                    <img src="{{ url_for('static', filename='images/' ~ plant.primary_image) }}" alt="{{ plant.common_name }}">
-                </div>
-                {% endif %}
+            <div class="hero__header">
                 <h1>{{ plant.common_name }}</h1>
                 {% if plant.scientific_name %}
                     <p><em>{{ plant.scientific_name }}</em></p>
+                {% endif %}
+            </div>
+            <div class="hero__body">
+            <div>
+                {% if plant.images %}
+                <div class="plant-detail__gallery">
+                    <div class="plant-detail__image">
+                        <img id="main-plant-img" src="{{ url_for('static', filename='images/' ~ plant.images[0]) }}" alt="{{ plant.common_name }}">
+                    </div>
+                    {% if plant.images|length > 1 %}
+                    <div class="plant-detail__thumbs">
+                        {% for img in plant.images %}
+                        <button class="plant-detail__thumb{% if loop.first %} plant-detail__thumb--active{% endif %}" type="button"
+                                data-src="{{ url_for('static', filename='images/' ~ img) }}">
+                            <img src="{{ url_for('static', filename='images/' ~ img) }}" alt="">
+                        </button>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
                 {% endif %}
                 {% if plant.description %}
                     <p>{{ plant.description }}</p>
@@ -61,6 +76,7 @@
                     <button type="submit" class="button-secondary">♡ Add to wishlist</button>
                 </form>
             </div>
+            </div>
         </section>
 
         <section class="card">
@@ -84,5 +100,14 @@
             <p><strong>Pruning:</strong> {{ plant.pruning_needs or 'Not listed' }}</p>
         </section>
     </main>
+    <script>
+        document.querySelectorAll(".plant-detail__thumb").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                document.getElementById("main-plant-img").src = btn.dataset.src;
+                document.querySelectorAll(".plant-detail__thumb").forEach(t => t.classList.remove("plant-detail__thumb--active"));
+                btn.classList.add("plant-detail__thumb--active");
+            });
+        });
+    </script>
 </body>
 </html>

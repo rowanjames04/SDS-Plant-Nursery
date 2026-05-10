@@ -21,16 +21,20 @@
     margin: 0;
 }
 
-.hero {
+.hero h1 {
+    margin-bottom: 8px;
+    font-size: 2.2rem;
+}
+
+.hero__header {
+    margin-bottom: 16px;
+}
+
+.hero__body {
     display: grid;
     grid-template-columns: 1.4fr 1fr;
     gap: 20px;
     align-items: start;
-}
-
-.hero h1 {
-    margin-bottom: 8px;
-    font-size: 2.2rem;
 }
 
 .hero-panel {
@@ -177,19 +181,55 @@
     color: #2d5a27;
 }
 
+.plant-detail__gallery {
+    margin-bottom: 16px;
+}
+
 .plant-detail__image {
     border-radius: 10px;
     overflow: hidden;
-    margin-bottom: 16px;
-    max-height: 320px;
     background: #eef5eb;
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .plant-detail__image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
+}
+
+.plant-detail__thumbs {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.plant-detail__thumb {
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    background: #eef5eb;
+    flex-shrink: 0;
+}
+
+.plant-detail__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.plant-detail__thumb--active {
+    border-color: #4a7c59;
 }
 
 .wishlist-card-actions {
