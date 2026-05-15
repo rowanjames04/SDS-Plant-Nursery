@@ -89,6 +89,19 @@
     min-width: 0;
 }
 
+.admin-content a:not(.button-link):not(.account-menu__item):not(.nav-button) {
+    color: #2d5a27;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid #a8c5a0;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.admin-content a:not(.button-link):not(.account-menu__item):not(.nav-button):hover {
+    color: #1a3a18;
+    border-bottom-color: #2d5a27;
+}
+
 .admin-plant-form {
     display: grid;
     gap: 20px;
@@ -607,31 +620,7 @@
 }
 
 .admin-orders-table {
-    table-layout: fixed;
-}
-
-.admin-orders-table th:first-child,
-.admin-orders-table td:first-child {
-    width: 56px;
-}
-
-.admin-orders-table th:nth-child(3),
-.admin-orders-table td:nth-child(3),
-.admin-orders-table th:nth-child(4),
-.admin-orders-table td:nth-child(4),
-.admin-orders-table th:nth-child(5),
-.admin-orders-table td:nth-child(5) {
-    width: 110px;
-}
-
-.admin-orders-table th:nth-child(6),
-.admin-orders-table td:nth-child(6) {
-    width: 110px;
-}
-
-.admin-orders-table th:last-child,
-.admin-orders-table td:last-child {
-    width: 300px;
+    min-width: 750px;
 }
 
 .table-scroll {
@@ -678,6 +667,10 @@
     .admin-nav__item {
         flex-shrink: 0;
         white-space: nowrap;
+    }
+
+    .admin-content {
+        padding: 14px;
     }
 
     .admin-field-grid--two,
@@ -733,9 +726,89 @@
 
     .admin-table-actions {
         justify-content: flex-start;
+        flex-wrap: wrap;
     }
 
     .admin-search-form--inline {
         grid-template-columns: 1fr auto auto;
     }
+
+    .admin-image-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    /* Orders: hide Date and Delivery columns */
+    .admin-orders-table th:nth-child(3),
+    .admin-orders-table td:nth-child(3),
+    .admin-orders-table th:nth-child(4),
+    .admin-orders-table td:nth-child(4) {
+        display: none;
+    }
+
+    /* Categories/Species/Varieties: hide Description and Assigned plants */
+    .taxonomy-table th:nth-child(2),
+    .taxonomy-table td:nth-child(2),
+    .taxonomy-table th:nth-child(3),
+    .taxonomy-table td:nth-child(3) {
+        display: none;
+    }
+
+    /* Plants list: hide Assigned pots and Total stock */
+    .admin-plants-table th:nth-child(3),
+    .admin-plants-table td:nth-child(3),
+    .admin-plants-table th:nth-child(4),
+    .admin-plants-table td:nth-child(4) {
+        display: none;
+    }
+
+    /* Dashboard recent orders: hide Date column */
+    .admin-dashboard-grid .data-table th:nth-child(3),
+    .admin-dashboard-grid .data-table td:nth-child(3) {
+        display: none;
+    }
+
+    .admin-orders-table {
+        min-width: unset;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-content {
+        padding: 10px;
+    }
+
+    .admin-page-header h1,
+    .admin-detail-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+    .stat-card__value {
+        font-size: 1.5rem;
+    }
+
+    .card {
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+
+    .admin-table-actions {
+        gap: 6px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 10px;
+        font-size: 0.82rem;
+    }
+
 }
