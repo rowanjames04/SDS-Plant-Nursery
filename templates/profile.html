@@ -225,5 +225,6 @@
         </script>
         <script async defer onerror="addressScriptFailed()" src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key|urlencode }}&libraries=places&callback=initAddressAutocomplete"></script>
     {% endif %}
+    {% include '_footer.html' %}
 </body>
 </html>
