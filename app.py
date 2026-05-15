@@ -836,7 +836,16 @@ with app.app_context():
 @app.context_processor
 def inject_header_cart_summary():
     return get_header_cart_summary()
+
+@app.context_processor
+def inject_current_year():
+    return {'current_year': datetime.now().year}
     
+@app.route("/refund-policy")
+def refund_policy():
+    return render_template('refund_policy.html')
+
+
 @app.route("/")
 def home():
     catalog = load_catalog()

@@ -1,0 +1,70 @@
+.site-footer {
+    background: #1c2b1a;
+    color: #b5c9b1;
+    margin-top: 40px;
+    padding: 36px 0 24px;
+}
+
+.site-footer__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.site-footer__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #e8f0e6;
+}
+
+.site-footer__brand .icon-glyph--brand {
+    font-size: 1.2rem;
+    color: #7db87a;
+}
+
+.site-footer__nav {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.site-footer__nav a {
+    color: #9ab896;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.15s;
+}
+
+.site-footer__nav a:hover {
+    color: #e8f0e6;
+}
+
+.site-footer__copy {
+    font-size: 0.8rem;
+    color: #6a8a66;
+    margin: 0;
+}
+
+.site-footer--admin {
+    margin-top: 0;
+    padding: 16px 28px;
+    text-align: left;
+}
+
+.site-footer--admin .site-footer__inner {
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+@media (max-width: 480px) {
+    .site-footer__nav {
+        gap: 16px;
+    }
+}

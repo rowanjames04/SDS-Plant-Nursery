@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refund Policy | Little Jill's Plant Nursery</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include '_header.html' %}
+    <main class="container">
+        <div class="page-header">
+            <h1>Refund Policy</h1>
+        </div>
+        <div class="card card--narrow">
+            <h2>No Refunds or Returns</h2>
+            <p>All sales at Little Jill's Plant Nursery are final. We do not offer refunds or accept returns on any plants or products once an order has been placed.</p>
+
+            <h2>Why We Have This Policy</h2>
+            <p>Plants are living things and their condition can change after they leave our care. Because we cannot guarantee how a plant will be handled or stored after delivery, we are unable to accept returns or issue refunds.</p>
+
+            <h2>Damaged or Incorrect Orders</h2>
+            <p>If your order arrives damaged or you receive the wrong item, please contact us as soon as possible after delivery with photos of the issue and we will do our best to resolve it.</p>
+
+            <h2>Questions</h2>
+            <p>If you have any questions about your order, please reach out to us before purchasing.</p>
+        </div>
+    </main>
+    {% include '_footer.html' %}
+</body>
+</html>

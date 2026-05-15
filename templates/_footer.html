@@ -1,0 +1,14 @@
+<footer class="site-footer">
+    <div class="site-footer__inner container">
+        <div class="site-footer__brand">
+            <span class="icon-glyph icon-glyph--brand" aria-hidden="true">❁</span>
+            <span>Little Jill's Plant Nursery</span>
+        </div>
+        <nav class="site-footer__nav">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('plants_index') }}">Plants</a>
+            <a href="{{ url_for('refund_policy') }}">Refund Policy</a>
+        </nav>
+        <p class="site-footer__copy">&copy; {{ current_year }} Little Jill's Plant Nursery. All rights reserved.</p>
+    </div>
+</footer>
