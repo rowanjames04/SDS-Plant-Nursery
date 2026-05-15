@@ -1,11 +1,13 @@
 import os
 import json
 import math
+import logging
 import urllib.parse
 import urllib.request
 from collections import Counter
 from datetime import UTC, datetime
 from decimal import Decimal, ROUND_HALF_UP
+from threading import Thread
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData, inspect, text, func
@@ -71,26 +73,64 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = ('Little Jill Plant Nursery', os.getenv('MAIL_USERNAME'))
 
 mail = Mail(app)
+logger = logging.getLogger(__name__)
 
-print("MAIL USERNAME:", app.config.get('MAIL_USERNAME'))
+
+def email_is_configured():
+    return all(
+        [
+            app.config.get('MAIL_SERVER'),
+            app.config.get('MAIL_PORT'),
+            app.config.get('MAIL_USERNAME'),
+            app.config.get('MAIL_PASSWORD'),
+            app.config.get('MAIL_DEFAULT_SENDER'),
+        ]
+    )
+
+
+def _deliver_message(message):
+    with app.app_context():
+        try:
+            mail.send(message)
+        except Exception:
+            logger.exception(
+                "Email delivery failed for recipients: %s",
+                ", ".join(message.recipients or []),
+            )
+
+
+def send_email(subject, recipients, html=None, body=None):
+    if not recipients:
+        return False
+
+    if not email_is_configured():
+        logger.warning(
+            "Skipping email send for subject '%s' because mail configuration is incomplete.",
+            subject,
+        )
+        return False
+
+    message = Message(subject=subject, recipients=recipients)
+    message.html = html
+    message.body = body
+    Thread(target=_deliver_message, args=(message,), daemon=True).start()
+    return True
 
 def send_welcome_email(user):
-    msg = Message(
+    return send_email(
         subject="Little Jill's Plant Nursery!",
-        recipients=[user.email]
+        recipients=[user.email],
+        html=render_template('emails/welcome.html', user=user),
+        body=f"Hi {user.full_name}, Little Jill's Plant Nursery! Your account has been created successfully.",
     )
-    msg.html = render_template('emails/welcome.html', user=user)
-    msg.body = f"Hi {user.full_name}, Little Jill's Plant Nursery! Your account has been created successfully."
-    mail.send(msg)
 
 def send_order_status_email(order):
-    msg = Message(
+    return send_email(
         subject=f"Your Order #{order.id} has been updated",
-        recipients=[order.user.email]
+        recipients=[order.user.email],
+        html=render_template('emails/order_status.html', order=order),
+        body=f"Hi {order.user.full_name}, your order #{order.id} status has been updated to {order.status}.",
     )
-    msg.html = render_template('emails/order_status.html', order=order)
-    msg.body = f"Hi {order.user.full_name}, your order #{order.id} status has been updated to {order.status}."
-    mail.send(msg)
     
 convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
@@ -557,8 +597,8 @@ def fulfill_stripe_checkout_session(session_id, session=None):
 
     try:
         send_order_status_email(order)
-    except Exception as e:
-        print(f"Order confirmation email failed: {e}")
+    except Exception:
+        logger.exception("Order confirmation email could not be prepared for order %s.", order.id)
     return order
 
 
@@ -1391,8 +1431,8 @@ def register():
 
         try:
             send_welcome_email(user)
-        except Exception as e:
-            print(f"Welcome email failed: {e}")
+        except Exception:
+            logger.exception("Welcome email could not be prepared for user %s.", user.id)
 
         flash('Account created! Please log in.', 'success')
         return redirect(url_for('login'))

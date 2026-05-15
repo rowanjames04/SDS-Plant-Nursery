@@ -4,7 +4,7 @@ from functools import wraps
 from flask import Blueprint, abort, flash, render_template, request, redirect, url_for
 from flask_login import current_user, login_required
 
-from app import db, mail, send_order_status_email
+from app import db, send_order_status_email
 from models import Category, Order, Plant, PlantPot, Pot, Species, Variety
 
 PLANT_IMAGE_DIR = os.path.join("static", "images", "plants")
@@ -392,10 +392,11 @@ def update_order_status(id):
             order.status = new_status
             db.session.commit()
             try:
-                send_order_status_email(order)
-                flash(f"Order #{order.id} updated to '{new_status}' and customer notified.", "success")
-            except Exception as e:
-                print(f"Order status email failed: {e}")
+                if send_order_status_email(order):
+                    flash(f"Order #{order.id} updated to '{new_status}' and customer notified.", "success")
+                else:
+                    flash(f"Order #{order.id} updated but email delivery is not configured.", "warning")
+            except Exception:
                 flash(f"Order #{order.id} updated but email could not be sent.", "warning")
         else:
             flash("Invalid status.", "error")
