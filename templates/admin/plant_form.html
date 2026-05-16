@@ -2,108 +2,118 @@
 {% block title %}New Plant{% endblock %}
 
 {% block content %}
-<header class="admin-page-header">
-    <div>
-        <p class="page-header__eyebrow">Plants</p>
-        <h1>New Plant</h1>
+<header class="admin-detail-header">
+    <div class="admin-detail-header__identity">
+        <a class="button-link button-secondary" href="{{ url_for('admin.plants') }}" style="font-size:1.1rem;padding:8px 14px;">&#8592;</a>
+        <div>
+            <p class="page-header__eyebrow">Plants</p>
+            <h1>New Plant</h1>
+        </div>
     </div>
-    <a class="button-link button-secondary" href="{{ url_for('admin.plants') }}" style="width:auto;">Back to plants</a>
+    <button class="button-link" type="submit" form="create-plant-form" style="width:auto;">Create plant</button>
 </header>
 
-<section class="card">
-    <form method="post" class="form">
-        <div class="input-group">
-            <label>Common name</label>
-            <input type="text" name="common_name" value="{{ plant.common_name if plant else '' }}" required>
-        </div>
-        <div class="input-group">
-            <label>Scientific name</label>
-            <input type="text" name="scientific_name" value="{{ plant.scientific_name if plant else '' }}">
-        </div>
+<div class="admin-detail-layout">
+    <form id="create-plant-form" method="post" action="{{ url_for('admin.create_plant') }}" class="admin-plant-form">
+        <section class="card card--soft admin-detail-main">
+            <div class="input-group">
+                <label>Common name</label>
+                <input type="text" name="common_name" required>
+            </div>
+            <div class="input-group">
+                <label>Scientific name</label>
+                <input type="text" name="scientific_name">
+            </div>
+            <div class="input-group">
+                <label>Description</label>
+                <textarea name="description" rows="5"></textarea>
+            </div>
+        </section>
+
+        <section class="card card--soft admin-form-section">
+            <h3>Conditions & Care</h3>
+            <div class="admin-field-grid admin-field-grid--three">
+                <div class="input-group">
+                    <label>Flowering period</label>
+                    <textarea name="flowering_period" rows="2"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Light requirements</label>
+                    <textarea name="light_requirements" rows="2"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Soil requirements</label>
+                    <textarea name="soil_requirements" rows="2"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Planting advice</label>
+                    <textarea name="planting_advice" rows="2"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Watering needs</label>
+                    <textarea name="watering_needs" rows="2"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Pruning needs</label>
+                    <textarea name="pruning_needs" rows="2"></textarea>
+                </div>
+            </div>
+        </section>
+    </form>
+
+    <section class="card card--soft admin-detail-sidebar">
         <div class="input-group">
             <label>Category</label>
-            <select name="category_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+            <select name="category_id" form="create-plant-form">
                 <option value="">—</option>
                 {% for c in categories %}
-                <option value="{{ c.id }}" {{ 'selected' if plant and plant.category_id == c.id }}>{{ c.name }}</option>
+                <option value="{{ c.id }}">{{ c.name }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="input-group">
             <label>Species</label>
-            <select name="species_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+            <select name="species_id" form="create-plant-form">
                 <option value="">—</option>
                 {% for s in species %}
-                <option value="{{ s.id }}" {{ 'selected' if plant and plant.species_id == s.id }}>{{ s.name }}</option>
+                <option value="{{ s.id }}">{{ s.name }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="input-group">
             <label>Variety</label>
-            <select name="variety_id" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+            <select name="variety_id" form="create-plant-form">
                 <option value="">—</option>
                 {% for v in varieties %}
-                <option value="{{ v.id }}" {{ 'selected' if plant and plant.variety_id == v.id }}>{{ v.name }}</option>
+                <option value="{{ v.id }}">{{ v.name }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="input-group">
-            <label>Description</label>
-            <input type="text" name="description" value="{{ plant.description if plant else '' }}">
-        </div>
-        <div class="input-group">
             <label>Colour</label>
-            <input type="text" name="colour" value="{{ plant.colour if plant else '' }}">
+            <input type="text" name="colour" form="create-plant-form">
         </div>
         <div class="input-group">
-            <label>Growth width (m)</label>
-            <input type="number" name="growth_width" step="0.1" value="{{ plant.growth_width if plant and plant.growth_width else '' }}">
-        </div>
-        <div class="input-group">
-            <label>Growth height (m)</label>
-            <input type="number" name="growth_height" step="0.1" value="{{ plant.growth_height if plant and plant.growth_height else '' }}">
+            <label>Growth size (m)</label>
+            <div class="admin-mini-field-row">
+                <input type="number" name="growth_width" form="create-plant-form" step="0.1" aria-label="Width">
+                <input type="number" name="growth_height" form="create-plant-form" step="0.1" aria-label="Height">
+            </div>
         </div>
         <div class="input-group">
             <label>Fragrant</label>
-            <select name="fragrant" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                <option value="false" {{ 'selected' if not plant or not plant.fragrant }}>No</option>
-                <option value="true" {{ 'selected' if plant and plant.fragrant }}>Yes</option>
-            </select>
+            <div class="admin-radio-group">
+                <label><input type="radio" name="fragrant" form="create-plant-form" value="false" checked> No</label>
+                <label><input type="radio" name="fragrant" form="create-plant-form" value="true"> Yes</label>
+            </div>
         </div>
         <div class="input-group">
             <label>Frost sensitive</label>
-            <select name="frost_sensitive" style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                <option value="false" {{ 'selected' if not plant or not plant.frost_sensitive }}>No</option>
-                <option value="true" {{ 'selected' if plant and plant.frost_sensitive }}>Yes</option>
-            </select>
+            <div class="admin-radio-group">
+                <label><input type="radio" name="frost_sensitive" form="create-plant-form" value="false" checked> No</label>
+                <label><input type="radio" name="frost_sensitive" form="create-plant-form" value="true"> Yes</label>
+            </div>
         </div>
-        <div class="input-group">
-            <label>Flowering period</label>
-            <input type="text" name="flowering_period" value="{{ plant.flowering_period if plant else '' }}">
-        </div>
-        <div class="input-group">
-            <label>Light requirements</label>
-            <input type="text" name="light_requirements" value="{{ plant.light_requirements if plant else '' }}">
-        </div>
-        <div class="input-group">
-            <label>Soil requirements</label>
-            <input type="text" name="soil_requirements" value="{{ plant.soil_requirements if plant else '' }}">
-        </div>
-        <div class="input-group">
-            <label>Planting advice</label>
-            <input type="text" name="planting_advice" value="{{ plant.planting_advice if plant else '' }}">
-        </div>
-        <div class="input-group">
-            <label>Watering needs</label>
-            <input type="text" name="watering_needs" value="{{ plant.watering_needs if plant else '' }}">
-        </div>
-        <div class="input-group">
-            <label>Pruning needs</label>
-            <input type="text" name="pruning_needs" value="{{ plant.pruning_needs if plant else '' }}">
-        </div>
-        <div>
-            <button type="submit">Create</button>
-        </div>
-    </form>
-</section>
+    </section>
+</div>
 {% endblock %}
