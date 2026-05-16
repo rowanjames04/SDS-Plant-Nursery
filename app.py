@@ -14,7 +14,6 @@ from sqlalchemy import MetaData, inspect, text, func
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
-from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 
 try:
@@ -24,9 +23,7 @@ except ModuleNotFoundError:
 
 
 load_dotenv()
-UPLOAD_FOLDER = 'static/images'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-MAX_CONTENT_LENGTH = 5 * 1000 * 1000  # 5 MB limit for uploaded images
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5 MB upload limit
 DEFAULT_DEV_SECRET_KEY = "dev-secret-key-change-me"
 GOOGLE_MAPS_API_KEY_FILE = "google_maps_api_key.txt"
 JILLIBY_CEMETERY_LATITUDE = -33.2610013
@@ -52,8 +49,7 @@ def load_google_maps_api_key():
 app = Flask(__name__, instance_relative_config=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI', 'sqlite:///nursery.db')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or DEFAULT_DEV_SECRET_KEY
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_SIZE
 app.config['GOOGLE_MAPS_API_KEY'] = load_google_maps_api_key()
 app.config['STRIPE_SECRET_KEY'] = os.getenv('STRIPE_SECRET_KEY', '').strip()
 app.config['STRIPE_WEBHOOK_SECRET'] = os.getenv('STRIPE_WEBHOOK_SECRET', '').strip()
@@ -161,17 +157,6 @@ from models import Cart, CartItem, Category, Order, OrderItem, Plant, PlantPot, 
 from admin import admin_bp
 app.register_blueprint(admin_bp)
     
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def save_image(file):
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return filename
-    return None
-
 def category_representative_images():
     subq = (
         db.session.query(Plant.category_id, func.min(Plant.id).label("min_id"))
