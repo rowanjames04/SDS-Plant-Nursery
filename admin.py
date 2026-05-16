@@ -146,6 +146,18 @@ def plants():
     categories = Category.query.all()
     category_map = {category.id: category.name for category in categories}
     search_query = request.args.get("q", "").strip()
+
+    pot_stats = {
+        plant_id: (count, total)
+        for plant_id, count, total in db.session.query(
+            PlantPot.plant_id,
+            db.func.count(PlantPot.pot_id),
+            db.func.sum(PlantPot.stock_qty),
+        )
+        .group_by(PlantPot.plant_id)
+        .all()
+    }
+
     plants = Plant.query.order_by(Plant.common_name).all()
     plant_rows = []
     for plant in plants:
@@ -160,13 +172,14 @@ def plants():
             if search_query.lower() not in searchable_text:
                 continue
 
+        stats = pot_stats.get(plant.id, (0, 0))
         plant_rows.append(
             {
                 "id": plant.id,
                 "common_name": plant.common_name,
                 "category_name": category_name,
-                "assigned_pot_count": len(plant.plant_pots),
-                "total_stock": sum(plant_pot.stock_qty for plant_pot in plant.plant_pots),
+                "assigned_pot_count": stats[0],
+                "total_stock": stats[1] or 0,
             }
         )
     return render_template(
@@ -529,8 +542,7 @@ def update_pot(id, pot_id):
         return redirect(url_for("admin.plant_detail", id=id) + "#pot-sizes")
 
     plant_pot.stock_qty = stock_qty
-    if price:
-        plant_pot.price = price
+    plant_pot.price = price or None
     db.session.commit()
     flash("Pot updated.", "success")
     return redirect(url_for("admin.plant_detail", id=id) + "#pot-sizes")

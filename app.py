@@ -984,7 +984,7 @@ def login():
             login_user(user)
             flash(f'Welcome back, {user.full_name}!', 'success')
             next_page = request.form.get('next') or request.args.get('next')
-            if next_page:
+            if next_page and next_page.startswith('/'):
                 return redirect(next_page)
             return redirect(url_for('home'))
         else:
@@ -1328,10 +1328,6 @@ def checkout_success():
         db.session.rollback()
         flash(f"We could not confirm your payment yet: {error}", "error")
         return redirect(url_for("checkout"))
-
-    if order is None:
-            flash("Payment has not completed yet. Please return to checkout and try again.", "error")
-            return redirect(url_for("checkout"))
 
     summary = build_order_summary(order)
     return render_template(
