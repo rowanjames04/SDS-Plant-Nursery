@@ -277,7 +277,7 @@ def assign_pot(id):
     plant_pot = PlantPot(plant_id=id, pot_id=pot_id, price=price, stock_qty=stock_qty)
     db.session.add(plant_pot)
     db.session.commit()
-    return redirect(url_for("admin.plant_detail", id=id))
+    return redirect(url_for("admin.plant_detail", id=id) + "#pot-sizes")
 
 
 @admin_bp.route("/plants/<int:id>/unassign-pot/<int:pot_id>", methods=["POST"])
@@ -367,46 +367,28 @@ def orders():
     return render_template("admin/orders.html", orders=orders)
 
 
-# @admin_bp.route("/orders/<int:id>/status", methods=["POST"])
-# @staff_required
-# def update_order_status(id):
-#     order = db.get_or_404(Order, id)
-#     status = request.form.get("status", "").strip()
-#     if status in {"preparing", "dispatched", "delivered", "cancelled"}:
-#         order.status = status
-#         db.session.commit()
-#         flash(f"Order #{order.id} updated to {status}.", "success")
-#     else:
-#         flash("Invalid status.", "error")
-#     return redirect(url_for("admin.orders"))
+ORDER_STATUSES = ["preparing", "dispatched", "delivered", "cancelled"]
 
-@admin_bp.route("/orders/<int:id>/update-status", methods=["GET", "POST"])
+
+@admin_bp.route("/orders/<int:id>/update-status", methods=["POST"])
 @staff_required
 def update_order_status(id):
     order = db.get_or_404(Order, id)
-    ORDER_STATUSES = ["preparing", "dispatched", "delivered", "cancelled"]
+    new_status = request.form.get("status", "").strip()
 
-    if request.method == "POST":
-        new_status = request.form.get("status", "").strip()
-        if new_status in ORDER_STATUSES:
-            order.status = new_status
-            db.session.commit()
-            try:
-                if send_order_status_email(order):
-                    flash(f"Order #{order.id} updated to '{new_status}' and customer notified.", "success")
-                else:
-                    flash(f"Order #{order.id} updated but email delivery is not configured.", "warning")
-            except Exception:
-                flash(f"Order #{order.id} updated but email could not be sent.", "warning")
-        else:
-            flash("Invalid status.", "error")
-        return redirect(url_for("admin.orders"))
-
-    return render_template(
-        "admin/order_update_status.html",
-        order=order,
-        statuses=ORDER_STATUSES,
-    )
+    if new_status in ORDER_STATUSES:
+        order.status = new_status
+        db.session.commit()
+        try:
+            if send_order_status_email(order):
+                flash(f"Order #{order.id} updated to '{new_status}' and customer notified.", "success")
+            else:
+                flash(f"Order #{order.id} updated but email delivery is not configured.", "warning")
+        except Exception:
+            flash(f"Order #{order.id} updated but email could not be sent.", "warning")
+    else:
+        flash("Invalid status.", "error")
+    return redirect(url_for("admin.orders"))
 
 
 @admin_bp.route("/orders/<int:id>/delete", methods=["POST"])

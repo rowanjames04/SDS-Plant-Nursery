@@ -59,8 +59,8 @@
                         <label class="inline-label" for="pot_id">Pot size</label>
                         <select id="pot_id" name="pot_id">
                             {% for pp in plant_pots %}
-                                <option value="{{ pp.pot_id }}" {% if pp.stock_qty <= 0 %}disabled{% endif %}>
-                                    {{ pp.pot.size }}mm — ${{ '%.2f'|format(pp.price) }}{% if pp.stock_qty <= 0 %} — out of stock{% endif %}
+                                <option value="{{ pp.pot_id }}" {% if not pp.price or pp.price <= 0 or pp.stock_qty <= 0 %}disabled{% endif %}>
+                                    {{ pp.pot.size }}mm{% if not pp.price or pp.price <= 0 %} — Unavailable{% elif pp.stock_qty <= 0 %} — Out of stock{% else %} — ${{ '%.2f'|format(pp.price) }}{% endif %}
                                 </option>
                             {% endfor %}
                         </select>
@@ -69,7 +69,7 @@
                         <button type="submit">Add to cart</button>
                     </form>
                 {% else %}
-                    <p class="muted">No sizes currently available.</p>
+                    <p class="muted">Currently unavailable for purchase.</p>
                 {% endif %}
                 <form class="inline-form" method="post" action="{{ url_for('add_to_wishlist', plant_id=plant.id) }}">
                     <input type="hidden" name="next" value="{{ url_for('plant_detail', id=plant.id) }}">

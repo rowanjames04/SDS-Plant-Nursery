@@ -864,6 +864,7 @@ def plants_index():
 
     min_prices = dict(
         db.session.query(PlantPot.plant_id, func.min(PlantPot.price))
+        .filter(PlantPot.price > 0)
         .group_by(PlantPot.plant_id)
         .all()
     )
@@ -1064,6 +1065,11 @@ def add_to_cart():
 
     plant_pot = PlantPot.query.filter_by(plant_id=plant_id, pot_id=pot_id).first_or_404()
     plant = plant_pot.plant
+
+    if not plant_pot.price:
+        flash("This plant is not available for purchase.", "error")
+        return redirect(url_for("plant_detail", id=plant.id))
+
     cart = get_or_create_active_cart(current_user)
     existing_item = CartItem.query.filter_by(cart_id=cart.id, plant_id=plant.id, pot_id=pot_id).first()
 
